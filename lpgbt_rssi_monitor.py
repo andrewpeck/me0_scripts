@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import datetime
 
-def main(system, boss, run_time_min, gain):
+def main(system, boss, run_time_min, gain, ver):
 
     init_adc()
     print("ADC Readings:")
@@ -39,7 +39,7 @@ def main(system, boss, run_time_min, gain):
     while int(time()) <= end_time:
         with open(filename, "a") as file:
             value = read_adc(7, gain, system)
-            rssi_current = rssi_current_conversion(value, gain) * 1e6 # in uA
+            rssi_current = rssi_current_conversion(value, gain, ver) * 1e6 # in uA
             second = time() - start_time
             seconds.append(second)
             rssi.append(rssi_current)
@@ -136,17 +136,26 @@ def read_adc(channel, gain, system):
 
     return val
 
-def rssi_current_conversion(rssi_adc, gain):
-    # Resistor values
-    R1 = 4.7 * 1000 # 4.7 kOhm
-    R2 = 1000.0 * 1000 # 1 MOhm
-    R3 = 470.0 * 1000 # 470 kOhm
+def rssi_current_conversion(rssi_adc, gain, ver):
 
+    rssi_current = -9999
     rssi_adc_converted = 1.0 * (rssi_adc/1024.0) # 10-bit ADC, range 0-1 V
     #rssi_voltage = rssi_adc_converted/gain # Gain
     rssi_voltage = rssi_adc_converted
-    v_r = rssi_voltage * ((R2+R3)/R3) # voltage divider
-    rssi_current = (2.5 - v_r)/R1 # rssi current
+
+    if ver == 1:
+        # Resistor values
+        R1 = 4.7 * 1000 # 4.7 kOhm
+        v_r = rssi_voltage
+        rssi_current = (2.5 - v_r)/R1 # rssi current
+    elif ver == 2:
+        # Resistor values
+        R1 = 4.7 * 1000 # 4.7 kOhm
+        R2 = 1000.0 * 1000 # 1 MOhm
+        R3 = 470.0 * 1000 # 470 kOhm
+        v_r = rssi_voltage * ((R2+R3)/R3) # voltage divider
+        rssi_current = (2.5 - v_r)/R1 # rssi current
+
     return rssi_current
 
 if __name__ == '__main__':
@@ -157,6 +166,7 @@ if __name__ == '__main__':
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
+    parser.add_argument("-v", "--ver", action="store", dest="ver", help="ver = OH version 1 or 2")
     parser.add_argument("-m", "--minutes", action="store", dest="minutes", help="minutes = int. # of minutes you want to run")
     parser.add_argument("-a", "--gain", action="store", dest="gain", default = "2", help="gain = Gain for RSSI ADC: 2, 8, 16, 32")
     args = parser.parse_args()
@@ -217,6 +227,10 @@ if __name__ == '__main__':
         sys.exit()
     gain = int(args.gain)
 
+    if args.ver is not in ["1", "2"]:
+        print(Colors.YELLOW + "Allowed versions = 1 or 2" + Colors.ENDC)
+        sys.exit()
+
     # Parsing Registers XML File
     print("Parsing xml file...")
     parseXML()
@@ -237,7 +251,7 @@ if __name__ == '__main__':
         check_lpgbt_ready()
 
     try:
-        main(args.system, boss, args.minutes, gain)
+        main(args.system, boss, args.minutes, gain, int(args.ver))
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
