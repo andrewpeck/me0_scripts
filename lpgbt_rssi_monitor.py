@@ -227,7 +227,7 @@ if __name__ == '__main__':
         sys.exit()
     gain = int(args.gain)
 
-    if args.ver is not in ["1", "2"]:
+    if args.ver not in ["1", "2"]:
         print(Colors.YELLOW + "Allowed versions = 1 or 2" + Colors.ENDC)
         sys.exit()
 
