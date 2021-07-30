@@ -97,7 +97,10 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, best_phase):
             cfg_node = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN" % (oh_select, vfat))
             for iread in range(depth):
                 vfat_cfg_run = simple_read_backend_reg(cfg_node, 9999)
-                cfg_run[vfat][phase] += (vfat_cfg_run != 0 and vfat_cfg_run != 1)
+                if vfat_cfg_run != 0 and vfat_cfg_run != 1:
+                    cfg_run[vfat][phase] = 1
+                    break
+                #cfg_run[vfat][phase] += (vfat_cfg_run != 0 and vfat_cfg_run != 1)
 
             # Check Link Good and Sync Errors
             link_node = get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
@@ -140,9 +143,9 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, best_phase):
             else:
                 result_str += Colors.RED
             if daq_err:
-                result_str += "\tResults of VFAT#%02d: link_good=%d, sync_err_cnt=%d, cfg_run_errs=%d, daq_crc_errors=%d" % (vfat, link_good[vfat][phase], sync_err_cnt[vfat][phase], cfg_run[vfat][phase], daq_crc_error[vfat][phase])
+                result_str += "\tResults of VFAT#%02d: link_good=%d, sync_err_cnt=%d, slow_control_bad=%d, daq_crc_errors=%d" % (vfat, link_good[vfat][phase], sync_err_cnt[vfat][phase], cfg_run[vfat][phase], daq_crc_error[vfat][phase])
             else:
-                result_str += "\tResults of VFAT#%02d: link_good=%d, sync_err_cnt=%d, cfg_run_errs=%d" % (vfat, link_good[vfat][phase], sync_err_cnt[vfat][phase], cfg_run[vfat][phase])
+                result_str += "\tResults of VFAT#%02d: link_good=%d, sync_err_cnt=%d, slow_control_bad=%d" % (vfat, link_good[vfat][phase], sync_err_cnt[vfat][phase], cfg_run[vfat][phase])
             result_str += Colors.ENDC
             print(result_str)
         write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.RESET"), 1)

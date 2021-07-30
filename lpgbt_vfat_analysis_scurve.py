@@ -178,6 +178,7 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="SCurve result filename")
     parser.add_argument("-c", "--channels", action="store", nargs="+", dest="channels", help="Channels to plot for each VFAT")
     parser.add_argument("-p", "--plotAll", action="store_true", dest="plotAll", help="Plot Scurves and fit results for all channels in separate files")
+    parser.add_argument("-m", "--mode", action="store", dest="mode", help="mode = voltage or current")
     parser.add_argument("-v", "--verbose", action="store_true", dest="verbose", help="Increase verbosity")
     args = parser.parse_args()
 
@@ -202,6 +203,8 @@ if __name__ == '__main__':
         vfat    = int(line.split()[0])
         channel = int(line.split()[1])
         charge  = int(line.split()[2])
+        if args.mode == "voltage":
+            charge = 255 - charge
         fired   = int(line.split()[3])
         events  = int(line.split()[4])
         if vfat not in scurve_result:

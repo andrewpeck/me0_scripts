@@ -12,11 +12,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plotting VFAT SCurve')
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="SCurve result filename")
     #parser.add_argument("-t", "--type", action="store", dest="type", help="type = daq or sbit")
+    parser.add_argument("-m", "--mode", action="store", dest="mode", help="mode = voltage or current")
     parser.add_argument("-c", "--channels", action="store", nargs="+", dest="channels", help="Channels to plot for each VFAT")
     args = parser.parse_args()
 
     if args.channels is None:
         print(Colors.YELLOW + "Enter channel list to plot SCurves" + Colors.ENDC)
+        sys.exit()
+
+    if args.mode not in ["voltage", "current"]:
+        print(Colors.YELLOW + "Mode can only be voltage or current" + Colors.ENDC)
         sys.exit()
 
     #if args.type not in ["daq", "sbit"]:
@@ -32,6 +37,8 @@ if __name__ == '__main__':
         vfat = int(line.split()[0])
         channel = int(line.split()[1])
         charge = int(line.split()[2])
+        if args.mode == "voltage":
+            charge = 255 - charge
         fired = int(line.split()[3])
         events = int(line.split()[4])
         if vfat not in scurve_result:

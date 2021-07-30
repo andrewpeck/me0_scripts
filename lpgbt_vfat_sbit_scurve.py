@@ -62,10 +62,10 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
         for channel in channel_list:
             sbit_data[vfat][channel] = {}
             for c in range(0,256,step):
-                if cal_mode[vfat] == 1:
-                    charge = 255 - c
-                else:
-                    charge = c
+                #if cal_mode[vfat] == 1:
+                #    charge = 255 - c
+                #else:
+                charge = c
                 sbit_data[vfat][channel][charge] = {}
                 sbit_data[vfat][channel][charge]["events"] = -9999
                 sbit_data[vfat][channel][charge]["fired"] = -9999
@@ -132,10 +132,10 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
 
             # Looping over charge
             for c in range(0,256,step):
-                if cal_mode[vfat] == 1:
-                    charge = 255 - c
-                else:
-                    charge = c
+                #if cal_mode[vfat] == 1:
+                #    charge = 255 - c
+                #else:
+                charge = c
                 #print ("    Injected Charge: %d"%charge)
                 write_backend_reg(dac_node[vfat], c)
 

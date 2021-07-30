@@ -62,10 +62,10 @@ def lpgbt_vfat_scurve(system, oh_select, vfat_list, channel_list, set_cal_mode, 
         for channel in channel_list:
             daq_data[vfat][channel] = {}
             for c in range(0,256,step):
-                if cal_mode[vfat] == 1:
-                    charge = 255 - c
-                else:
-                    charge = c
+                #if cal_mode[vfat] == 1:
+                #    charge = 255 - c
+                #else:
+                charge = c
                 daq_data[vfat][channel][charge] = {}
                 daq_data[vfat][channel][charge]["events"] = -9999
                 daq_data[vfat][channel][charge]["fired"] = -9999
@@ -127,10 +127,10 @@ def lpgbt_vfat_scurve(system, oh_select, vfat_list, channel_list, set_cal_mode, 
 
         # Looping over charge
         for c in range(0,256,step):
-            if cal_mode[vfat] == 1:
-                charge = 255 - c
-            else:
-                charge = c
+            #if cal_mode[vfat] == 1:
+            #    charge = 255 - c
+            #else:
+            charge = c
             #print ("    Injected Charge: %d"%charge)
             for vfat in vfat_list:
                 write_backend_reg(dac_node[vfat], c)
