@@ -209,6 +209,35 @@ Use -h option for any script to check usage
 
 ```reg_interface.py```: interactive tool to communicate with lpGBT registers
 
+## Retrieving VFAT Calibrbation Data
 
+To execute the script get_cal_info_vfat.py:
+1. Install the `cx_Oracle` `python` module:
+   ```
+   $ pip3 install cx_Oracle
+   ```
+   `cx_Oracle` is an API used to interface with Oracle databases.
+2. Define the following environment variables in your `.bash_profile`:
+```
+export GEM_ONLINE_DB_CONN="CMS_GEM_APPUSER_R/GEM_Reader_2015@"
+export GEM_ONLINE_DB_NAME="INT2R_LB_LOCAL"
+```
+and source:
+```
+source ~/.bash_profile
+```
+3. Add the script `cheesecake_integration_devel/tnsnames.ora` to `/etc`. This file specifies the connection information for the Oracle database.
+4. Edit the last line of DBconnect with your lxplus username.
+5. In a separate shell session, open the tunnel to CERN's network with:
+```
+$ ./DBconnect.sh .
+```
+and login using your CERN credentials. (To execute from any directory, place `DBconnectsh` in `/usr/local/bin`.)
+6. Update the VFAT text file (example file provided at `cheesecake_integration_devel/ME0WP_vfatID.txt`) with your list of plugin cards you want to retrieve calibration data for.
+7. Execute the script:
+```
+# python3 get_cal_info_vfat.py -s backend -l <me0_layer> -g <geb_type> -a <asiago_number> -i <input_text_file>.txt -w
+```
+For more information on usage, run `# python3 get_cal_info_vfat.py -h`.
 
 
