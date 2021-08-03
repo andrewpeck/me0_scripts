@@ -235,11 +235,9 @@ $ ./DBconnect.sh .
 and login using your CERN credentials. (To execute from any directory, place `DBconnectsh` in `/usr/local/bin`.)
 
 6. Update the VFAT text file (example file provided at `cheesecake_integration_devel/ME0WP_vfatID.txt`) with your list of plugin cards you want to retrieve calibration data for.
-7. 
-8. Execute the script:
+ 
+7. Execute the script:
 ```
 # python3 get_cal_info_vfat.py -s backend -l <me0_layer> -g <geb_type> -a <asiago_number> -i <input_text_file>.txt -w
 ```
 For more information on usage, run `# python3 get_cal_info_vfat.py -h`.
-
-
