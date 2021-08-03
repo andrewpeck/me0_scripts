@@ -35,6 +35,12 @@ REGISTER_DAC_MONITOR_MAP = {
     "SLVS Vref": 41 # ??
 }
 
+def parseList(inFile):
+    with open(inFile) as file:
+        dacList = file.readlines()
+        dacList = [line.rstrip('\n') for line in dacList]
+    return dacList
+
 def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, step, niter, adc_ref, vref):
     if not os.path.exists("dac_scan_results"):
         os.makedirs("dac_scan_results")
@@ -165,6 +171,7 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--ref", action="store", dest="ref", default = "internal", help="ref = ADC reference: internal or external (default=internal)")
     parser.add_argument("-vr", "--vref", action="store", dest="vref", default = "3", help="vref = CFG_VREF_ADC (0-3) (default=3)")
     parser.add_argument("-a", "--addr", action="store", nargs='+', dest="addr", help="addr = list of VFATs to enable HDLC addressing")
+    parser.add_argument("-d", "--dacList", action="store", dest="dacList", help="Input text file with list of DACs")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -203,13 +210,24 @@ if __name__ == '__main__':
             sys.exit()
         vfat_list.append(v_int)
 
-    if args.regs is None:
+    if args.regs is None and args.dacList is None:
         print(Colors.YELLOW + "Need list of Registers to scan" + Colors.ENDC)
         sys.exit()
-    for reg in args.regs:
-        if reg not in REGISTER_DAC_MONITOR_MAP:
-            print(Colors.YELLOW + "Register %s not supported for DAC scan"%reg + Colors.ENDC)
-            sys.exit()
+    if args.dacList is not None and args.regs is not None:
+        print(Colors.YELLOW + "Must specify registers in a text file (-d) or with -r and a space-separated list of DACs" + Colors.ENDC)
+        sys.exit()
+
+    if args.regs is not None:   
+        for reg in args.regs:
+            if reg not in REGISTER_DAC_MONITOR_MAP:
+                print(Colors.YELLOW + "Register %s not supported for DAC scan"%reg + Colors.ENDC)
+                sys.exit()
+    if args.dacList is not None:
+        dac_list = parseList(args.dacList)
+        for reg in dac_list:    
+            if reg not in REGISTER_DAC_MONITOR_MAP:
+                print(Colors.YELLOW + "Register %s not supported for DAC scan"%reg + Colors.ENDC)
+                sys.exit()
 
     lower = int(args.lower)
     upper = int(args.upper)
@@ -260,7 +278,11 @@ if __name__ == '__main__':
     
     # Running Phase Scan
     try:
-        lpgbt_vfat_dac_scan(args.system, int(args.ohid), vfat_list, args.regs, lower, upper, step, int(args.niter), args.ref, vref)
+        if args.regs is not None:
+            lpgbt_vfat_dac_scan(args.system, int(args.ohid), vfat_list, args.regs, lower, upper, step, int(args.niter), args.ref, vref)
+        elif args.dacList is not None:    
+            dac_list = parseList(args.dacList)
+            lpgbt_vfat_dac_scan(args.system, int(args.ohid), vfat_list, dac_list, lower, upper, step, int(args.niter), args.ref, vref)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
