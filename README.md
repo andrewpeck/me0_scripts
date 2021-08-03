@@ -227,7 +227,7 @@ and source:
 source ~/.bash_profile
 ```
 3. Add the script `cheesecake_integration_devel/tnsnames.ora` to `/etc`. This file specifies the connection information for the Oracle database.
-4. Edit the last line of DBconnect with your lxplus username.
+4. Edit the last line of `DBconnect.sh` with your lxplus username.
 5. In a separate shell session, open the tunnel to CERN's network with:
 ```
 $ ./DBconnect.sh .
