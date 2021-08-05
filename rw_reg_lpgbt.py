@@ -696,6 +696,8 @@ def lpgbt_write_config_file(config_file = 'config.txt'):
     f = open(config_file,"w+")
     for i in range (n_rw_reg):
         val =  mpeek(i)
+        if i in range(0x0f0, 0x105): # I2C Masters
+            val = 0x00
         write_string = "0x%03X  0x%02X\n" % (i, val)
         f.write(write_string)
     f.close()
