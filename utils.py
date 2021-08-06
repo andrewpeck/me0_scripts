@@ -27,7 +27,7 @@ if sys.version_info < (3, 6):
     print(Colors.RED + "Please use python 3.6 or higher (you are using python %d.%d)" % (sys.version_info[0], sys.version_info[1]) + Colors.ENDC)
     exit()
 
-import common.tables.tableformatter as tf
+#import common.tables.tableformatter as tf
 import imp
 
 try:
@@ -40,8 +40,8 @@ except ImportError:
     exit(1)
 
 
-FULL_TABLE_GRID_STYLE = tf.FancyGrid()
-DEFAULT_TABLE_GRID_STYLE = tf.AlternatingRowGrid()
+#FULL_TABLE_GRID_STYLE = tf.FancyGrid()
+#DEFAULT_TABLE_GRID_STYLE = tf.AlternatingRowGrid()
 
 def get_config(config_name):
     return eval("befe_config." + config_name)

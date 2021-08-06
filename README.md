@@ -158,6 +158,8 @@ Use -h option for any script to check usage
 
 ```lpgbt_status.py```: check status of lpGBT
 
+```lpgbt_vfat_analysis_dac.py```: DAC Scan Analysis for VFATs
+
 ```lpgbt_vfat_analysis_scurve.py```: SCurve Analysis (fitting) using DAQ data for VFATs
 
 ```lpgbt_vfat_config.py```: configure VFAT
