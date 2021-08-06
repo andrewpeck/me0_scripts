@@ -305,7 +305,7 @@ def rw_initialize(system_val, boss=None, ohIdx=None, gbtIdx=None):
     elif system=="backend":
         import rw_reg
         global rw_reg
-        rw_reg.parseXML()
+        rw_reg.parse_xml()
 
         global NODE_IC_GBTX_LINK_SELECT
         global NODE_IC_GBTX_I2C_ADDRESS
