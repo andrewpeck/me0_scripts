@@ -316,7 +316,7 @@ def rw_initialize(system_val, boss=None, ohIdx=None, gbtIdx=None):
         global NODE_IC_EXEC_READ
         global NODE_IC_READ_DATA
         NODE_IC_GBTX_LINK_SELECT = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBTX_LINK_SELECT")
-        NODE_IC_GBTX_I2C_ADDRESS = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBTX_I2C_ADDRESS")
+        NODE_IC_GBTX_I2C_ADDRESS = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBTX_I2C_ADDR")
         NODE_IC_READ_WRITE_LENGTH = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.READ_WRITE_LENGTH")
         NODE_IC_ADDR = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.ADDRESS")
         NODE_IC_WRITE_DATA = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.WRITE_DATA")
