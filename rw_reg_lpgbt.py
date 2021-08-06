@@ -529,7 +529,7 @@ def mpeek(address):
             rw_terminate()
     elif system=="backend":
         #write_backend_reg(NODE_IC_READ_WRITE_LENGTH, 1)
-        #write_backend_reg(NODE_IC_ADDRESS, address)
+        #write_backend_reg(NODE_IC_ADDR, address)
         #write_backend_reg(NODE_IC_EXECUTE_READ, 1)
         #data = read_backend_reg(NODE_IC_READ_DATA)
         #return data
@@ -551,7 +551,7 @@ def mpoke(address, value):
             rw_terminate()
     elif system=="backend":
         write_backend_reg(NODE_IC_READ_WRITE_LENGTH, 1)
-        write_backend_reg(NODE_IC_ADDRESS, address)
+        write_backend_reg(NODE_IC_ADDR, address)
         write_backend_reg(NODE_IC_WRITE_DATA, value)
         write_backend_reg(NODE_IC_EXECUTE_WRITE, 1)
         reg_list_dryrun[address] = value
