@@ -38,7 +38,7 @@ REGISTER_DAC_MONITOR_MAP = {
 def parseList(inFile):
     with open(inFile) as file:
         dacList = file.readlines()
-        dacList = [line.rstrip('\n') for line in dacList]
+        dacList = [line.rstrip("\n") for line in dacList]
     return dacList
 
 def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, step, niter, adc_ref, vref):
@@ -74,8 +74,8 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
         lpgbt, gbt_select, elink, gpio = vfat_to_gbt_elink_gpio(vfat)
         check_lpgbt_link_ready(oh_select, gbt_select)
 
-        link_good_node[vfat] = get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
-        sync_error_node[vfat] = get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
+        link_good_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
+        sync_error_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
         link_good = read_backend_reg(link_good_node[vfat])
         sync_err = read_backend_reg(sync_error_node[vfat])
         if system!="dryrun" and (link_good == 0 or sync_err > 0):
@@ -86,16 +86,16 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
         for dac in dac_list:
             if dac in ["CFG_CAL_DAC_I", "CFG_CAL_DAC_V"]:
                 dac = "CFG_CAL_DAC"
-            dac_node[vfat][dac] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (oh_select, vfat, dac))
-        vfat_cfg_run_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN" % (oh_select, vfat))
-        vfat_cfg_calmode_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_CAL_MODE" % (oh_select, vfat))
-        adc_monitor_select_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_MONITOR_SELECT" % (oh_select, vfat))
-        adc0_cached_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC0_CACHED" % (oh_select, vfat))
-        adc0_update_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC0_UPDATE" % (oh_select, vfat))
-        adc1_cached_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC1_CACHED" % (oh_select, vfat))
-        adc1_update_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC1_UPDATE" % (oh_select, vfat))
+            dac_node[vfat][dac] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (oh_select, vfat, dac))
+        vfat_cfg_run_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN" % (oh_select, vfat))
+        vfat_cfg_calmode_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_CAL_MODE" % (oh_select, vfat))
+        adc_monitor_select_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_MONITOR_SELECT" % (oh_select, vfat))
+        adc0_cached_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC0_CACHED" % (oh_select, vfat))
+        adc0_update_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC0_UPDATE" % (oh_select, vfat))
+        adc1_cached_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC1_CACHED" % (oh_select, vfat))
+        adc1_update_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC1_UPDATE" % (oh_select, vfat))
 
-        write_backend_reg(get_rwreg_node("GEM_AMC.OH.OH%i.GEB.VFAT%d.CFG_VREF_ADC" % (oh_select, vfat)) , vref)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%d.CFG_VREF_ADC" % (oh_select, vfat)) , vref)
 
         dac_scan_results[vfat] = {}
         for dac in dac_list:
@@ -154,23 +154,23 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
 
     print ("DAC Scan completed\n")
     file_out.close()
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT VFAT DAC Scan')
+    parser = argparse.ArgumentParser(description="LpGBT VFAT DAC Scan")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
-    parser.add_argument("-v", "--vfats", action="store", nargs='+', dest="vfats", help="vfats = list of VFAT numbers (0-23)")
-    parser.add_argument("-r", "--regs", action="store", nargs='+', dest="regs", help="DACs to scan")
+    parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
+    parser.add_argument("-r", "--regs", action="store", nargs="+", dest="regs", help="DACs to scan")
     parser.add_argument("-ll", "--lower", action="store", dest="lower", default="0", help="lower = Lower limit for DAC scan (default=0)")
     parser.add_argument("-ul", "--upper", action="store", dest="upper", default="255", help="upper = Upper limit for DAC scan (default=255)")
     parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for DAC scan (default=1)")
     parser.add_argument("-n", "--niter", action="store", dest="niter", default="100", help="niter = Number of times to read ADC for averaging (default=100)")
     parser.add_argument("-f", "--ref", action="store", dest="ref", default = "internal", help="ref = ADC reference: internal or external (default=internal)")
     parser.add_argument("-vr", "--vref", action="store", dest="vref", default = "3", help="vref = CFG_VREF_ADC (0-3) (default=3)")
-    parser.add_argument("-a", "--addr", action="store", nargs='+', dest="addr", help="addr = list of VFATs to enable HDLC addressing")
+    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     parser.add_argument("-d", "--dacList", action="store", dest="dacList", help="Input text file with list of DACs")
     args = parser.parse_args()
 

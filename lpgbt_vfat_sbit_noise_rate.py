@@ -36,7 +36,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
     vfat_oh_link_reset()
     global_reset()
     sleep(0.1)
-    write_backend_reg(get_rwreg_node("GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 1)
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 1)
 
     sbit_data = {}
     # Check ready and get nodes
@@ -49,8 +49,8 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
         for channel in range(0,128):
             enableVfatchannel(vfat, oh_select, channel, 0, 0) # unmask all channels and disable calpulsing
 
-        link_good_node = get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
-        sync_error_node = get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
+        link_good_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
+        sync_error_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
         link_good = read_backend_reg(link_good_node)
         sync_err = read_backend_reg(sync_error_node)
         if system!="dryrun" and (link_good == 0 or sync_err > 0):
@@ -66,17 +66,17 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
                 sbit_data[vfat][elink][thr]["fired"] = -9999
 
     # Nodes for Sbit counters
-    vfat_sbit_select_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SEL_VFAT_SBIT_ME0") # VFAT for reading S-bits
-    elink_sbit_select_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SEL_ELINK_SBIT_ME0") # Node for selecting Elink to count
-    channel_sbit_select_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SEL_SBIT_ME0") # Node for selecting S-bit to count
-    elink_sbit_counter_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SBIT0XE_COUNT_ME0") # S-bit counter for elink
-    channel_sbit_counter_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SBIT0XS_COUNT_ME0") # S-bit counter for specific channel
-    reset_sbit_counter_node = get_rwreg_node("GEM_AMC.SBIT_ME0.CTRL.SBIT_TEST_RESET")  # To reset all S-bit counters
+    vfat_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_VFAT_SBIT_ME0") # VFAT for reading S-bits
+    elink_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_ELINK_SBIT_ME0") # Node for selecting Elink to count
+    channel_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_SBIT_ME0") # Node for selecting S-bit to count
+    elink_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SBIT0XE_COUNT_ME0") # S-bit counter for elink
+    channel_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SBIT0XS_COUNT_ME0") # S-bit counter for specific channel
+    reset_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.CTRL.SBIT_TEST_RESET")  # To reset all S-bit counters
 
     dac_node = {}
     dac = "CFG_THR_ARM_DAC"
     for vfat in vfat_list:
-        dac_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%i.GEB.VFAT%d.%s"%(oh_select, vfat, dac))
+        dac_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%d.%s"%(oh_select, vfat, dac))
 
     print ("\nRunning Sbit Noise Scans for VFATs:")
     print (vfat_list)
@@ -109,7 +109,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
     for vfat in vfat_list:
         print("Unconfiguring VFAT %d" % (vfat))
         configureVfat(0, vfat, oh_select, 0)
-    write_backend_reg(get_rwreg_node("GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 0)
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 0)
 
     # Writing Results
     for vfat in vfat_list:
@@ -123,19 +123,19 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
     file_out.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT VFAT S-Bit Noise Rate')
+    parser = argparse.ArgumentParser(description="LpGBT VFAT S-Bit Noise Rate")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
-    parser.add_argument("-v", "--vfats", action="store", dest="vfats", nargs='+', help="vfats = VFAT number (0-23)")
-    parser.add_argument("-e", "--elinks", action="store", nargs='+', dest="elinks", help="elinks = list of elinks (default: 0-7)")
+    parser.add_argument("-v", "--vfats", action="store", dest="vfats", nargs="+", help="vfats = VFAT number (0-23)")
+    parser.add_argument("-e", "--elinks", action="store", nargs="+", dest="elinks", help="elinks = list of elinks (default: 0-7)")
     parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for SCurve scan (default=1)")
     parser.add_argument("-m", "--time", action="store", dest="time", default="0.001", help="time = time for each elink (default= 1 ms)")
-    parser.add_argument("-a", "--addr", action="store", nargs='+', dest="addr", help="addr = list of VFATs to enable HDLC addressing")
+    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     args = parser.parse_args()
 
     if args.system == "chc":

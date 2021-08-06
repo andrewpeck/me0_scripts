@@ -35,10 +35,10 @@ def main(system, boss, reg_list, data_list):
     
         print ("")
     
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT R/W Registers')
+    parser = argparse.ArgumentParser(description="LpGBT R/W Registers")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")

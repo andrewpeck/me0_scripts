@@ -23,9 +23,9 @@ def lpgbt_vfat_bert(system, oh_select, vfat_list, reg_list, niter, runtime, verb
     link_good_node = {}
     sync_error_node = {}
     reg_node = {}
-    sc_transactions_node = get_rwreg_node("GEM_AMC.SLOW_CONTROL.VFAT3.TRANSACTION_CNT")
-    sc_crc_error_node = get_rwreg_node("GEM_AMC.SLOW_CONTROL.VFAT3.CRC_ERROR_CNT")
-    sc_timeout_error_node = get_rwreg_node("GEM_AMC.SLOW_CONTROL.VFAT3.TIMEOUT_ERROR_CNT")
+    sc_transactions_node = get_rwreg_node("BEFE.GEM_AMC.SLOW_CONTROL.VFAT3.TRANSACTION_CNT")
+    sc_crc_error_node = get_rwreg_node("BEFE.GEM_AMC.SLOW_CONTROL.VFAT3.CRC_ERROR_CNT")
+    sc_timeout_error_node = get_rwreg_node("BEFE.GEM_AMC.SLOW_CONTROL.VFAT3.TIMEOUT_ERROR_CNT")
     initial_sc_transaction_count = read_backend_reg(sc_transactions_node)
     initial_sc_crc_error_count = read_backend_reg(sc_crc_error_node)
     initial_sc_timeout_error_count = read_backend_reg(sc_timeout_error_node)
@@ -36,8 +36,8 @@ def lpgbt_vfat_bert(system, oh_select, vfat_list, reg_list, niter, runtime, verb
         lpgbt, gbt_select, elink, gpio = vfat_to_gbt_elink_gpio(vfat)
         check_lpgbt_link_ready(oh_select, gbt_select)
 
-        link_good_node[vfat] = get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
-        sync_error_node[vfat] = get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
+        link_good_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
+        sync_error_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
         link_good = read_backend_reg(link_good_node[vfat])
         sync_err = read_backend_reg(sync_error_node[vfat])
         if system!="dryrun" and (link_good == 0 or sync_err > 0):
@@ -46,7 +46,7 @@ def lpgbt_vfat_bert(system, oh_select, vfat_list, reg_list, niter, runtime, verb
 
         reg_node[vfat] = {}
         for reg in reg_list:
-            reg_node[vfat][reg] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (oh_select, vfat, reg))
+            reg_node[vfat][reg] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (oh_select, vfat, reg))
 
     # Loop over registers
     for reg in reg_list:
@@ -263,19 +263,19 @@ def lpgbt_vfat_bert(system, oh_select, vfat_list, reg_list, niter, runtime, verb
         print ("")
         file_out.write("\n")
     file_out.close()
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT VFAT Slow Control Error Ratio Test')
+    parser = argparse.ArgumentParser(description="LpGBT VFAT Slow Control Error Ratio Test")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
-    parser.add_argument("-v", "--vfats", action="store", nargs='+', dest="vfats", help="vfats = list of VFAT numbers (0-23)")
-    parser.add_argument("-r", "--reg", action="store", dest="reg", nargs='+', help="reg = register names to read/write: HW_ID (read), HW_ID_VER (read), TEST_REG (read/write), HW_CHIP_ID (read)")
+    parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
+    parser.add_argument("-r", "--reg", action="store", dest="reg", nargs="+", help="reg = register names to read/write: HW_ID (read), HW_ID_VER (read), TEST_REG (read/write), HW_CHIP_ID (read)")
     parser.add_argument("-n", "--niter", action="store", dest="niter", help="niter = number of times to perform the read/write")
     parser.add_argument("-t", "--runtime", action="store", dest="runtime", help="runtime = time (in minutes) to perform the read/write")
-    parser.add_argument("-a", "--addr", action="store", nargs='+', dest="addr", help="addr = list of VFATs to enable HDLC addressing")
+    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     parser.add_argument("-z", "--verbose", action="store_true", dest="verbose", default=False, help="Set for more verbosity")
     args = parser.parse_args()
 

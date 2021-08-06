@@ -6,10 +6,10 @@ import numpy as np
 import os, sys, glob
 import argparse
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='Plotting VFAT SCurve')
+    parser = argparse.ArgumentParser(description="Plotting VFAT SCurve")
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="SCurve result filename")
     #parser.add_argument("-t", "--type", action="store", dest="type", help="type = daq or sbit")
     parser.add_argument("-m", "--mode", action="store", dest="mode", help="mode = voltage or current")
@@ -53,8 +53,8 @@ if __name__ == '__main__':
 
     for vfat in scurve_result:
         fig, axs = plt.subplots()
-        plt.xlabel('Channel Number')
-        plt.ylabel('Injected Charge (DAC)')
+        plt.xlabel("Channel Number")
+        plt.ylabel("Injected Charge (DAC)")
         #plt.xlim(0,128)
         #plt.ylim(0,256)
 
@@ -73,14 +73,14 @@ if __name__ == '__main__':
         chargeVals = np.arange(0, 256, 1)
         plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(chargeVals), max(chargeVals)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
         cbar = fig.colorbar(plot, ax=axs, pad=0.01)
-        cbar.set_label('Fired Events / Total Events')
+        cbar.set_label("Fired Events / Total Events")
         plt.title("VFAT# %02d"%vfat)
         plt.savefig((plot_filename_prefix+"_map_VFAT%02d.pdf")%vfat)
 
     for vfat in scurve_result:
         fig, ax = plt.subplots()
-        plt.xlabel('Injected Charge (DAC)')
-        plt.ylabel('Fired Events / Total Events')
+        plt.xlabel("Injected Charge (DAC)")
+        plt.ylabel("Fired Events / Total Events")
         #if args.type == "daq":
         #    plt.ylim(-0.1,1.1)
         #else:
@@ -97,8 +97,8 @@ if __name__ == '__main__':
                 if c in scurve_result[vfat][channel]:
                     charge_plot.append(c)
                     frac.append(scurve_result[vfat][channel][c])
-            ax.plot(charge_plot, frac, 'o', label="Channel %d"%channel)
-        leg = ax.legend(loc='center right', ncol=2)
+            ax.plot(charge_plot, frac, "o", label="Channel %d"%channel)
+        leg = ax.legend(loc="center right", ncol=2)
         plt.title("VFAT# %02d"%vfat)
         plt.savefig((plot_filename_prefix+"_VFAT%02d.pdf")%vfat)
 

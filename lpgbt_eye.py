@@ -132,9 +132,9 @@ def main(system, cap, r0, r1, r2, r3, count, boss):
     writeReg(getNode("LPGBT.RWF.EQUALIZER.EQRES2"), r2_config, 0)
     writeReg(getNode("LPGBT.RWF.EQUALIZER.EQRES3"), r3_config, 0)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LPGBT EYE')
+    parser = argparse.ArgumentParser(description="LPGBT EYE")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss allowed")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")

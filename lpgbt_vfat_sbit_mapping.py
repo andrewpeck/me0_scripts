@@ -14,7 +14,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap):
     vfat_oh_link_reset()
     global_reset()
     sleep(0.1)
-    write_backend_reg(get_rwreg_node("GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 1)
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 1)
 
     s_bit_channel_mapping = {}
 
@@ -24,26 +24,26 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap):
         lpgbt, gbt_select, elink_daq, gpio = vfat_to_gbt_elink_gpio(vfat)
         check_lpgbt_link_ready(oh_select, gbt_select)
 
-        link_good = read_backend_reg(get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat)))
-        sync_err = read_backend_reg(get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat)))
+        link_good = read_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat)))
+        sync_err = read_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat)))
         if system!="dryrun" and (link_good == 0 or sync_err > 0):
             print (Colors.RED + "Link is bad for VFAT# %02d"%(vfat) + Colors.ENDC)
             rw_terminate()
 
         # Reset TTC generator
-        write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.RESET"), 1)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET"), 1)
 
         # Reading S-bit counter
-        cyclic_running_node = get_rwreg_node("GEM_AMC.TTC.GENERATOR.CYCLIC_RUNNING")
-        l1a_node = get_rwreg_node("GEM_AMC.TTC.CMD_COUNTERS.L1A")
-        calpulse_node = get_rwreg_node("GEM_AMC.TTC.CMD_COUNTERS.CALPULSE")
+        cyclic_running_node = get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_RUNNING")
+        l1a_node = get_rwreg_node("BEFE.GEM_AMC.TTC.CMD_COUNTERS.L1A")
+        calpulse_node = get_rwreg_node("BEFE.GEM_AMC.TTC.CMD_COUNTERS.CALPULSE")
 
-        write_backend_reg(get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SEL_VFAT_SBIT_ME0"), vfat) # Select VFAT for reading S-bits
-        elink_sbit_select_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SEL_ELINK_SBIT_ME0") # Node for selecting Elink to count
-        channel_sbit_select_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SEL_SBIT_ME0") # Node for selecting S-bit to count
-        elink_sbit_counter_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SBIT0XE_COUNT_ME0") # S-bit counter for elink
-        channel_sbit_counter_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SBIT0XS_COUNT_ME0") # S-bit counter for specific channel
-        reset_sbit_counter_node = get_rwreg_node("GEM_AMC.SBIT_ME0.CTRL.SBIT_TEST_RESET")  # To reset all S-bit counters
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_VFAT_SBIT_ME0"), vfat) # Select VFAT for reading S-bits
+        elink_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_ELINK_SBIT_ME0") # Node for selecting Elink to count
+        channel_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_SBIT_ME0") # Node for selecting S-bit to count
+        elink_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SBIT0XE_COUNT_ME0") # S-bit counter for elink
+        channel_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SBIT0XS_COUNT_ME0") # S-bit counter for specific channel
+        reset_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.CTRL.SBIT_TEST_RESET")  # To reset all S-bit counters
 
         # Configure the pulsing VFAT
         print("Configuring VFAT %02d" % (vfat))
@@ -79,26 +79,26 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap):
                     s_bit_matches[sbit] = 0
 
                     # Configure TTC generator
-                    write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.ENABLE"), 1)
-                    write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 50)
-                    write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_GAP"), l1a_bxgap)
-                    write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_COUNT"), nl1a)
+                    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 1)
+                    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 50)
+                    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_GAP"), l1a_bxgap)
+                    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_COUNT"), nl1a)
 
                     # Start the cyclic generator
-                    write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.CYCLIC_START"), 1)
+                    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_START"), 1)
                     cyclic_running = read_backend_reg(cyclic_running_node)
                     while cyclic_running:
                         cyclic_running = read_backend_reg(cyclic_running_node)
 
                     # Stop the cyclic generator
-                    write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.RESET"), 1)
+                    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET"), 1)
 
                     elink_sbit_counter_final = read_backend_reg(elink_sbit_counter_node)
                     l1a_counter = read_backend_reg(l1a_node)
                     calpulse_counter = read_backend_reg(calpulse_node)
 
                     if system!="dryrun" and l1a_counter != nl1a:
-                        print (Colors.RED + "ERROR: Number of L1A's incorrect" + Colors.ENDC)
+                        print (Colors.RED + "ERROR: Number of L1A"s incorrect" + Colors.ENDC)
                         rw_terminate()
                     if system!="dryrun" and elink_sbit_counter_final == 0:
                         print (Colors.YELLOW + "WARNING: Elink %02d did not register any S-bit for calpulse on channel %02d"%(elink, channel) + Colors.ENDC)
@@ -148,7 +148,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap):
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
     filename = "sbit_mapping_results/sbit_mapping_results_"+now+".py"
-    with open(filename, 'w') as file:
+    with open(filename, "w") as file:
         file.write(json.dumps(s_bit_channel_mapping))
 
     print ("S-bit Mapping Results: \n")
@@ -163,19 +163,19 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap):
                     print (Colors.GREEN + "    Channel %02d:  S-bit %02d"%(channel, s_bit_channel_mapping[vfat][elink][channel]) + Colors.ENDC)
         print ("")
 
-    write_backend_reg(get_rwreg_node("GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 0)
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 0)
     print ("\nS-bit mapping done\n")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT VFAT S-Bit Mapping')
+    parser = argparse.ArgumentParser(description="LpGBT VFAT S-Bit Mapping")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
-    parser.add_argument("-v", "--vfats", action="store", nargs='+', dest="vfats", help="vfats = list of VFAT numbers (0-23)")
-    parser.add_argument("-a", "--addr", action="store", nargs='+', dest="addr", help="addr = list of VFATs to enable HDLC addressing")
+    parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
+    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -214,8 +214,8 @@ if __name__ == '__main__':
             sys.exit()
         vfat_list.append(v_int)
 
-    nl1a = 100 # Nr. of L1A's
-    l1a_bxgap = 500 # Gap between 2 L1A's in nr. of BX's
+    nl1a = 100 # Nr. of L1A"s
+    l1a_bxgap = 500 # Gap between 2 L1A"s in nr. of BX"s
         
     # Parsing Registers XML File
     print("Parsing xml file...")

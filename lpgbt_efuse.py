@@ -32,7 +32,7 @@ def main(system, boss, fusing, input_config_file, input_vtrx, input_register, in
         lpgbt_write_fuse_file("fuse_sub.txt")
 
 def fuse_from_file(system, boss, filename, vtrx):
-    f = open(filename, 'r')
+    f = open(filename, "r")
     config = {}
     for line in f.readlines():
         config[int(line.split()[0],16)] = int(line.split()[1],16)
@@ -314,7 +314,7 @@ def write_fuse_magic(fuse_enable):
     magic_number = readReg(getNode("LPGBT.RW.EFUSES.FUSEMAGICNUMBER"))
     print ("Reading Magic Number: " + str(hex(magic_number)))
 
-def lpgbt_write_fuse_file(fuse_file = 'fuse.txt'):
+def lpgbt_write_fuse_file(fuse_file = "fuse.txt"):
     f = open(fuse_file, "w+")
     for i in range(n_rw_fuse):
         val = fuse_list[i]
@@ -322,10 +322,10 @@ def lpgbt_write_fuse_file(fuse_file = 'fuse.txt'):
         f.write(write_string)
     f.close()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT Fusing for ME0 Optohybrid')
+    parser = argparse.ArgumentParser(description="LpGBT Fusing for ME0 Optohybrid")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-f", "--fusing", action="store", dest="fusing", help="fusing = input_file, register, user_id")

@@ -36,10 +36,10 @@ def main(geb, asiago, inFile, write):
 
 
     for vfat in geb_asiago_vfat_map[geb][asiago]:
-        register = get_rwreg_node("GEM_AMC.OH.OH0.GEB.VFAT%d.HW_CHIP_ID" % vfat)
+        register = get_rwreg_node("BEFE.GEM_AMC..OH.OH0.GEB.VFAT%d.HW_CHIP_ID" % vfat)
         serialN[vfat] = simple_read_backend_reg(register, -9999)
         #print(data_read)
-    	#serialN[vfat] = read_reg('GEM_AMC.OH.OH0.GEB.VFAT%s.HW_CHIP_ID' % vfat)
+    	#serialN[vfat] = read_reg('BEFE.GEM_AMC..OH.OH0.GEB.VFAT%s.HW_CHIP_ID' % vfat)
     print("=" * 31)
     print("====== VFAT Chip Numbers ======")
     print("=" * 31)

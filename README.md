@@ -35,6 +35,7 @@ Set some environment variables (after compiling the 0xbefe repo):
 export ADDRESS_TABLE="<Absolute Path for 0xbefe/address_table/gem/generated/me0_cvp13/gem_amc.xml>"
 export ME0_LIBRWREG_SO="<Absolute Path for 0xbefe/scripts/boards/cvp13/rwreg/librwreg.so>"
 export BOARD_TYPE="cvp13"
+export BOARD_IDX="0"
 ```
 
 ### Configuration

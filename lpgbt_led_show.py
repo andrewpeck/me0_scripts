@@ -8,14 +8,14 @@ import struct
 DEBUG=False
 
 class Colors:            
-    WHITE   = '\033[97m' 
-    CYAN    = '\033[96m' 
-    MAGENTA = '\033[95m' 
-    BLUE    = '\033[94m' 
-    YELLOW  = '\033[93m' 
-    GREEN   = '\033[92m' 
-    RED     = '\033[91m' 
-    ENDC    = '\033[0m'  
+    WHITE   = "\033[97m"
+    CYAN    = "\033[96m"
+    MAGENTA = "\033[95m"
+    BLUE    = "\033[94m"
+    YELLOW  = "\033[93m"
+    GREEN   = "\033[92m"
+    RED     = "\033[91m"
+    ENDC    = "\033[0m"
 
 def main(system, boss):
 
@@ -52,20 +52,20 @@ def check_bit(byteval,idx):
 
 def debug(string):
     if DEBUG:
-        print('DEBUG: ' + string)
+        print("DEBUG: " + string)
 
 def debugCyan(string):
     if DEBUG:
-        printCyan('DEBUG: ' + string)
+        printCyan("DEBUG: " + string)
 
 def heading(string):                                                                    
     print (Colors.BLUE)
-    print ('\n>>>>>>> '+str(string).upper()+' <<<<<<<')
+    print ("\n>>>>>>> "+str(string).upper()+" <<<<<<<")
     print (Colors.ENDC)
                                                       
 def subheading(string):                         
     print (Colors.YELLOW)
-    print ('---- '+str(string)+' ----',Colors.ENDC)
+    print ("---- "+str(string)+" ----",Colors.ENDC)
                                                                      
 def printCyan(string):                                                
     print (Colors.CYAN)
@@ -77,20 +77,20 @@ def printRed(string):
 
 def hex(number):
     if number is None:
-        return 'None'
+        return "None"
     else:
         return "{0:#0x}".format(number)
 
 def binary(number, length):
     if number is None:
-        return 'None'
+        return "None"
     else:
         return "{0:#0{1}b}".format(number, length + 2)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT LED Show')
+    parser = argparse.ArgumentParser(description="LpGBT LED Show")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
@@ -98,17 +98,17 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.system == "chc":
-        print ("Using Rpi CHeeseCake for LED Show'")
+        print ("Using Rpi CHeeseCake for LED Show"")
     elif args.system == "backend":
-        print ("Using Backend for LED Show'")
+        print ("Using Backend for LED Show"")
         #print ("Only chc (Rpi Cheesecake) or dryrun supported at the moment")
         #sys.exit()
     elif args.system == "dongle":
-        #print ("Using USB Dongle for LED Show'")
+        #print ("Using USB Dongle for LED Show"")
         print (Colors.YELLOW + "Only chc (Rpi Cheesecake) or dryrun supported at the moment" + Colors.ENDC)
         sys.exit()
     elif args.system == "dryrun":
-        print ("Dry Run - not actually doing the LED Show'")
+        print ("Dry Run - not actually doing the LED Show"")
     else:
         print (Colors.YELLOW + "Only valid options: chc, backend, dongle, dryrun" + Colors.ENDC)
         sys.exit()

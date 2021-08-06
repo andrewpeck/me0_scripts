@@ -7,14 +7,14 @@ import smbus
 import time
 
 class Colors:
-    WHITE   = '\033[97m'
-    CYAN    = '\033[96m'
-    MAGENTA = '\033[95m'
-    BLUE    = '\033[94m'
-    YELLOW  = '\033[93m'
-    GREEN   = '\033[92m'
-    RED     = '\033[91m'
-    ENDC    = '\033[0m'
+    WHITE   = "\033[97m"
+    CYAN    = "\033[96m"
+    MAGENTA = "\033[95m"
+    BLUE    = "\033[94m"
+    YELLOW  = "\033[93m"
+    GREEN   = "\033[92m"
+    RED     = "\033[91m"
+    ENDC    = "\033[0m"
     
 class rpi_chc:
     # Raspberry CHeeseCake interface for I2C

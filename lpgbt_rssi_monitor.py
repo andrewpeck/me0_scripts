@@ -28,8 +28,8 @@ def main(system, boss, run_time_min, gain, voltage, ver):
     run_time_min = float(run_time_min)
 
     fig, ax = plt.subplots()
-    ax.set_xlabel('minutes')
-    ax.set_ylabel('RSSI (uA)')
+    ax.set_xlabel("minutes")
+    ax.set_ylabel("RSSI (uA)")
     #ax.set_xticks(range(0,run_time_min+1))
     #ax.set_xlim([0,run_time_min])
 
@@ -52,7 +52,7 @@ def main(system, boss, run_time_min, gain, voltage, ver):
             sleep(1)
 
     figure_name = foldername + now + "_plot.pdf"
-    fig.savefig(figure_name, bbox_inches='tight')
+    fig.savefig(figure_name, bbox_inches="tight")
 
     powerdown_adc()
 
@@ -90,22 +90,22 @@ def powerdown_adc():
 def read_adc(channel, gain, system):
     # ADCInPSelect[3:0]	|  Input
     # ------------------|----------------------------------------
-    # 4'd0	        |  ADC0 (external pin)
-    # 4'd1	        |  ADC1 (external pin)
-    # 4'd2	        |  ADC2 (external pin)
-    # 4'd3	        |  ADC3 (external pin)
-    # 4'd4	        |  ADC4 (external pin)
-    # 4'd5	        |  ADC5 (external pin)
-    # 4'd6	        |  ADC6 (external pin)
-    # 4'd7	        |  ADC7 (external pin)
-    # 4'd8	        |  EOM DAC (internal signal)
-    # 4'd9	        |  VDDIO * 0.42 (internal signal)
-    # 4'd10	        |  VDDTX * 0.42 (internal signal)
-    # 4'd11	        |  VDDRX * 0.42 (internal signal)
-    # 4'd12	        |  VDD * 0.42 (internal signal)
-    # 4'd13	        |  VDDA * 0.42 (internal signal)
-    # 4'd14	        |  Temperature sensor (internal signal)
-    # 4'd15	        |  VREF/2 (internal signal)
+    # 4"d0	        |  ADC0 (external pin)
+    # 4"d1	        |  ADC1 (external pin)
+    # 4"d2	        |  ADC2 (external pin)
+    # 4"d3	        |  ADC3 (external pin)
+    # 4"d4	        |  ADC4 (external pin)
+    # 4"d5	        |  ADC5 (external pin)
+    # 4"d6	        |  ADC6 (external pin)
+    # 4"d7	        |  ADC7 (external pin)
+    # 4"d8	        |  EOM DAC (internal signal)
+    # 4"d9	        |  VDDIO * 0.42 (internal signal)
+    # 4"d10	        |  VDDTX * 0.42 (internal signal)
+    # 4"d11	        |  VDDRX * 0.42 (internal signal)
+    # 4"d12	        |  VDD * 0.42 (internal signal)
+    # 4"d13	        |  VDDA * 0.42 (internal signal)
+    # 4"d14	        |  Temperature sensor (internal signal)
+    # 4"d15	        |  VREF/2 (internal signal)
 
     writeReg(getNode("LPGBT.RW.ADC.ADCINPSELECT"), channel, 0)
     writeReg(getNode("LPGBT.RW.ADC.ADCINNSELECT"), 0xf, 0)
@@ -158,10 +158,10 @@ def rssi_current_conversion(rssi_adc, gain, input_voltage, ver):
 
     return rssi_current
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='RSSI Monitor for ME0 Optohybrid')
+    parser = argparse.ArgumentParser(description="RSSI Monitor for ME0 Optohybrid")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")

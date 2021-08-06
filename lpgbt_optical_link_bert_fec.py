@@ -20,7 +20,7 @@ def check_fec_errors(system, boss, path, opr, ohid, gbtid, runtime, vfat_list, v
             print (Colors.YELLOW + "Only run and read operation allowed for uplink" + Colors.ENDC)
             rw_terminate()
 
-        fec_node = get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.GBT%d_FEC_ERR_CNT" % (ohid, gbtid))
+        fec_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.GBT%d_FEC_ERR_CNT" % (ohid, gbtid))
 
         if opr == "read":
             read_fec_errors = read_backend_reg(fec_node)
@@ -38,12 +38,12 @@ def check_fec_errors(system, boss, path, opr, ohid, gbtid, runtime, vfat_list, v
             return
 
         # Reset the error counters
-        node = get_rwreg_node("GEM_AMC.GEM_SYSTEM.CTRL.LINK_RESET")
+        node = get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.CTRL.LINK_RESET")
         write_backend_reg(node, 0x001)
 
         vfat_node = []
         for vfat in vfat_list:
-            vfat_node.append(get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (ohid, vfat-6*ohid, "TEST_REG")))
+            vfat_node.append(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (ohid, vfat-6*ohid, "TEST_REG")))
         
         # start error counting loop
         start_fec_errors = read_backend_reg(fec_node)
@@ -172,9 +172,9 @@ def lpgbt_fec_error_counter():
     return error_counter   
        
        
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LPGBT Bit Error Ratio Test (BERT) using FEC Error Counters')
+    parser = argparse.ArgumentParser(description="LPGBT Bit Error Ratio Test (BERT) using FEC Error Counters")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss/sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend/dryrun)")
@@ -182,8 +182,8 @@ if __name__ == '__main__':
     parser.add_argument("-p", "--path", action="store", dest="path", help="path = uplink, downlink")
     parser.add_argument("-r", "--opr", action="store", dest="opr", default="run", help="opr = start, run, read, stop (only run, read allowed for uplink)")
     parser.add_argument("-t", "--time", action="store", dest="time", help="TIME = measurement time in minutes")
-    parser.add_argument("-v", "--vfats", action="store", dest="vfats", nargs='+', help="vfats = list of VFATs (0-23) for read/write TEST_REG")
-    parser.add_argument("-a", "--addr", action="store", nargs='+', dest="addr", help="addr = list of VFATs to enable HDLC addressing")
+    parser.add_argument("-v", "--vfats", action="store", dest="vfats", nargs="+", help="vfats = list of VFATs (0-23) for read/write TEST_REG")
+    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     parser.add_argument("-z", "--verbose", action="store_true", dest="verbose", help="VERBOSE")
     args = parser.parse_args()
 

@@ -94,8 +94,8 @@ def main(system, boss, channel, name, reg, upper, lower, gain):
     out_file.close()
     
     #fig, ax = plt.subplots()
-    #ax.set_xlabel('Hex')
-    #ax.set_ylabel('RSSI')
+    #ax.set_xlabel("Hex")
+    #ax.set_ylabel("RSSI")
     #plt.plot(data_array, rssi_array)
     #plt.show()
 
@@ -104,9 +104,9 @@ def main(system, boss, channel, name, reg, upper, lower, gain):
     i2cmaster_write(system, reg, initial_bias)
     print ("")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LPGBT VTRX+ CONTROL')
+    parser = argparse.ArgumentParser(description="LPGBT VTRX+ CONTROL")
     parser.add_argument("-s", "--system", action="store", dest="system",
                         help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss allowed")

@@ -16,21 +16,21 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
     vfat_oh_link_reset()
     global_reset()
     sleep(0.1)
-    write_backend_reg(get_rwreg_node("GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 1)
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 1)
 
     lpgbt, gbt_select, elink_daq, gpio = vfat_to_gbt_elink_gpio(vfat)
     print ("Testing VFAT#: %02d\n" %(vfat))
     file_out.write("Testing VFAT#: %02d\n\n")
     
     check_lpgbt_link_ready(oh_select, gbt_select)
-    link_good = read_backend_reg(get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat)))
-    sync_err = read_backend_reg(get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat)))
+    link_good = read_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat)))
+    sync_err = read_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat)))
     if system!="dryrun" and (link_good == 0 or sync_err > 0):
         print (Colors.RED + "Link is bad for VFAT# %02d"%(vfat) + Colors.ENDC)
         rw_terminate()
 
     # Reset TTC generator
-    write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.RESET"), 1)
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET"), 1)
 
     # Reading S-bit counter
     if nl1a != 0:
@@ -39,16 +39,16 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
     else:
         print ("\nReading S-bit counter for %.2f minutes\n" %(runtime))
         file_out.write("\nReading S-bit counter for %.2f minutes\n\n" %(runtime))
-    cyclic_running_node = get_rwreg_node("GEM_AMC.TTC.GENERATOR.CYCLIC_RUNNING")
-    l1a_node = get_rwreg_node("GEM_AMC.TTC.CMD_COUNTERS.L1A")
-    calpulse_node = get_rwreg_node("GEM_AMC.TTC.CMD_COUNTERS.CALPULSE")
+    cyclic_running_node = get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_RUNNING")
+    l1a_node = get_rwreg_node("BEFE.GEM_AMC.TTC.CMD_COUNTERS.L1A")
+    calpulse_node = get_rwreg_node("BEFE.GEM_AMC.TTC.CMD_COUNTERS.CALPULSE")
 
-    write_backend_reg(get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SEL_VFAT_SBIT_ME0"), vfat) # Select VFAT for reading S-bits
-    elink_sbit_select_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SEL_ELINK_SBIT_ME0") # Node for selecting Elink to count
-    channel_sbit_select_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SEL_SBIT_ME0") # Node for selecting S-bit to count
-    elink_sbit_counter_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SBIT0XE_COUNT_ME0") # S-bit counter for elink
-    channel_sbit_counter_node = get_rwreg_node("GEM_AMC.SBIT_ME0.TEST_SBIT0XS_COUNT_ME0") # S-bit counter for specific channel
-    reset_sbit_counter_node = get_rwreg_node("GEM_AMC.SBIT_ME0.CTRL.SBIT_TEST_RESET")  # To reset all S-bit counters
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_VFAT_SBIT_ME0"), vfat) # Select VFAT for reading S-bits
+    elink_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_ELINK_SBIT_ME0") # Node for selecting Elink to count
+    channel_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_SBIT_ME0") # Node for selecting S-bit to count
+    elink_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SBIT0XE_COUNT_ME0") # S-bit counter for elink
+    channel_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SBIT0XS_COUNT_ME0") # S-bit counter for specific channel
+    reset_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.CTRL.SBIT_TEST_RESET")  # To reset all S-bit counters
 
     elink_sbit_counter = 0
     channel_sbit_counter = 0
@@ -67,15 +67,15 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
     file_out.write("Configuring VFAT %02d\n" % (vfat))
     configureVfat(1, vfat, oh_select, 0)
     if set_cal_mode == "voltage":
-        write_backend_reg(get_rwreg_node("GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)), 1)
-        write_backend_reg(get_rwreg_node("GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"% (oh_select, vfat)), 200)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)), 1)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"% (oh_select, vfat)), 200)
     elif set_cal_mode == "current":
-        write_backend_reg(get_rwreg_node("GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)), 2)
-        write_backend_reg(get_rwreg_node("GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"% (oh_select, vfat)), 0)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)), 2)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"% (oh_select, vfat)), 0)
     else:
-        write_backend_reg(get_rwreg_node("GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)), 0)
-        write_backend_reg(get_rwreg_node("GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"% (oh_select, vfat)), 0)
-    write_backend_reg(get_rwreg_node("GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DAC"% (oh_select, vfat)), cal_dac)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)), 0)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"% (oh_select, vfat)), 0)
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DAC"% (oh_select, vfat)), cal_dac)
 
     if parallel == "all":
         print ("Injecting charge in all channels in parallel\n")
@@ -128,18 +128,18 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
             write_backend_reg(channel_sbit_select_node, sbit_read) # Select S-bit for S-bit counter
 
             # Configure TTC generator
-            write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.ENABLE"), 1)
-            write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_GAP"), l1a_bxgap)
-            write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_COUNT"), nl1a)
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 1)
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_GAP"), l1a_bxgap)
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_COUNT"), nl1a)
             if l1a_bxgap >= 40:
-                write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 25)
+                write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 25)
             else:
-                write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 2)
+                write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 2)
 
             # Start the cyclic generator
             print ("ELINK# %02d, Channel %02d: Start L1A and Calpulsing cycle"%(elink, channel))
             file_out.write("ELINK# %02d, Channel %02d: Start L1A and Calpulsing cycle\n"%(elink, channel))
-            write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.CYCLIC_START"), 1)
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_START"), 1)
 
             cyclic_running = read_backend_reg(cyclic_running_node)
             nl1a_reg_cycles = 0
@@ -183,7 +183,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
                         time_prev = time()
 
             # Stop the cyclic generator
-            write_backend_reg(get_rwreg_node("GEM_AMC.TTC.GENERATOR.RESET"), 1)
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET"), 1)
             total_time = time() - t0
             print ("ELINK# %02d, Channel %02d, S-bit %02d: L1A and Calpulsing cycle completed in %.2f seconds (%.2f minutes)"%(elink, channel, sbit_read, total_time, total_time/60.0))
             file_out.write("ELINK# %02d, Channel %02d, S-bit %02d: L1A and Calpulsing cycle completed in %.2f seconds (%.2f minutes)\n"%(elink, channel, sbit_read, total_time, total_time/60.0))
@@ -220,7 +220,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
     file_out.write("Unconfiguring VFAT %02d\n" % (vfat))
     configureVfat(0, vfat, oh_select, 0)
 
-    write_backend_reg(get_rwreg_node("GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 0)
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 0)
 
     print ("\nS-Bit Error Test Results for VFAT %02d: \n"%(vfat))
     file_out.write("\nS-Bit Error Test Results for VFAT %02d: \n\n"%(vfat))
@@ -244,8 +244,8 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
                     s_bit_expected = real_calpulse_counter*2 # S-bit double counting
                 else:
                     s_bit_expected = real_calpulse_counter
-                print ("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f seconds (%.2f minutes), L1A rate: %.2f kHz, Nr. of L1A's  (effi=%.3f): %.2e, Nr. of Calpulses: %.2e \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, total_time, total_time/60.0, l1a_rate/1000.0, efficiency, real_l1a_counter, real_calpulse_counter, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
-                file_out.write("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f seconds (%.2f minutes), L1A rate: %.2f kHz, Nr. of L1A's (effi=%.3f): %.2e, Nr. of Calpulses: %.2e, \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e\n" %(elink, channel, sbit_read, total_time, total_time/60.0, l1a_rate/1000.0, efficiency, real_l1a_counter, real_calpulse_counter, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
+                print ("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f seconds (%.2f minutes), L1A rate: %.2f kHz, Nr. of L1A"s  (effi=%.3f): %.2e, Nr. of Calpulses: %.2e \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, total_time, total_time/60.0, l1a_rate/1000.0, efficiency, real_l1a_counter, real_calpulse_counter, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
+                file_out.write("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f seconds (%.2f minutes), L1A rate: %.2f kHz, Nr. of L1A"s (effi=%.3f): %.2e, Nr. of Calpulses: %.2e, \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e\n" %(elink, channel, sbit_read, total_time, total_time/60.0, l1a_rate/1000.0, efficiency, real_l1a_counter, real_calpulse_counter, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
             else:
                 if nl1a != 0:
                     if cal_mode == "voltage":
@@ -259,8 +259,8 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
                         s_bit_expected = expected_l1a*2 # S-bit double counting
                     else:
                         s_bit_expected = expected_l1a
-                    print ("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f minutes, L1A rate: %.2f kHz, Nr. of L1A's (effi=%.3f): %.2e, \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, runtime, l1a_rate/1000.0, efficiency, expected_l1a, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
-                    file_out.write("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f minutes, L1A rate: %.2f kHz, Nr. of L1A's (effi=%.3f): %.2e, \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e\n" %(elink, channel, sbit_read, runtime, l1a_rate/1000.0, efficiency, expected_l1a, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
+                    print ("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f minutes, L1A rate: %.2f kHz, Nr. of L1A"s (effi=%.3f): %.2e, \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, runtime, l1a_rate/1000.0, efficiency, expected_l1a, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
+                    file_out.write("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f minutes, L1A rate: %.2f kHz, Nr. of L1A"s (effi=%.3f): %.2e, \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e\n" %(elink, channel, sbit_read, runtime, l1a_rate/1000.0, efficiency, expected_l1a, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
 
             # BER for Channel S-bit
             channel_n_err = s_bit_expected - channel_sbit_counter_list[elink][channel]
@@ -283,25 +283,25 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
     file_out.write("\nS-bit testing done\n\n")
     file_out.close()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT VFAT S-Bit Test')
+    parser = argparse.ArgumentParser(description="LpGBT VFAT S-Bit Test")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--vfat", action="store", dest="vfat", help="vfat = VFAT number (0-23)")
-    parser.add_argument("-e", "--elink", action="store", dest="elink", nargs='+', help="elink = list of ELINKs (0-7) for S-bits")
-    parser.add_argument("-c", "--channels", action="store", dest="channels", nargs='+', help="channels = list of channels for chosen VFAT and ELINK (list allowed only for 1 elink, by default all channels used for the elinks)")
-    parser.add_argument("-x", "--sbits", action="store", dest="sbits", nargs='+', help="sbit = list of sbits to read for chosen VFAT and ELINK (list allowed only for 1 elink, by default all s-bits used for the elinks)")
+    parser.add_argument("-e", "--elink", action="store", dest="elink", nargs="+", help="elink = list of ELINKs (0-7) for S-bits")
+    parser.add_argument("-c", "--channels", action="store", dest="channels", nargs="+", help="channels = list of channels for chosen VFAT and ELINK (list allowed only for 1 elink, by default all channels used for the elinks)")
+    parser.add_argument("-x", "--sbits", action="store", dest="sbits", nargs="+", help="sbit = list of sbits to read for chosen VFAT and ELINK (list allowed only for 1 elink, by default all s-bits used for the elinks)")
     parser.add_argument("-m", "--cal_mode", action="store", dest="cal_mode", default = "current", help="cal_mode = voltage or current (default = current)")
     parser.add_argument("-d", "--cal_dac", action="store", dest="cal_dac", help="cal_dac = Value of CAL_DAC register (default = 50 for voltage pulse mode and 150 for current pulse mode)")
     parser.add_argument("-p", "--parallel", action="store", dest="parallel", help="parallel = all (inject calpulse in all channels) or select (inject calpulse in selected channels) simultaneously (only possible in voltage mode, not a preferred option)")
     parser.add_argument("-n", "--nl1a", action="store", dest="nl1a", help="nl1a = fixed number of L1A cycles")
     parser.add_argument("-t", "--time", action="store", dest="time", help="time = time for which to run the S-bit testing (in minutes)")
-    parser.add_argument("-b", "--bxgap", action="store", dest="bxgap", default="500", help="bxgap = Nr. of BX between two L1A's (default = 500 i.e. 12.5 us)")
-    parser.add_argument("-a", "--addr", action="store", nargs='+', dest="addr", help="addr = list of VFATs to enable HDLC addressing")
+    parser.add_argument("-b", "--bxgap", action="store", dest="bxgap", default="500", help="bxgap = Nr. of BX between two L1A"s (default = 500 i.e. 12.5 us)")
+    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     args = parser.parse_args()
 
     if args.system == "chc":

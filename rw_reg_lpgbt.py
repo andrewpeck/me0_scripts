@@ -3,7 +3,7 @@ import sys, os, subprocess
 from collections import OrderedDict
 
 DEBUG = True
-ADDRESS_TABLE_TOP = './address_table/lpgbt_registers.xml'
+ADDRESS_TABLE_TOP = "./address_table/lpgbt_registers.xml"
 nodes = OrderedDict()
 system = ""
 reg_list_dryrun = {}
@@ -12,6 +12,15 @@ for i in range(462):
 n_rw_reg = (0x13C+1) # number of registers in LPGBT rwf + rw block
 
 TOP_NODE_NAME = "LPGBT"
+
+NODE_IC_GBTX_LINK_SELECT = None
+NODE_IC_GBTX_I2C_ADDRESS = None
+NODE_IC_READ_WRITE_LENGTH = None
+NODE_IC_ADDR = None
+NODE_IC_WRITE_DATA = None
+NODE_IC_EXEC_WRITE = None
+NODE_IC_EXEC_READ = None
+#NODE_IC_READ_DATA = None
 
 # VFAT number: boss/sub, gbtid, elink
 # For GE2/1 GEB + Pizza
@@ -132,11 +141,11 @@ hdlc_address_map = {
 
 
 class Node:
-    name = ''
-    vhdlname = ''
+    name = ""
+    vhdlname = ""
     address = 0x0
     real_address = 0x0
-    permission = ''
+    permission = ""
     mask = 0x0
     lsb_pos = 0x0
     isModule = False
@@ -151,26 +160,26 @@ class Node:
         self.children.append(child)
 
     def getVhdlName(self):
-        return self.name.replace(TOP_NODE_NAME + '.', '').replace('.', '_')
+        return self.name.replace(TOP_NODE_NAME + ".", "").replace(".", "_")
 
     def output(self):
-        print ('Name:',self.name)
-        print ('Address:','{0:#010x}'.format(self.address))
-        print ('Permission:',self.permission)
-        print ('Mask:',self.mask)
-        print ('LSB:',self.lsb_pos)
-        print ('Module:',self.isModule)
-        print ('Parent:',self.parent.name)
+        print ("Name:",self.name)
+        print ("Address:","{0:#010x}".format(self.address))
+        print ("Permission:",self.permission)
+        print ("Mask:",self.mask)
+        print ("LSB:",self.lsb_pos)
+        print ("Module:",self.isModule)
+        print ("Parent:",self.parent.name)
 
 class Colors:
-    WHITE   = '\033[97m'
-    CYAN    = '\033[96m'
-    MAGENTA = '\033[95m'
-    BLUE    = '\033[94m'
-    YELLOW  = '\033[93m'
-    GREEN   = '\033[92m'
-    RED     = '\033[91m'
-    ENDC    = '\033[0m'
+    WHITE   = "\033[97m"
+    CYAN    = "\033[96m"
+    MAGENTA = "\033[95m"
+    BLUE    = "\033[94m"
+    YELLOW  = "\033[93m"
+    GREEN   = "\033[92m"
+    RED     = "\033[91m"
+    ENDC    = "\033[0m"
 
 def main():
     parseXML()
@@ -180,27 +189,27 @@ def main():
     #        nodes[nodename].output()
     #    i=i+1
 
-    print ('Example1:')
+    print ("Example1:")
     print (getNode("LPGBT.RWF.CHIPID.CHIPID0").output())
     
-    print ('\nExample2:')
+    print ("\nExample2:")
     for node in getNodesContaining("CHIPID"):
         print (node.output())
         
-    print ('\nExample3:')
+    print ("\nExample3:")
     print (getNodeFromAddress(0x00).output())
     
-    print ('\nExample4:')
+    print ("\nExample4:")
     for node in getRegsContaining("CHIPID"):
         print (node.output())
         
-    print ('\nExample5:')
+    print ("\nExample5:")
     print (completeReg("LPGBT.RWF.CHIPID.CHIPID"))
 
     #print (gbt.gbtx_read_register(320))
     #print str(random_node.__class__.__name__)
-    #print 'Node:',random_node.name
-    #print 'Parent:',random_node.parent.name
+    #print "Node:",random_node.name
+    #print "Parent:",random_node.parent.name
     #kids = []
     #getAllChildren(random_node, kids)
     #print len(kids), kids.name
@@ -209,43 +218,43 @@ def main():
 def parseXML(filename = None, num_of_oh = None):
     if filename == None:
         filename = ADDRESS_TABLE_TOP
-    print ('Parsing',filename,'...')
+    print ("Parsing",filename,"...")
     tree = xml.parse(filename)
     root = tree.getroot()[0]
     vars = {}
-    makeTree(root,'',0x0,nodes,None,vars,False,num_of_oh)
+    makeTree(root,"",0x0,nodes,None,vars,False,num_of_oh)
 
 def makeTree(node,baseName,baseAddress,nodes,parentNode,vars,isGenerated,num_of_oh=None):
-    if (isGenerated == None or isGenerated == False) and node.get('generate') is not None and node.get('generate') == 'true':
-        if (node.get('generate_idx_var') == 'OH_IDX' and num_of_oh is not None):
+    if (isGenerated == None or isGenerated == False) and node.get("generate") is not None and node.get("generate") == "true":
+        if (node.get("generate_idx_var") == "OH_IDX" and num_of_oh is not None):
             generateSize = num_of_oh
         else:
-            generateSize = parseInt(node.get('generate_size'))
-        # generateSize = parseInt(node.get('generate_size'))
-        generateAddressStep = parseInt(node.get('generate_address_step'))
-        generateIdxVar = node.get('generate_idx_var')
+            generateSize = parseInt(node.get("generate_size"))
+        # generateSize = parseInt(node.get("generate_size"))
+        generateAddressStep = parseInt(node.get("generate_address_step"))
+        generateIdxVar = node.get("generate_idx_var")
         for i in range(0, generateSize):
             vars[generateIdxVar] = i
-            #print('generate base_addr = ' + hex(baseAddress + generateAddressStep * i) + ' for node ' + node.get('id'))
+            #print("generate base_addr = " + hex(baseAddress + generateAddressStep * i) + " for node " + node.get("id"))
             makeTree(node, baseName, baseAddress + generateAddressStep * i, nodes, parentNode, vars, True)
         return
     newNode = Node()
     name = baseName
-    if baseName != '': name += '.'
-    name += node.get('id')
+    if baseName != "": name += "."
+    name += node.get("id")
     name = substituteVars(name, vars)
     newNode.name = name
     address = baseAddress
-    if node.get('address') is not None:
-        address = baseAddress + parseInt(eval(node.get('address')))
+    if node.get("address") is not None:
+        address = baseAddress + parseInt(eval(node.get("address")))
     newNode.address = address
     newNode.real_address = address
-    newNode.permission = node.get('permission')
-    newNode.mask = parseInt(node.get('mask'))
+    newNode.permission = node.get("permission")
+    newNode.mask = parseInt(node.get("mask"))
     newNode.lsb_pos = mask_to_lsb(newNode.mask)
-    newNode.isModule = node.get('fw_is_module') is not None and node.get('fw_is_module') == 'true'
-    if node.get('mode') is not None:
-        newNode.mode = node.get('mode')
+    newNode.isModule = node.get("fw_is_module") is not None and node.get("fw_is_module") == "true"
+    if node.get("mode") is not None:
+        newNode.mode = node.get("mode")
     nodes[newNode.name] = newNode
     if parentNode is not None:
         parentNode.addChild(newNode)
@@ -279,7 +288,7 @@ def getNodesContaining(nodeString):
     else: return None
 
 def getRegsContaining(nodeString):
-    nodelist = [nodes[nodename] for nodename in nodes if nodeString in nodename and nodes[nodename].permission is not None and 'r' in nodes[nodename].permission]
+    nodelist = [nodes[nodename] for nodename in nodes if nodeString in nodename and nodes[nodename].permission is not None and "r" in nodes[nodename].permission]
     if len(nodelist): return nodelist
     else: return None
 
@@ -297,6 +306,24 @@ def rw_initialize(system_val, boss=None, ohIdx=None, gbtIdx=None):
         import rw_reg
         global rw_reg
         rw_reg.parseXML()
+
+        global NODE_IC_GBTX_LINK_SELECT
+        global NODE_IC_GBTX_I2C_ADDRESS
+        global NODE_IC_READ_WRITE_LENGTH
+        global NODE_IC_ADDR
+        global NODE_IC_WRITE_DATA
+        global NODE_IC_EXEC_WRITE
+        global NODE_IC_EXEC_READ
+        global NODE_IC_READ_DATA
+        NODE_IC_GBTX_LINK_SELECT = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBTX_LINK_SELECT")
+        NODE_IC_GBTX_I2C_ADDRESS = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBTX_I2C_ADDRESS")
+        NODE_IC_READ_WRITE_LENGTH = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.READ_WRITE_LENGTH")
+        NODE_IC_ADDR = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.ADDRESS")
+        NODE_IC_WRITE_DATA = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.WRITE_DATA")
+        NODE_IC_EXEC_WRITE = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.EXECUTE_WRITE")
+        NODE_IC_EXEC_READ = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.EXECUTE_READ")
+        #NODE_IC_READ_DATA = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.READ_DATA")
+
         if ohIdx is not None and gbtIdx is not None:
             select_ic_link(ohIdx, gbtIdx)
 
@@ -319,12 +346,12 @@ def select_ic_link(ohIdx, gbtIdx):
             print (Colors.RED + "ERROR: Invalid ohIdx or gbtIdx" + Colors.ENDC)
             rw_terminate()
         linkIdx = ohIdx * 8 + gbtIdx
-        write_backend_reg(rw_reg.getNode("GEM_AMC.SLOW_CONTROL.IC.GBTX_LINK_SELECT"), linkIdx)
-        write_backend_reg(rw_reg.getNode("GEM_AMC.SLOW_CONTROL.IC.GBTX_I2C_ADDR"), 0x70)
+        write_backend_reg(NODE_IC_GBTX_LINK_SELECT, linkIdx)
+        write_backend_reg(NODE_IC_GBTX_I2C_ADDRESS, 0x70)
 
 def check_lpgbt_link_ready(ohIdx, gbtIdx):
     if system=="backend":
-        link_ready = read_backend_reg(rw_reg.getNode("GEM_AMC.OH_LINKS.OH%s.GBT%s_READY" % (ohIdx, gbtIdx)))
+        link_ready = read_backend_reg(rw_reg.get_node("BEFE.GEM_AMC.OH_LINKS.OH%s.GBT%s_READY" % (ohIdx, gbtIdx)))
         if (link_ready!=1):
             print (Colors.RED + "ERROR: OH lpGBT links are not READY, check fiber connections" + Colors.ENDC)  
             rw_terminate()
@@ -354,7 +381,7 @@ def vfat_to_sbit_elink(vfat):
 
 def enable_hdlc_addressing(addr_list):
     for vfat in addr_list:
-        reg_name = "GEM_AMC.GEM_SYSTEM.VFAT3.VFAT%d_HDLC_ADDRESS"%(vfat)
+        reg_name = "BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.VFAT%d_HDLC_ADDRESS"%(vfat)
         address = hdlc_address_map[vfat]
         write_backend_reg(get_rwreg_node(reg_name), address)
 
@@ -403,7 +430,7 @@ def chc_terminate():
 
 def rw_terminate():
     if system=="backend":
-        write_backend_reg(get_rwreg_node("GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 0)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 0)
     if system=="chc":
         chc_terminate()
     sys.exit()
@@ -418,24 +445,24 @@ def check_rom_readback():
 
 def vfat_oh_link_reset():
     if system=="backend":
-        write_backend_reg(rw_reg.getNode("GEM_AMC.GEM_SYSTEM.CTRL.LINK_RESET"), 0x1)
+        write_backend_reg(rw_reg.get_node("BEFE.GEM_AMC.GEM_SYSTEM.CTRL.LINK_RESET"), 0x1)
 
 def global_reset():
     if system=="backend":
-        write_backend_reg(rw_reg.getNode("GEM_AMC.GEM_SYSTEM.CTRL.GLOBAL_RESET"), 0x1)
+        write_backend_reg(rw_reg.get_node("BEFE.GEM_AMC.GEM_SYSTEM.CTRL.GLOBAL_RESET"), 0x1)
 
 def get_rwreg_node(name):
     if system=="backend":
-        return rw_reg.getNode(name)
+        return rw_reg.get_node(name)
     else:
         return ""
 
 def simple_read_backend_reg(node, error_value):
     output_value = 0
     if system=="backend":
-        output = rw_reg.readReg(node)
-        if output != "Bus Error":
-            output_value = int(output,16)
+        output = rw_reg.read_reg(node)
+        if output != -1:
+            output_value = output
         else:
             output_value = error_value
     return output_value
@@ -443,54 +470,54 @@ def simple_read_backend_reg(node, error_value):
 def simple_write_backend_reg(node, data, error_value):
     output_value = 0
     if system=="backend":
-        output = rw_reg.writeReg(node, data)
-        if output != "Bus Error":
+        output = rw_reg.write_reg(node, data)
+        if output != -1:
             output_value = 1
         else:
             output_value = error_value
     return output_value
 
 def read_backend_reg(node):
-    output = "0x00"
+    output = 0
     if system=="backend":
-        output = rw_reg.readReg(node)
-        if output=="Bus Error":
+        output = rw_reg.read_reg(node)
+        if output==-1:
             print (Colors.YELLOW + "ERROR: Bus Error, Trying again" + Colors.ENDC)
-            output = rw_reg.readReg(node)
-            if output=="Bus Error":
+            output = rw_reg.read_reg(node)
+            if output==-1:
                 print (Colors.YELLOW + "ERROR: Bus Error, Trying again" + Colors.ENDC)
-                output = rw_reg.readReg(node)
-                if output=="Bus Error":
+                output = rw_reg.read_reg(node)
+                if output==-1:
                     print (Colors.RED + "ERROR: Bus Error" + Colors.ENDC)
                     rw_terminate()
-    return int(output,16)
+    return output
     
 def write_backend_reg(node, data):
     if system=="backend":
-        output = rw_reg.writeReg(node, data)
-        if output=="Bus Error":
+        output = rw_reg.write_reg(node, data)
+        if output==-1:
             print (Colors.YELLOW + "ERROR: Bus Error, Trying again" + Colors.ENDC)
-            output = rw_reg.writeReg(node, data)
-            if output=="Bus Error":
+            output = rw_reg.write_reg(node, data)
+            if output==-1:
                 print (Colors.YELLOW + "ERROR: Bus Error, Trying again" + Colors.ENDC)
-                output = rw_reg.writeReg(node, data)
-                if output=="Bus Error":
+                output = rw_reg.write_reg(node, data)
+                if output==-1:
                     print (Colors.RED + "ERROR: Bus Error" + Colors.ENDC)
                     rw_terminate()
     
 def readAddress(address):
     try:
         output = subprocess.check_output("mpeek (" + str(address) + ")" + stderr==subprocess.STDOUT , shell=True)
-        value = ''.join(s for s in output if s.isalnum())
+        value = "".join(s for s in output if s.isalnum())
     except subprocess.CalledProcessError as e: value = parseError(int(str(e)[-1:]))
-    return '{0:#010x}'.format(parseInt(str(value)))
+    return "{0:#010x}".format(parseInt(str(value)))
 
 def readRawAddress(raw_address):
     try:
         address = (parseInt(raw_address) << 2)+0x64000000
         return readAddress(address)
     except:
-        return 'Error reading address. (rw_reg)'
+        return "Error reading address. (rw_reg)"
 
 def mpeek(address):
     if system=="chc":
@@ -501,10 +528,10 @@ def mpeek(address):
             print(Colors.RED + "ERROR: Problem in reading register: " + str(hex(address)) + Colors.ENDC)
             rw_terminate()
     elif system=="backend":
-        #write_backend_reg(rw_reg.getNode("GEM_AMC.SLOW_CONTROL.IC.READ_WRITE_LENGTH"), 1)
-        #write_backend_reg(rw_reg.getNode("GEM_AMC.SLOW_CONTROL.IC.ADDRESS"), address)
-        #write_backend_reg(rw_reg.getNode("GEM_AMC.SLOW_CONTROL.IC.EXECUTE_READ"), 1)
-        #data = read_backend_reg(rw_reg.getNode("GEM_AMC.SLOW_CONTROL.IC.READ_DATA"))
+        #write_backend_reg(NODE_IC_READ_WRITE_LENGTH, 1)
+        #write_backend_reg(NODE_IC_ADDRESS, address)
+        #write_backend_reg(NODE_IC_EXECUTE_READ, 1)
+        #data = read_backend_reg(NODE_IC_READ_DATA)
         #return data
         return reg_list_dryrun[address]
     #elif system=="dongle":
@@ -523,10 +550,10 @@ def mpoke(address, value):
             print(Colors.RED + "ERROR: Problem in writing register: " + str(hex(address)) + Colors.ENDC)
             rw_terminate()
     elif system=="backend":
-        write_backend_reg(rw_reg.getNode("GEM_AMC.SLOW_CONTROL.IC.READ_WRITE_LENGTH"), 1)
-        write_backend_reg(rw_reg.getNode("GEM_AMC.SLOW_CONTROL.IC.ADDRESS"), address)
-        write_backend_reg(rw_reg.getNode("GEM_AMC.SLOW_CONTROL.IC.WRITE_DATA"), value)
-        write_backend_reg(rw_reg.getNode("GEM_AMC.SLOW_CONTROL.IC.EXECUTE_WRITE"), 1)
+        write_backend_reg(NODE_IC_READ_WRITE_LENGTH, 1)
+        write_backend_reg(NODE_IC_ADDRESS, address)
+        write_backend_reg(NODE_IC_WRITE_DATA, value)
+        write_backend_reg(NODE_IC_EXECUTE_WRITE, 1)
         reg_list_dryrun[address] = value
     #elif system=="dongle":
     #    gbt_dongle.gbtx_write_register(address,value)
@@ -537,17 +564,17 @@ def mpoke(address, value):
         rw_terminate()
 
 def readRegStr(reg):
-    return '0x%02X'%(readReg(reg))
-    #return '{0:#010x}'.format(readReg(reg))
+    return "0x%02X"%(readReg(reg))
+    #return "{0:#010x}".format(readReg(reg))
 
 def readReg(reg):
     try:
         address = reg.real_address
     except:
-        print ('Reg',reg,'not a Node')
+        print ("Reg",reg,"not a Node")
         return
-    if 'r' not in reg.permission:
-        return 'No read permission!'
+    if "r" not in reg.permission:
+        return "No read permission!"
 
     # read
     value = mpeek(address)
@@ -560,31 +587,31 @@ def readReg(reg):
 
 def displayReg(reg, option=None):
     address = reg.real_address
-    if 'r' not in reg.permission:
-        return 'No read permission!'
+    if "r" not in reg.permission:
+        return "No read permission!"
     # mpeek
     value = mpeek(address)
     # Apply Mask
     if reg.mask is not None:
         shift_amount=0
-        for bit in reversed('{0:b}'.format(reg.mask)):
-            if bit=='0': shift_amount+=1
+        for bit in reversed("{0:b}".format(reg.mask)):
+            if bit=="0": shift_amount+=1
             else: break
         final_value = (parseInt(str(reg.mask))&parseInt(value)) >> shift_amount
     else: final_value = value
     final_int =  parseInt(str(final_value))
 
-    if option=='hexbin': return hex(address).rstrip('L')+' '+reg.permission+'\t'+tabPad(reg.name,7)+'{0:#010x}'.format(final_int)+' = '+'{0:032b}'.format(final_int)
-    else: return hex(address).rstrip('L')+' '+reg.permission+'\t'+tabPad(reg.name,7)+'{0:#010x}'.format(final_int)
+    if option=="hexbin": return hex(address).rstrip("L")+" "+reg.permission+"\t"+tabPad(reg.name,7)+"{0:#010x}".format(final_int)+" = "+"{0:032b}".format(final_int)
+    else: return hex(address).rstrip("L")+" "+reg.permission+"\t"+tabPad(reg.name,7)+"{0:#010x}".format(final_int)
 
 def writeReg(reg, value, readback):
     try:
         address = reg.real_address
     except:
-        print ('Reg',reg,'not a Node')
+        print ("Reg",reg,"not a Node")
         return
-    if 'w' not in reg.permission:
-        return 'No write permission!'
+    if "w" not in reg.permission:
+        return "No write permission!"
 
     if (readback):
         if (value!=readReg(reg)):
@@ -594,7 +621,7 @@ def writeReg(reg, value, readback):
         if (reg.mask != 0):
             value = value << reg.lsb_pos
             value = value & reg.mask
-            if 'r' in reg.permission:
+            if "r" in reg.permission:
                 value = (value) | (mpeek(address) & ~reg.mask)
         # mpoke
         mpoke(address, value)
@@ -603,23 +630,23 @@ def writeandcheckReg(reg, value):
     try:
         address = reg.real_address
     except:
-        print ('Reg',reg,'not a Node')
+        print ("Reg",reg,"not a Node")
         return
-    if 'w' not in reg.permission:
-        return 'No write permission!'
+    if "w" not in reg.permission:
+        return "No write permission!"
 
     # Apply Mask if applicable
     if (reg.mask != 0):
         value = value << reg.lsb_pos
         value = value & reg.mask
-        if 'r' in reg.permission:
+        if "r" in reg.permission:
             value = (value) | (mpeek(address) & ~reg.mask)
     # mpoke
     mpoke(address, value)
 
     # Check register value
-    if 'r' not in reg.permission:
-        return 'No read permission!, cant check'
+    if "r" not in reg.permission:
+        return "No read permission!, cant check"
     value_check = mpeek(address)
     if (reg.mask != 0):
         value_check = (reg.mask & value_check) >> reg.lsb_pos
@@ -630,14 +657,14 @@ def writeandcheckReg(reg, value):
     return check
 
 def isValid(address):
-    #try: subprocess.check_output('mpeek '+str(address), stderr=subprocess.STDOUT , shell=True)
+    #try: subprocess.check_output("mpeek "+str(address), stderr=subprocess.STDOUT , shell=True)
     #except subprocess.CalledProcessError as e: return False
     return True
 
 def completeReg(string):
     possibleNodes = []
     completions = []
-    currentLevel = len([c for c in string if c=='.'])
+    currentLevel = len([c for c in string if c=="."])
 
     possibleNodes = [nodes[nodename] for nodename in nodes if nodename.startswith(string) and nodes[nodename].level == currentLevel]
     if len(possibleNodes)==1:
@@ -661,9 +688,9 @@ def parseInt(s):
     if s is None:
         return None
     string = str(s)
-    if string.startswith('0x'):
+    if string.startswith("0x"):
         return int(string, 16)
-    elif string.startswith('0b'):
+    elif string.startswith("0b"):
         return int(string, 2)
     else:
         return int(string)
@@ -673,7 +700,7 @@ def substituteVars(string, vars):
         return string
     ret = string
     for varKey in vars.keys():
-        ret = ret.replace('${' + varKey + '}', str(vars[varKey]))
+        ret = ret.replace("${" + varKey + "}", str(vars[varKey]))
     return ret
 
 def tabPad(s,maxlen):
@@ -692,7 +719,7 @@ def mask_to_lsb(mask):
                 return idx
             idx = idx+1
 
-def lpgbt_write_config_file(config_file = 'config.txt'):
+def lpgbt_write_config_file(config_file = "config.txt"):
     f = open(config_file,"w+")
     for i in range (n_rw_reg):
         val =  mpeek(i)
@@ -702,10 +729,10 @@ def lpgbt_write_config_file(config_file = 'config.txt'):
         f.write(write_string)
     f.close()
 
-def lpgbt_dump_config(config_file = 'Loopback_test.txt'):
+def lpgbt_dump_config(config_file = "Loopback_test.txt"):
         #dump configuration to lpGBT - accepts .txt of .xml input
         # Read configuration file
-        if(config_file[-4:] == '.xml'):
+        if(config_file[-4:] == ".xml"):
             tree = ET.parse(config_file)
             root = tree.getroot()
             reg_config = []
@@ -713,18 +740,18 @@ def lpgbt_dump_config(config_file = 'Loopback_test.txt'):
                 reg_config.append([0,0]) # Value / Mask
 
             for child in root:
-                name_signal = child.attrib['name']
-                triplicated = child.attrib['triplicated']
+                name_signal = child.attrib["name"]
+                triplicated = child.attrib["triplicated"]
                 reg_value   = int(child[0].text)
-                if(triplicated in ['true', 'True', 'TRUE']) : n=3
+                if(triplicated in ["true", "True", "TRUE"]) : n=3
                 else                                        : n=1
                 for i in range(1,n+1):
                     #print(name_signal)
                     #print(triplicated)
                     #print(reg_value)
-                    reg_addr = int(child[i].attrib['startAddress'])
-                    startbit = int(child[i].attrib['startBitIndex'])
-                    endbit   = int(child[i].attrib['lastBitIndex'])
+                    reg_addr = int(child[i].attrib["startAddress"])
+                    startbit = int(child[i].attrib["startBitIndex"])
+                    endbit   = int(child[i].attrib["lastBitIndex"])
                     mask     = 2**(startbit+1) - 2**(endbit)
                     reg_config[reg_addr][0] = reg_config[reg_addr][0] | (reg_value << startbit)
                     reg_config[reg_addr][1] = reg_config[reg_addr][1] | mask
@@ -737,7 +764,7 @@ def lpgbt_dump_config(config_file = 'Loopback_test.txt'):
                     value = (value & (~mask)) | value
                     mpoke(reg_addr, value)
         else:
-            input_file = open(config_file, 'r')
+            input_file = open(config_file, "r")
             for line in input_file.readlines():
                 reg_addr = int(line.split()[0],16)
                 value = int(line.split()[1],16)
@@ -745,7 +772,7 @@ def lpgbt_dump_config(config_file = 'Loopback_test.txt'):
                     value = 0x00
                 mpoke(reg_addr, value)
             input_file.close()
-        print('lpGBT Configuration Done')
+        print("lpGBT Configuration Done")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

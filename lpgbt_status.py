@@ -28,22 +28,22 @@ def main(system, boss):
     print ("LpGBT Mode:")
     mode = readReg(getNode("LPGBT.RO.LPGBTSETTINGS.LPGBTMODE"))
 
-    if (mode==0) : print ("\t4'b0000    5 Gbps     FEC5    Off")
-    if (mode==1) : print ("\t4'b0001    5 Gbps     FEC5    Simplex TX")
-    if (mode==2) : print ("\t4'b0010    5 Gbps     FEC5    Simplex RX")
-    if (mode==3) : print ("\t4'b0011    5 Gbps     FEC5    Transceiver")
-    if (mode==4) : print ("\t4'b0100    5 Gbps     FEC12   Off")
-    if (mode==5) : print ("\t4'b0101    5 Gbps     FEC12   Simplex TX")
-    if (mode==6) : print ("\t4'b0110    5 Gbps     FEC12   Simplex RX")
-    if (mode==7) : print ("\t4'b0111    5 Gbps     FEC12   Transceiver")
-    if (mode==8) : print ("\t4'b1000    10 Gbps    FEC5    Off")
-    if (mode==9) : print ("\t4'b1001    10 Gbps    FEC5    Simplex TX")
-    if (mode==10): print ("\t4'b1010    10 Gbps    FEC5    Simplex RX")
-    if (mode==11): print ("\t4'b1011    10 Gbps    FEC5    Transceiver")
-    if (mode==12): print ("\t4'b1100    10 Gbps    FEC12   Off")
-    if (mode==13): print ("\t4'b1101    10 Gbps    FEC12   Simplex TX")
-    if (mode==14): print ("\t4'b1110    10 Gbps    FEC12   Simplex RX")
-    if (mode==15): print ("\t4'b1111    10 Gbps    FEC12   Transceiver")
+    if (mode==0) : print ("\t4"b0000    5 Gbps     FEC5    Off")
+    if (mode==1) : print ("\t4"b0001    5 Gbps     FEC5    Simplex TX")
+    if (mode==2) : print ("\t4"b0010    5 Gbps     FEC5    Simplex RX")
+    if (mode==3) : print ("\t4"b0011    5 Gbps     FEC5    Transceiver")
+    if (mode==4) : print ("\t4"b0100    5 Gbps     FEC12   Off")
+    if (mode==5) : print ("\t4"b0101    5 Gbps     FEC12   Simplex TX")
+    if (mode==6) : print ("\t4"b0110    5 Gbps     FEC12   Simplex RX")
+    if (mode==7) : print ("\t4"b0111    5 Gbps     FEC12   Transceiver")
+    if (mode==8) : print ("\t4"b1000    10 Gbps    FEC5    Off")
+    if (mode==9) : print ("\t4"b1001    10 Gbps    FEC5    Simplex TX")
+    if (mode==10): print ("\t4"b1010    10 Gbps    FEC5    Simplex RX")
+    if (mode==11): print ("\t4"b1011    10 Gbps    FEC5    Transceiver")
+    if (mode==12): print ("\t4"b1100    10 Gbps    FEC12   Off")
+    if (mode==13): print ("\t4"b1101    10 Gbps    FEC12   Simplex TX")
+    if (mode==14): print ("\t4"b1110    10 Gbps    FEC12   Simplex RX")
+    if (mode==15): print ("\t4"b1111    10 Gbps    FEC12   Transceiver")
 
     print ("State Override:")
     if (readReg(getNode("LPGBT.RO.LPGBTSETTINGS.STATEOVERRIDE"))):
@@ -232,22 +232,22 @@ def powerdown_adc():
 def read_adc(channel, system):
     # ADCInPSelect[3:0]	|  Input
     # ------------------|----------------------------------------
-    # 4'd0	        |  ADC0 (external pin)
-    # 4'd1	        |  ADC1 (external pin)
-    # 4'd2	        |  ADC2 (external pin)
-    # 4'd3	        |  ADC3 (external pin)
-    # 4'd4	        |  ADC4 (external pin)
-    # 4'd5	        |  ADC5 (external pin)
-    # 4'd6	        |  ADC6 (external pin)
-    # 4'd7	        |  ADC7 (external pin)
-    # 4'd8	        |  EOM DAC (internal signal)
-    # 4'd9	        |  VDDIO * 0.42 (internal signal)
-    # 4'd10	        |  VDDTX * 0.42 (internal signal)
-    # 4'd11	        |  VDDRX * 0.42 (internal signal)
-    # 4'd12	        |  VDD * 0.42 (internal signal)
-    # 4'd13	        |  VDDA * 0.42 (internal signal)
-    # 4'd14	        |  Temperature sensor (internal signal)
-    # 4'd15	        |  VREF/2 (internal signal)
+    # 4"d0	        |  ADC0 (external pin)
+    # 4"d1	        |  ADC1 (external pin)
+    # 4"d2	        |  ADC2 (external pin)
+    # 4"d3	        |  ADC3 (external pin)
+    # 4"d4	        |  ADC4 (external pin)
+    # 4"d5	        |  ADC5 (external pin)
+    # 4"d6	        |  ADC6 (external pin)
+    # 4"d7	        |  ADC7 (external pin)
+    # 4"d8	        |  EOM DAC (internal signal)
+    # 4"d9	        |  VDDIO * 0.42 (internal signal)
+    # 4"d10	        |  VDDTX * 0.42 (internal signal)
+    # 4"d11	        |  VDDRX * 0.42 (internal signal)
+    # 4"d12	        |  VDD * 0.42 (internal signal)
+    # 4"d13	        |  VDDA * 0.42 (internal signal)
+    # 4"d14	        |  Temperature sensor (internal signal)
+    # 4"d15	        |  VREF/2 (internal signal)
 
     # "LPGBT.RW.ADC.ADCINPSELECT"
     # "LPGBT.RW.ADC.ADCINNSELECT"
@@ -281,10 +281,10 @@ def read_adc(channel, system):
 
     return val
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='Checking Status of LpGBT Configuration for ME0 Optohybrid')
+    parser = argparse.ArgumentParser(description="Checking Status of LpGBT Configuration for ME0 Optohybrid")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")

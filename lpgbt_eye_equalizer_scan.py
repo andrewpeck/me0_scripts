@@ -146,20 +146,20 @@ def main(system, count, eq_attn, eq_cap, eq_res3, eq_res2, eq_res1, eq_res0, bos
     writeReg(getNode("LPGBT.RWF.EQUALIZER.EQRES2"), 0x0, 0)
     writeReg(getNode("LPGBT.RWF.EQUALIZER.EQRES3"), 0x0, 0)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LPGBT EYE')
+    parser = argparse.ArgumentParser(description="LPGBT EYE")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss allowed")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-c", "--count", action="store", dest="count", default="0x7", help="EOMendOfCountSel[3:0] in hex")
-    parser.add_argument("-eqa", "--eq_attn", action="store", nargs='+', dest="eq_attn", default=["0x3"], help="EQAttenuation[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x3]")
-    parser.add_argument("-eqc", "--eq_cap", action="store", nargs='+', dest="eq_cap", default=["0x0"], help="EQCap[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x0]")
-    parser.add_argument("-eqr3", "--eq_res3", action="store", nargs='+', dest="eq_res3", default=["0x0"], help="EQRes3[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x0]")
-    parser.add_argument("-eqr2", "--eq_res2", action="store", nargs='+', dest="eq_res2", default=["0x0"], help="EQRes2[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x0]")
-    parser.add_argument("-eqr1", "--eq_res1", action="store", nargs='+', dest="eq_res1", default=["0x0"], help="EQRes1[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x0]")
-    parser.add_argument("-eqr0", "--eq_res0", action="store", nargs='+', dest="eq_res0", default=["0x0"], help="EQRes0[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x0]")
+    parser.add_argument("-eqa", "--eq_attn", action="store", nargs="+", dest="eq_attn", default=["0x3"], help="EQAttenuation[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x3]")
+    parser.add_argument("-eqc", "--eq_cap", action="store", nargs="+", dest="eq_cap", default=["0x0"], help="EQCap[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x0]")
+    parser.add_argument("-eqr3", "--eq_res3", action="store", nargs="+", dest="eq_res3", default=["0x0"], help="EQRes3[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x0]")
+    parser.add_argument("-eqr2", "--eq_res2", action="store", nargs="+", dest="eq_res2", default=["0x0"], help="EQRes2[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x0]")
+    parser.add_argument("-eqr1", "--eq_res1", action="store", nargs="+", dest="eq_res1", default=["0x0"], help="EQRes1[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x0]")
+    parser.add_argument("-eqr0", "--eq_res0", action="store", nargs="+", dest="eq_res0", default=["0x0"], help="EQRes0[1:0] (in hex) = See lpGBT manual Section 15.1.5 for options, default=[0x0]")
     args = parser.parse_args()
 
     if args.system == "chc":

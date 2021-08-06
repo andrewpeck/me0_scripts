@@ -8,7 +8,7 @@ class Prompt(Cmd):
     def do_hello(self, args):
         """Says hello. If you provide a name, it will greet you with it."""
         if len(args) == 0:
-            name = 'stranger'
+            name = "stranger"
         else:
             name = args
         print ("Hello, %s" % name)
@@ -19,14 +19,14 @@ class Prompt(Cmd):
         reg = getNode(args)
         if reg is not None:
             address = reg.real_address
-            if 'r' in str(reg.permission):
+            if "r" in str(reg.permission):
                 print (displayReg(reg))
             elif reg.isModule:
-                print ('This is a module!')
+                print ("This is a module!")
             else:
-                print (hex(address),reg.name,'No read permission!')
+                print (hex(address),reg.name,"No read permission!")
         else:
-            print (args,'not found!')
+            print (args,"not found!")
 
 
     def complete_read(self, text, line, begidx, endidx):
@@ -43,14 +43,14 @@ class Prompt(Cmd):
             if reg is not None:
                 try: value = parseInt(arglist[1])
                 except:
-                    print ('Write Value must be a number!')
+                    print ("Write Value must be a number!")
                     return
-                if 'w' in str(reg.permission):
+                if "w" in str(reg.permission):
                     print (writeReg(reg, value, 0))
                 else:
-                    print ('No write permission!')
+                    print ("No write permission!")
             else:
-                print (arglist[0],'not found!')
+                print (arglist[0],"not found!")
 
     def complete_write(self, text, line, begidx, endidx):
         return completeReg(text)
@@ -60,39 +60,39 @@ class Prompt(Cmd):
         """Read all registers below node in register tree. USAGE: readGroup <register/node name> """
         node = getNode(args)
         if node is not None:
-            print ('NODE:',node.name)
+            print ("NODE:",node.name)
             kids = []
             getAllChildren(node, kids)
-            print (len(kids),'CHILDREN')
+            print (len(kids),"CHILDREN")
             for reg in kids:
-                if 'r' in str(reg.permission): print displayReg(reg)
-        else: print (args,'not found!')
+                if "r" in str(reg.permission): print displayReg(reg)
+        else: print (args,"not found!")
 
     def complete_readGroup(self, text, line, begidx, endidx):
         return completeReg(text)
 
     def do_readFW(self, args):
         """Quick read of all FW-related registers"""
-        for reg in getNodesContaining('STATUS.FW'):
-            if 'r' in str(reg.permission): print (hex(reg.real_address),reg.permission,reg.name,readRegStr(reg))
+        for reg in getNodesContaining("STATUS.FW"):
+            if "r" in str(reg.permission): print (hex(reg.real_address),reg.permission,reg.name,readRegStr(reg))
 
     def do_readKW(self, args):
         """Read all registers containing KeyWord. USAGE: readKW <KeyWord>"""
-        if getNodesContaining(args) is not None and args!='':
+        if getNodesContaining(args) is not None and args!="":
             for reg in getNodesContaining(args):
                 address = reg.real_address
-                if 'r' in str(reg.permission):
-                    print (hex(address).rstrip('L'),reg.permission,reg.name,readRegStr(reg))
-                elif reg.isModule: print (hex(address).rstrip('L'),reg.permission,reg.name) #,'Module!'
-                else: print (hex(address).rstrip('L'),reg.permission,reg.name) #,'No read permission!'
-        else: print (args,'not found!')
+                if "r" in str(reg.permission):
+                    print (hex(address).rstrip("L"),reg.permission,reg.name,readRegStr(reg))
+                elif reg.isModule: print (hex(address).rstrip("L"),reg.permission,reg.name) #,"Module!"
+                else: print (hex(address).rstrip("L"),reg.permission,reg.name) #,"No read permission!"
+        else: print (args,"not found!")
 
 
 
     def do_readAll(self, args):
         """Read all registers with read-permission"""
-        for reg in getNodesContaining(''):
-            if 'r' in (reg.permission):
+        for reg in getNodesContaining(""):
+            if "r" in (reg.permission):
                 print (displayReg(reg))
 
     def do_exit(self, args):
@@ -103,23 +103,23 @@ class Prompt(Cmd):
         """ Directly read address. USAGE: readAddress <address> """
         try: reg = getNodeFromAddress(parseInt(args))
         except:
-            print ('Error retrieving node.')
+            print ("Error retrieving node.")
             return
         if reg is not None:
             address = reg.real_address
-            if 'r' in str(reg.permission):
-                print (hex(address),'{0:#010x}'.format(reg.mask),reg.permission,reg.name,readRegStr(reg))
+            if "r" in str(reg.permission):
+                print (hex(address),"{0:#010x}".format(reg.mask),reg.permission,reg.name,readRegStr(reg))
             elif reg.isModule:
-                print ('This is a module!')
+                print ("This is a module!")
             else:
-                print (hex(address),reg.name,'No read permission!')
+                print (hex(address),reg.name,"No read permission!")
         else:
-            print (args,'not found!')
+            print (args,"not found!")
 
     def do_readRawAddress(self, args):
         """Read raw address (from XML file). USAGE: readRawAddress <address> """
         try: print (readRawAddress(args))
-        except: print ('Error reading address. (reg_interface)')
+        except: print ("Error reading address. (reg_interface)")
 
 
     def do_mpeek(self,args):
@@ -134,9 +134,9 @@ class Prompt(Cmd):
         else: print ("Incorrect number of arguments!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='Register Interface for lpGBT')
+    parser = argparse.ArgumentParser(description="Register Interface for lpGBT")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-7 (only needed for backend)")
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     try:
         prompt = Prompt()
         prompt.prompt = args.system + ":> "
-        prompt.cmdloop('Starting Register Command Line Interface.')
+        prompt.cmdloop("Starting Register Command Line Interface.")
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

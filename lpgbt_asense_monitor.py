@@ -28,11 +28,11 @@ def main(system, boss, gbt, run_time_min, gain):
     run_time_min = float(run_time_min)
 
     fig1, ax1 = plt.subplots()
-    ax1.set_xlabel('minutes')
-    ax1.set_ylabel('PG Current (A)')
+    ax1.set_xlabel("minutes")
+    ax1.set_ylabel("PG Current (A)")
     fig2, ax2 = plt.subplots()
-    ax2.set_xlabel('minutes')
-    ax2.set_ylabel('Rt Voltage (V)')
+    ax2.set_xlabel("minutes")
+    ax2.set_ylabel("Rt Voltage (V)")
     #ax.set_xticks(range(0,run_time_min+1))
     #ax.set_xlim([0,run_time_min])
     start_time = int(time())
@@ -67,9 +67,9 @@ def main(system, boss, gbt, run_time_min, gain):
             sleep(1)
 
     figure_name1 = foldername + now + "_pg_current_plot.pdf"
-    fig1.savefig(figure_name1, bbox_inches='tight')
+    fig1.savefig(figure_name1, bbox_inches="tight")
     figure_name2 = foldername + now + "_rt_voltage_plot.pdf"
-    fig2.savefig(figure_name2, bbox_inches='tight')
+    fig2.savefig(figure_name2, bbox_inches="tight")
 
     powerdown_adc()
 
@@ -122,22 +122,22 @@ def powerdown_adc():
 def read_adc(channel, gain, system):
     # ADCInPSelect[3:0]	|  Input
     # ------------------|----------------------------------------
-    # 4'd0	        |  ADC0 (external pin)
-    # 4'd1	        |  ADC1 (external pin)
-    # 4'd2	        |  ADC2 (external pin)
-    # 4'd3	        |  ADC3 (external pin)
-    # 4'd4	        |  ADC4 (external pin)
-    # 4'd5	        |  ADC5 (external pin)
-    # 4'd6	        |  ADC6 (external pin)
-    # 4'd7	        |  ADC7 (external pin)
-    # 4'd8	        |  EOM DAC (internal signal)
-    # 4'd9	        |  VDDIO * 0.42 (internal signal)
-    # 4'd10	        |  VDDTX * 0.42 (internal signal)
-    # 4'd11	        |  VDDRX * 0.42 (internal signal)
-    # 4'd12	        |  VDD * 0.42 (internal signal)
-    # 4'd13	        |  VDDA * 0.42 (internal signal)
-    # 4'd14	        |  Temperature sensor (internal signal)
-    # 4'd15	        |  VREF/2 (internal signal)
+    # 4"d0	        |  ADC0 (external pin)
+    # 4"d1	        |  ADC1 (external pin)
+    # 4"d2	        |  ADC2 (external pin)
+    # 4"d3	        |  ADC3 (external pin)
+    # 4"d4	        |  ADC4 (external pin)
+    # 4"d5	        |  ADC5 (external pin)
+    # 4"d6	        |  ADC6 (external pin)
+    # 4"d7	        |  ADC7 (external pin)
+    # 4"d8	        |  EOM DAC (internal signal)
+    # 4"d9	        |  VDDIO * 0.42 (internal signal)
+    # 4"d10	        |  VDDTX * 0.42 (internal signal)
+    # 4"d11	        |  VDDRX * 0.42 (internal signal)
+    # 4"d12	        |  VDD * 0.42 (internal signal)
+    # 4"d13	        |  VDDA * 0.42 (internal signal)
+    # 4"d14	        |  Temperature sensor (internal signal)
+    # 4"d15	        |  VREF/2 (internal signal)
 
     writeReg(getNode("LPGBT.RW.ADC.ADCINPSELECT"), channel, 0)
     writeReg(getNode("LPGBT.RW.ADC.ADCINNSELECT"), 0xf, 0)
@@ -185,10 +185,10 @@ def asense_temp_voltage_conversion(asense_adc):
     return asense_voltage
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='Asense monitoring for ME0 Optohybrid')
+    parser = argparse.ArgumentParser(description="Asense monitoring for ME0 Optohybrid")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")

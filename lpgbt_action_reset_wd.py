@@ -29,10 +29,10 @@ def main(system, boss, action):
         print ("Disabling WatchDog\n")
         mpoke(0xED, 0x63)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT Reset, Disable/Enable Watchdog')
+    parser = argparse.ArgumentParser(description="LpGBT Reset, Disable/Enable Watchdog")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")

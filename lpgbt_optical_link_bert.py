@@ -118,11 +118,11 @@ def prbs_generate(system, boss, path, ohid, gbtid):
         mgt_channel = int(ohid) * 8 + int(gbtid)
 
         # PRBS7 for the entire data frame
-        node = get_rwreg_node('GEM_AMC.OPTICAL_LINKS.MGT_CHANNEL_%d.CTRL.TX_PRBS_SEL' % (mgt_channel))
+        node = get_rwreg_node("BEFE.MGTS.MGT%d.CTRL.TX_PRBS_SEL" % (mgt_channel))
         write_backend_reg(node, 0x001)
 
         # Reset the TX and RX channels
-        node = get_rwreg_node('GEM_AMC.OPTICAL_LINKS.MGT_CHANNEL_%d.RESET' % (mgt_channel))
+        node = get_rwreg_node("BEFE.MGTS.MGT%d.RESET" % (mgt_channel))
         write_backend_reg(node, 0x001)
     
     print ("Started PRBS signal for: " + path + "\n")
@@ -143,11 +143,11 @@ def prbs_stop(system, boss, path, ohid, gbtid):
         mgt_channel = int(ohid) * 8 + int(gbtid)
         
         # Stopping PRBS7 for the entire data frame
-        node = get_rwreg_node('GEM_AMC.OPTICAL_LINKS.MGT_CHANNEL_%d.CTRL.TX_PRBS_SEL' % (mgt_channel))
+        node = get_rwreg_node("BEFE.MGTS.MGT%d.CTRL.TX_PRBS_SEL" % (mgt_channel))
         write_backend_reg(node, 0x000)
 
         # Reset the TX and RX channels
-        node = get_rwreg_node('GEM_AMC.OPTICAL_LINKS.MGT_CHANNEL_%d.RESET' % (mgt_channel))
+        node = get_rwreg_node("BEFE.MGTS.MGT%d.RESET" % (mgt_channel))
         write_backend_reg(node, 0x001)
 
     print ("Stopped PRBS signal for: " + path + "\n")
@@ -160,11 +160,11 @@ def prbs_check(system, boss, path, ohid, gbtid, bert_source, time):
         mgt_channel = int(ohid) * 8 + int(gbtid)
 
         # Reading PRBS7
-        rx_select_node = get_rwreg_node('GEM_AMC.OPTICAL_LINKS.MGT_CHANNEL_%d.CTRL.RX_PRBS_SEL' % (mgt_channel))
+        rx_select_node = get_rwreg_node("BEFE.MGTS.MGT%d.CTRL.RX_PRBS_SEL" % (mgt_channel))
         write_backend_reg(rx_select_node, 0x001)
 
         # Reset the TX and RX channels
-        node = get_rwreg_node('GEM_AMC.OPTICAL_LINKS.MGT_CHANNEL_%d.RESET' % (mgt_channel))
+        node = get_rwreg_node("BEFE.MGTS.MGT%d.RESET" % (mgt_channel))
         write_backend_reg(node, 0x001)
            
         # Measurement Time
@@ -177,14 +177,14 @@ def prbs_check(system, boss, path, ohid, gbtid, bert_source, time):
         n_transactions = n_clocks
         
         # Reset counter
-        reset_node = get_rwreg_node('GEM_AMC.OPTICAL_LINKS.MGT_CHANNEL_%d.CTRL.RX_PRBS_CNT_RESET' % (mgt_channel))
+        reset_node = get_rwreg_node("BEFE.MGTS.MGT%d.CTRL.RX_PRBS_CNT_RESET" % (mgt_channel))
         write_backend_reg(reset_node, 0x001)
         
         # Sleep for measurement time
         sleep(measure_time)
         
         # Read the error counter
-        error_node = get_rwreg_node('GEM_AMC.OPTICAL_LINKS.MGT_CHANNEL_%d.STATUS.PRBS_ERROR_CNT' % (mgt_channel))
+        error_node = get_rwreg_node("BEFE.MGTS.MGT%d.STATUS.PRBS_ERROR_CNT" % (mgt_channel))
         prbs_errors = read_backend_reg(error_node)
         ber = prbs_errors
         #ber = float(prbs_errors)/float(n_transactions) # if prbs errors count error in each transaction
@@ -320,16 +320,16 @@ def prbs_check(system, boss, path, ohid, gbtid, bert_source, time):
 
     print ("Finished measuring PRBS errors for: " + path + "\n")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LPGBT Bit Error Rate Test (BERT)')
+    parser = argparse.ArgumentParser(description="LPGBT Bit Error Rate Test (BERT)")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss/sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-p", "--path", action="store", dest="path", help="path = uplink, downlink, loopback")
     parser.add_argument("-f", "--func", action="store", dest="func", help="func = generate, check, all, stop")
-    parser.add_argument("-b", "--bert_source", action="store", nargs='+', dest="bert_source", help="COURSE BERT SOURCE = See lpGBT manual Table 14.4 for options, default = DLFRAME")
+    parser.add_argument("-b", "--bert_source", action="store", nargs="+", dest="bert_source", help="COURSE BERT SOURCE = See lpGBT manual Table 14.4 for options, default = DLFRAME")
     parser.add_argument("-t", "--time", action="store", dest="time", help="TIME = measurement time (See lpGBT manual Table 14.5 for options), default: BC_MT_2e35")
     args = parser.parse_args()
 

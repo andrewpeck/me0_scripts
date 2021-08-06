@@ -122,10 +122,10 @@ def invert_eptx(boss, readback):
             writeReg(getNode("LPGBT.RWF.EPORTTX.EPTX23INVERT"), 0x1, readback) #boss 11
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='lpGBT Initialization')
+    parser = argparse.ArgumentParser(description="lpGBT Initialization")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")

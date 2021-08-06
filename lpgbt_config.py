@@ -464,7 +464,7 @@ def reset_lpgbt(readback):
 
 def configure_eport_dlls(readback):
     print ("Configuring eport dlls...")
-    #2.2.2. Uplink: ePort Inputs DLL's
+    #2.2.2. Uplink: ePort Inputs DLL"s
     #[0x034] EPRXDllConfig
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDLLCURRENT"), 0x1, readback)
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDLLCONFIRMCOUNT"), 0x1, readback)
@@ -484,10 +484,10 @@ def configure_phase_shifter(readback):
     writeReg(getNode("LPGBT.RWF.PHASE_SHIFTER.PS1PREEMPHASISMODE"), 0x0, readback)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT Configuration for ME0 Optohybrid')
+    parser = argparse.ArgumentParser(description="LpGBT Configuration for ME0 Optohybrid")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")

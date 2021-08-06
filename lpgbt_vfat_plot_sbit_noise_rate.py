@@ -6,10 +6,10 @@ import numpy as np
 import os, sys, glob
 import argparse
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='Plotting VFAT Sbit Noise Rate')
+    parser = argparse.ArgumentParser(description="Plotting VFAT Sbit Noise Rate")
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="Noise rate result filename")
     args = parser.parse_args()
 
@@ -50,11 +50,11 @@ if __name__ == '__main__':
                 noise_rate[i] += noise_result[vfat][elink][thr]/time
 
         fig, ax = plt.subplots()
-        plt.xlabel('Threshold (DAC)')
-        plt.ylabel('SBit Rate (Hz)')
-        plt.yscale('log')
-        ax.plot(threshold, noise_rate, 'o')
-        #leg = ax.legend(loc='center right', ncol=2)
+        plt.xlabel("Threshold (DAC)")
+        plt.ylabel("SBit Rate (Hz)")
+        plt.yscale("log")
+        ax.plot(threshold, noise_rate, "o")
+        #leg = ax.legend(loc="center right", ncol=2)
         plt.title("VFAT# %02d"%vfat)
         plt.savefig((plot_filename_prefix+"_VFAT%02d.pdf")%vfat)
 

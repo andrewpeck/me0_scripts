@@ -9,7 +9,7 @@ config_boss = {}
 config_sub = {}
 
 def getConfig (filename):
-    f = open(filename, 'r')
+    f = open(filename, "r")
     reg_map = {}
     for line in f.readlines():
         reg = int(line.split()[0], 16)
@@ -37,7 +37,7 @@ def lpgbt_elink_scan(system, oh_select, vfat_list):
             lpgbt, gbt_select, elink_old, gpio = vfat_to_gbt_elink_gpio(vfat)
             check_lpgbt_link_ready(oh_select, gbt_select)
 
-            hwid_node = get_rwreg_node('GEM_AMC.OH.OH%d.GEB.VFAT%d.HW_ID' % (oh_select, vfat))
+            hwid_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.HW_ID" % (oh_select, vfat))
             n_err = 0
             for iread in range(10):
                 hwid = simple_read_backend_reg(hwid_node, -9999)
@@ -85,16 +85,16 @@ def setVfatRxEnable(system, oh_select, vfat, enable, elink):
     mpoke(addr, value)
     sleep(0.000001) # writing too fast for CVP13
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT Elink Scan for each VFAT')
+    parser = argparse.ArgumentParser(description="LpGBT Elink Scan for each VFAT")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
-    parser.add_argument("-v", "--vfats", action="store", nargs='+', dest="vfats", help="vfats = list of VFAT numbers (0-23)")
-    parser.add_argument("-a", "--addr", action="store", nargs='+', dest="addr", help="addr = list of VFATs to enable HDLC addressing")
+    parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
+    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     args = parser.parse_args()
 
     if args.system == "chc":

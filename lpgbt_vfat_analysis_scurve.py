@@ -10,21 +10,21 @@ from math import sqrt
 from tqdm import tqdm
 import warnings
 
-plt.rcParams.update({'font.size': 22}) # Increase font size
+plt.rcParams.update({"font.size": 22}) # Increase font size
 
 def dictToArray(dictionary, vfatNumber, channel):
-    '''
+    """
     Returns (256, 2) ndarray.
     column 0 = injected charge
     column 1 = ratio of fired events / total events
-    '''
+    """
     return np.array(list(dictionary[vfatNumber][channel].items()))
 
 def scurveFunc(injCharge, A, ch_pedestal, mean, sigma):
-    '''
+    """
     Modified error function.
     injCharge = injected charge
-    '''
+    """
     
     pedestal = np.zeros(256)
     if ch_pedestal > 0.0:
@@ -35,11 +35,11 @@ def scurveFunc(injCharge, A, ch_pedestal, mean, sigma):
     return A * erf(np.true_divide((maxCharge - mean), sigma * sqrt(2))) + A
 
 def DACToCharge(injCharge):
-    '''
+    """
     Slope and intercept for all VFATs from the CAL_DAC 
     cal file needs to be added. Default values here are
     a rough average of cal data.
-    '''
+    """
     slope     = 0.22 # fC/DAC
     intercept = 54   # fC
     injCharge = np.multiply(slope, injCharge)
@@ -52,8 +52,8 @@ def fit_scurve(vfatList, scurve_result, plot_filename_prefix, directoryName, ver
     scurveParams = np.ndarray((len(vfatList), 128, 2))
     
     for vfat in vfatList:
-        print('Fitting data for VFAT%2d' % vfat)
-        fitFileName = directoryName + '/' + plot_filename_prefix + ("_VFAT%02d_" % vfat) + "fitResults.txt"
+        print("Fitting data for VFAT%2d" % vfat)
+        fitFileName = directoryName + "/" + plot_filename_prefix + ("_VFAT%02d_" % vfat) + "fitResults.txt"
         file_out = open(fitFileName, "w+")
         file_out.write("========= Results for VFAT%2d =========\n" % vfat)
         print("========= Processing data for VFAT%2d =========\n" % vfat)
@@ -70,27 +70,27 @@ def fit_scurve(vfatList, scurve_result, plot_filename_prefix, directoryName, ver
             scurveParams[vfatCounter, channel, 1] = params[2] # store channel mean
             
             if verbose == True:
-                print('Channel %i Average ENC: %.4f ' % (channel, scurveParams[vfatCounter, channel, 0]))
-                print('Channel %i Average mean: %.4f ' % (channel, scurveParams[vfatCounter, channel, 1]))
+                print("Channel %i Average ENC: %.4f " % (channel, scurveParams[vfatCounter, channel, 0]))
+                print("Channel %i Average mean: %.4f " % (channel, scurveParams[vfatCounter, channel, 1]))
             else:
                 pass
             
             if plotAll == True:
                 fig, ax = plt.subplots(figsize = (16,10))
-                plt.xlabel('Charge (fC)')
-                plt.ylabel('Fired Events / Total Events')
-                ax.plot(scurveData[:,0], scurveData[:,1], 'o', markersize= 6, label = 'Channel %d' % channel) # plot raw data
-                ax.plot(scurveData[:,0], scurveFunc(scurveData[:,0], *params), 'r-', label='fit')
-                props = dict(boxstyle='round', facecolor='white',edgecolor='lightgrey', alpha=1)
-                textstr = '\n'.join((
-                    r'Threshold: $\mu=%.4f$ (fC)' % (params[2], ),
-                    r'ENC: $\sigma=%.4f$ (fC)' % (params[3], ),))
-                ax.text(0.663, 0.7, textstr, transform=ax.transAxes, fontsize=22, verticalalignment='top', bbox=props)
-                ax.set_title('VFAT0%d' % vfat)
-                leg = ax.legend(loc='center right', ncol=2)
+                plt.xlabel("Charge (fC)")
+                plt.ylabel("Fired Events / Total Events")
+                ax.plot(scurveData[:,0], scurveData[:,1], "o", markersize= 6, label = "Channel %d" % channel) # plot raw data
+                ax.plot(scurveData[:,0], scurveFunc(scurveData[:,0], *params), "r-", label="fit")
+                props = dict(boxstyle="round", facecolor="white",edgecolor="lightgrey", alpha=1)
+                textstr = "\n".join((
+                    r"Threshold: $\mu=%.4f$ (fC)" % (params[2], ),
+                    r"ENC: $\sigma=%.4f$ (fC)" % (params[3], ),))
+                ax.text(0.663, 0.7, textstr, transform=ax.transAxes, fontsize=22, verticalalignment="top", bbox=props)
+                ax.set_title("VFAT0%d" % vfat)
+                leg = ax.legend(loc="center right", ncol=2)
                 plt.grid()
                 fig.tight_layout()
-                plt.savefig(directoryName + '/scurveFit_VFAT%d_channel%d.pdf' % (vfat, channel))
+                plt.savefig(directoryName + "/scurveFit_VFAT%d_channel%d.pdf" % (vfat, channel))
                 plt.close() # clear the plot
             else:
                 pass
@@ -115,12 +115,12 @@ def fit_scurve(vfatList, scurve_result, plot_filename_prefix, directoryName, ver
     return scurveParams
 
 def plotENCdistributions(vfatList, scurveParams, plot_filename_prefix, directoryName):
-    '''
+    """
     Plots the ENC distribution of all channels for each VFAT.
-    '''
+    """
     fig, ax = plt.subplots(figsize = (12,10))
-    ax.set_xlabel('VFAT Number')
-    ax.set_ylabel('S-curve ENC (fC)')
+    ax.set_xlabel("VFAT Number")
+    ax.set_ylabel("S-curve ENC (fC)")
 
     data = []
     for ii in range(len(vfatList)):
@@ -129,17 +129,17 @@ def plotENCdistributions(vfatList, scurveParams, plot_filename_prefix, directory
     ax.boxplot(data, patch_artist=True)
     
     plt.xticks(np.arange(1, len(vfatList) + 1), vfatList) # replace ticks with vfat number
-    ax.set_title('ENC Distributions')
+    ax.set_title("ENC Distributions")
     plt.grid()
     fig.tight_layout()
-    plt.savefig(directoryName + '/' + plot_filename_prefix + '_scurveENCdistribution.pdf')
-    print("\nENC distribution plot saved at %s" % directoryName + '/' + plot_filename_prefix + '_scurveENCdistribution.pdf')
+    plt.savefig(directoryName + "/" + plot_filename_prefix + "_scurveENCdistribution.pdf")
+    print("\nENC distribution plot saved at %s" % directoryName + "/" + plot_filename_prefix + "_scurveENCdistribution.pdf")
 
 def plot2Dhist(vfatList, directoryName, scurve_result):
-    '''
+    """
     Formats data originally stored in the s-curve dictionary
     and plots the 2D s-curve histogram.
-    '''
+    """
     hist2Ddata  = np.ndarray((len(vfatList), 256, 128))
     vfatCounter = 0
     
@@ -156,25 +156,25 @@ def plot2Dhist(vfatList, directoryName, scurve_result):
         fig, ax = plt.subplots(figsize = (10,10))
         hist = ax.imshow(hist2Ddata[vfatCounter,:,:],
                    extent=[min(channelNum), max(channelNum), min(chargeVals), max(chargeVals)],cmap = cm.ocean_r,
-                   origin="lower", interpolation='none', aspect="auto")
+                   origin="lower", interpolation="none", aspect="auto")
         cbar = fig.colorbar(hist, ax=ax, pad=0.01)
-        cbar.set_label('Fired Events / Total Events')
-        ax.set_xlabel('Channel Number')
-        ax.set_ylabel('Injected Charge (DAC)')
-        ax.set_title('S-curves for VFAT%d' % vfat)
+        cbar.set_label("Fired Events / Total Events")
+        ax.set_xlabel("Channel Number")
+        ax.set_ylabel("Injected Charge (DAC)")
+        ax.set_title("S-curves for VFAT%d" % vfat)
         fig.tight_layout()
         plt.xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
-        fig.savefig(directoryName + '/scurve2Dhist_VFAT%d.pdf' % vfat, dpi=1000)
+        fig.savefig(directoryName + "/scurve2Dhist_VFAT%d.pdf" % vfat, dpi=1000)
         print(("\n2D histogram of scurves for VFAT%d " % vfat )+ ("saved at %s" % directoryName) + "/scurve2Dhist_VFAT%d.pdf" % vfat)
         
         vfatCounter += 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     warnings.filterwarnings("ignore") # temporarily disable warnings; infinite covariance matrix is returned when calling scipy.optimize.curve_fit(), but fit is fine
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='Plotting VFAT DAQ SCurve')
+    parser = argparse.ArgumentParser(description="Plotting VFAT DAQ SCurve")
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="SCurve result filename")
     parser.add_argument("-c", "--channels", action="store", nargs="+", dest="channels", help="Channels to plot for each VFAT")
     parser.add_argument("-p", "--plotAll", action="store_true", dest="plotAll", help="Plot Scurves and fit results for all channels in separate files")

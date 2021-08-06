@@ -59,7 +59,7 @@ def i2cmaster_write(system, reg_addr, data):
 
     reg_addr_string = "0x%02X" % (reg_addr)
     data_string = "0x%02X" % (data)
-    print ("Successful I2C write to slave register: " + reg_addr_string + ", data: " + data_string + " (" + '{0:08b}'.format(data) + ")")
+    print ("Successful I2C write to slave register: " + reg_addr_string + ", data: " + data_string + " (" + "{0:08b}".format(data) + ")")
 
     # Reset the I2C Master registers
     writeReg(getNode("LPGBT.RW.I2C.I2CM2DATA0"), 0x00, 0)
@@ -133,7 +133,7 @@ def i2cmaster_read(system, reg_addr):
     data = readReg(getNode("LPGBT.RO.I2CREAD.I2CM2READ15"))
     reg_addr_string = "0x%02X" % (reg_addr)
     data_string = "0x%02X" % (data)
-    print ("Successful read from slave register: " + reg_addr_string + ", data: " + data_string + " (" + '{0:08b}'.format(data) + ")")
+    print ("Successful read from slave register: " + reg_addr_string + ", data: " + data_string + " (" + "{0:08b}".format(data) + ")")
     return data
 
     # Reset the I2C Master registers
@@ -198,19 +198,19 @@ def main(system, boss, channel, enable, reg_list, data_list):
     print ("")
     
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LPGBT VTRX+ CONTROL')
+    parser = argparse.ArgumentParser(description="LPGBT VTRX+ CONTROL")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss allowed")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-t", "--type", action="store", dest="type", help="type = reg or name")
-    parser.add_argument("-r", "--reg", action="store", nargs='+', dest="reg", help="reg = list of registers to read/write; only use with type: reg")
-    parser.add_argument("-c", "--channel", action="store", dest="channel", nargs='+', help="channel = TX1, TX2, TX3, TX4; only use with type: name")
+    parser.add_argument("-r", "--reg", action="store", nargs="+", dest="reg", help="reg = list of registers to read/write; only use with type: reg")
+    parser.add_argument("-c", "--channel", action="store", dest="channel", nargs="+", help="channel = TX1, TX2, TX3, TX4; only use with type: name")
     parser.add_argument("-e", "--enable", action="store", dest="enable", help="enable = 0 or 1; only use with type: name")
-    parser.add_argument("-n", "--name", action="store", dest="name", nargs='+', help="name = biascur_reg, modcur_reg, empamp_reg; only use with type: name")
-    parser.add_argument("-d", "--data", action="store", nargs='+', dest="data", help="data = list of data values to write")
+    parser.add_argument("-n", "--name", action="store", dest="name", nargs="+", help="name = biascur_reg, modcur_reg, empamp_reg; only use with type: name")
+    parser.add_argument("-d", "--data", action="store", nargs="+", dest="data", help="data = list of data values to write")
     args = parser.parse_args()
 
     if args.system == "chc":

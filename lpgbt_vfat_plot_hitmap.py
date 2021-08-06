@@ -5,10 +5,10 @@ import numpy as np
 import os, sys, glob
 import argparse
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='Plotting VFAT HitMap')
+    parser = argparse.ArgumentParser(description="Plotting VFAT HitMap")
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="Hit/Noise map result filename")
     parser.add_argument("-t", "--type", action="store", dest="type", help="type = hit or noise")
     args = parser.parse_args()
@@ -36,8 +36,8 @@ if __name__ == '__main__':
     file.close()
 
     fig, ax = plt.subplots()
-    plt.xlabel('Channel')
-    plt.ylabel('# Fired Events / # Total Events')
+    plt.xlabel("Channel")
+    plt.ylabel("# Fired Events / # Total Events")
     plt.ylim(-0.1,1.1)
     channel_plot = range(0,128)
     if args.type == "hit":
@@ -48,8 +48,8 @@ if __name__ == '__main__':
         frac = []
         for channel in channel_plot:
             frac.append(hitmap_result[vfat][channel])
-        ax.plot(channel_plot, frac, 'o', label="VFAT %d"%vfat)
-        leg = ax.legend(loc='center right', ncol=2)
+        ax.plot(channel_plot, frac, "o", label="VFAT %d"%vfat)
+        leg = ax.legend(loc="center right", ncol=2)
     plt.savefig(plot_filename_prefix+"_map.pdf")
 
 

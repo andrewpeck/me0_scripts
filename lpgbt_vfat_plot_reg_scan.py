@@ -6,10 +6,10 @@ import numpy as np
 import os, sys, glob
 import argparse
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='Plotting VFAT Register Scan')
+    parser = argparse.ArgumentParser(description="Plotting VFAT Register Scan")
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="Register Scan result filename")
     parser.add_argument("-c", "--channels", action="store", nargs="+", dest="channels", help="Channels to plot for each VFAT")
     parser.add_argument("-d", "--dac", action="store", dest="dac", help="Register to plot")
@@ -43,8 +43,8 @@ if __name__ == '__main__':
 
     for vfat in dac_result:
         fig, axs = plt.subplots()
-        plt.xlabel('Channel Number')
-        plt.ylabel(dac + ' (DAC)')
+        plt.xlabel("Channel Number")
+        plt.ylabel(dac + " (DAC)")
         #plt.xlim(0,128)
         #plt.ylim(0,256)
 
@@ -63,14 +63,14 @@ if __name__ == '__main__':
         dacVals = np.arange(0, 256, 1)
         plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(dacVals), max(dacVals)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
         cbar = fig.colorbar(plot, ax=axs, pad=0.01)
-        cbar.set_label('Fired Events / Total Events')
+        cbar.set_label("Fired Events / Total Events")
         plt.title("VFAT# %02d"%vfat)
         plt.savefig((plot_filename_prefix+"_map_VFAT%02d.pdf")%vfat)
 
     for vfat in dac_result:
         fig, ax = plt.subplots()
         plt.xlabel(dac)
-        plt.ylabel('# Fired Events / # Total Events')
+        plt.ylabel("# Fired Events / # Total Events")
         plt.ylim(-0.1,1.1)
         for channel in args.channels:
             channel = int(channel)
@@ -84,8 +84,8 @@ if __name__ == '__main__':
                 if r in dac_result[vfat][channel]:
                     reg_plot.append(r)
                     frac.append(dac_result[vfat][channel][r])
-            ax.plot(reg_plot, frac, 'o', label="Channel %d"%channel)
-        leg = ax.legend(loc='center right', ncol=2)
+            ax.plot(reg_plot, frac, "o", label="Channel %d"%channel)
+        leg = ax.legend(loc="center right", ncol=2)
         plt.title("VFAT# %02d"%vfat)
         plt.savefig((plot_filename_prefix+"_VFAT%02d.pdf")%vfat)
 

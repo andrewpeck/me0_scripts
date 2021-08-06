@@ -35,7 +35,7 @@ def lpgbt_vfat_bert(system, oh_select, vfat_list, reg_list, niter, verbose):
             print ("VFAT#: %02d" %(vfat))
             
             check_lpgbt_link_ready(oh_select, gbt_select)
-            node[vfat] = get_rwreg_node('GEM_AMC.OH.OH%d.GEB.VFAT%d.%s' % (oh_select, vfat, reg))
+            node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (oh_select, vfat, reg))
 
         #n=0
         #while n<niter:
@@ -62,18 +62,18 @@ def lpgbt_vfat_bert(system, oh_select, vfat_list, reg_list, niter, verbose):
         print ("Operations for register %s completed \n" % (reg))      
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='LpGBT VFAT Slow Control Timing Test')
+    parser = argparse.ArgumentParser(description="LpGBT VFAT Slow Control Timing Test")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
-    parser.add_argument("-v", "--vfats", action="store", nargs='+', dest="vfats", help="vfats = list of VFAT numbers (0-23)")
-    parser.add_argument("-r", "--reg", action="store", dest="reg", nargs='+', help="reg = register names to read/write: HW_ID (read), HW_ID_VER (read), TEST_REG (read/write), HW_CHIP_ID (read)")
+    parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
+    parser.add_argument("-r", "--reg", action="store", dest="reg", nargs="+", help="reg = register names to read/write: HW_ID (read), HW_ID_VER (read), TEST_REG (read/write), HW_CHIP_ID (read)")
     parser.add_argument("-n", "--niter", action="store", dest="niter", default="1", help="niter = number of times to perform the read/write")
-    parser.add_argument("-a", "--addr", action="store", nargs='+', dest="addr", help="addr = list of VFATs to enable HDLC addressing")
+    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     parser.add_argument("-z", "--verbose", action="store_true", dest="verbose", default=False, help="Set for more verbosity")
     args = parser.parse_args()
 

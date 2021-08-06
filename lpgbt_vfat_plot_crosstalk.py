@@ -5,10 +5,10 @@ import numpy as np
 import os, sys, glob
 import argparse
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description='Plotting VFAT Cross Talk')
+    parser = argparse.ArgumentParser(description="Plotting VFAT Cross Talk")
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="Cross talk result filename")
     args = parser.parse_args()
 
@@ -43,11 +43,11 @@ if __name__ == '__main__':
             plot_data.append(data)
 
         fig, axs = plt.subplots()
-        plt.xlabel('Channel Injected')
-        plt.ylabel('Channel Read')
+        plt.xlabel("Channel Injected")
+        plt.ylabel("Channel Read")
         plt.xlim(0,128)
         plt.ylim(0,128)
-        plot = axs.imshow(plot_data, cmap='jet')
+        plot = axs.imshow(plot_data, cmap="jet")
         fig.colorbar(plot, ax=axs)
         plt.title("VFAT# %02d"%vfat)
         plt.savefig((plot_filename_prefix+"_VFAT%02d.pdf")%vfat)
