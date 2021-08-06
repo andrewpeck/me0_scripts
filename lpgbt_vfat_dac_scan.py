@@ -170,7 +170,6 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--niter", action="store", dest="niter", default="100", help="niter = Number of times to read ADC for averaging (default=100)")
     parser.add_argument("-f", "--ref", action="store", dest="ref", default = "internal", help="ref = ADC reference: internal or external (default=internal)")
     parser.add_argument("-vr", "--vref", action="store", dest="vref", default = "3", help="vref = CFG_VREF_ADC (0-3) (default=3)")
-    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     parser.add_argument("-d", "--dacList", action="store", dest="dacList", help="Input text file with list of DACs")
     args = parser.parse_args()
 
@@ -263,18 +262,6 @@ if __name__ == "__main__":
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
     print("Initialization Done\n")
-
-    if args.addr is not None:
-        print ("Enabling VFAT addressing for plugin cards on slots: ")
-        print (args.addr)
-        addr_list = []
-        for a in args.addr:
-            a_int = int(a)
-            if a_int not in range(0,24):
-                print (Colors.YELLOW + "Invalid VFAT number for HDLC addressing, only allowed 0-23" + Colors.ENDC)
-                sys.exit()
-            addr_list.append(a_int)
-        enable_hdlc_addressing(addr_list)
     
     # Running Phase Scan
     try:

@@ -279,7 +279,6 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--calpulse", action="store_true", dest="calpulse", help="if calpulsing for all channels should be enabled")
     parser.add_argument("-m", "--cal_mode", action="store", dest="cal_mode", default = "voltage", help="cal_mode = voltage or current (default = voltage), only required when calpulsing")
     parser.add_argument("-d", "--cal_dac", action="store", dest="cal_dac", help="cal_dac = Value of CAL_DAC register (default = 50 for voltage pulse mode and 150 for current pulse mode)")
-    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -375,18 +374,6 @@ if __name__ == "__main__":
     rw_initialize(args.system)
     print("Initialization Done\n")
 
-    if args.addr is not None:
-        print ("Enabling VFAT addressing for plugin cards on slots: ")
-        print (args.addr)
-        addr_list = []
-        for a in args.addr:
-            a_int = int(a)
-            if a_int not in range(0,24):
-                print (Colors.YELLOW + "Invalid VFAT number for HDLC addressing, only allowed 0-23" + Colors.ENDC)
-                sys.exit()
-            addr_list.append(a_int)
-        enable_hdlc_addressing(addr_list)
-    
     # Running Phase Scan
     try:
         lpgbt_vfat_bert(args.system, int(args.ohid), vfat_list, cal_mode, cal_dac, nl1a, runtime, l1a_bxgap, args.calpulse)

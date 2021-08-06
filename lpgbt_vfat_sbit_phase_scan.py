@@ -304,7 +304,6 @@ if __name__ == "__main__":
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
     parser.add_argument("-b", "--bestphase", action="store", dest="bestphase", help="bestphase = Best value of the elinkRX phase (in hex), calculated from phase scan by default")
-    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -362,18 +361,6 @@ if __name__ == "__main__":
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
     print("Initialization Done\n")
-
-    if args.addr is not None:
-        print ("Enabling VFAT addressing for plugin cards on slots: ")
-        print (args.addr)
-        addr_list = []
-        for a in args.addr:
-            a_int = int(a)
-            if a_int not in range(0,24):
-                print (Colors.YELLOW + "Invalid VFAT number for HDLC addressing, only allowed 0-23" + Colors.ENDC)
-                sys.exit()
-            addr_list.append(a_int)
-        enable_hdlc_addressing(addr_list)
 
     if not os.path.isfile(config_boss_filename):
         print (Colors.YELLOW + "Missing config file for boss: config_boss.txt" + Colors.ENDC)

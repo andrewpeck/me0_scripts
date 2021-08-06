@@ -275,7 +275,6 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--reg", action="store", dest="reg", nargs="+", help="reg = register names to read/write: HW_ID (read), HW_ID_VER (read), TEST_REG (read/write), HW_CHIP_ID (read)")
     parser.add_argument("-n", "--niter", action="store", dest="niter", help="niter = number of times to perform the read/write")
     parser.add_argument("-t", "--runtime", action="store", dest="runtime", help="runtime = time (in minutes) to perform the read/write")
-    parser.add_argument("-a", "--addr", action="store", nargs="+", dest="addr", help="addr = list of VFATs to enable HDLC addressing")
     parser.add_argument("-z", "--verbose", action="store_true", dest="verbose", default=False, help="Set for more verbosity")
     args = parser.parse_args()
 
@@ -345,18 +344,6 @@ if __name__ == "__main__":
     rw_initialize(args.system)
     print("Initialization Done\n")
 
-    if args.addr is not None:
-        print ("Enabling VFAT addressing for plugin cards on slots: ")
-        print (args.addr)
-        addr_list = []
-        for a in args.addr:
-            a_int = int(a)
-            if a_int not in range(0,24):
-                print (Colors.YELLOW + "Invalid VFAT number for HDLC addressing, only allowed 0-23" + Colors.ENDC)
-                sys.exit()
-            addr_list.append(a_int)
-        enable_hdlc_addressing(addr_list)
-    
     # Running Phase Scan
     try:
         lpgbt_vfat_bert(args.system, int(args.ohid), vfat_list, args.reg, niter, runtime, args.verbose)
