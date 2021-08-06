@@ -10,7 +10,7 @@ def lpgbt_vfat_bert(system, oh_select, vfat_list, set_cal_mode, cal_dac, nl1a, r
     file_out = open("vfat_daq_test_output.txt", "w+")
 
     if nl1a!=0:
-        print ("LPGBT VFAT Bit Error Ratio Test with %.2e L1A"s\n" % (nl1a))
+        print ("LPGBT VFAT Bit Error Ratio Test with %.2e L1A"\n" % (nl1a))
         file_out.write("LPGBT VFAT Bit Error Ratio Test with %.2e L1A"s\n\n" % (nl1a))
     elif runtime!=0:
         print ("LPGBT VFAT Bit Error Ratio Test for %.2f minutes\n" % (runtime))
