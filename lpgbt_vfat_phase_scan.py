@@ -236,7 +236,7 @@ def find_phase_center(err_list):
                 ngood_center=ngood_center+1
         # odd windows
         else:
-            ngood_center = ngood_edge - (ngood_max/2) - 1;
+            ngood_center = ngood_edge - int(ngood_max/2) - 1;
 
     ngood_center = ngood_center % phase_max - 1
 
