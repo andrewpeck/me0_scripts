@@ -348,6 +348,7 @@ def select_ic_link(ohIdx, gbtIdx):
         linkIdx = ohIdx * 8 + gbtIdx
         write_backend_reg(NODE_IC_GBTX_LINK_SELECT, linkIdx)
         write_backend_reg(NODE_IC_GBTX_I2C_ADDRESS, 0x70)
+        write_backend_reg(NODE_IC_READ_WRITE_LENGTH, 1)
 
 def check_lpgbt_link_ready(ohIdx, gbtIdx):
     if system=="backend":
@@ -528,7 +529,6 @@ def mpeek(address):
             print(Colors.RED + "ERROR: Problem in reading register: " + str(hex(address)) + Colors.ENDC)
             rw_terminate()
     elif system=="backend":
-        #write_backend_reg(NODE_IC_READ_WRITE_LENGTH, 1)
         #write_backend_reg(NODE_IC_ADDR, address)
         #write_backend_reg(NODE_IC_EXEC_READ, 1)
         #data = read_backend_reg(NODE_IC_READ_DATA)
@@ -550,7 +550,6 @@ def mpoke(address, value):
             print(Colors.RED + "ERROR: Problem in writing register: " + str(hex(address)) + Colors.ENDC)
             rw_terminate()
     elif system=="backend":
-        write_backend_reg(NODE_IC_READ_WRITE_LENGTH, 1)
         write_backend_reg(NODE_IC_ADDR, address)
         write_backend_reg(NODE_IC_WRITE_DATA, value)
         write_backend_reg(NODE_IC_EXEC_WRITE, 1)
