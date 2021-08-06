@@ -275,7 +275,7 @@ if __name__ == "__main__":
     l1a_bxgap = int(args.bxgap)
     l1a_timegap = l1a_bxgap * 25 * 0.001 # in microseconds
     if l1a_bxgap<25:
-        print (Colors.YELLOW + "Gap between L1A"s should be at least 25 BX to read out enitre DAQ data packets" + Colors.ENDC)
+        print (Colors.YELLOW + "Gap between L1As should be at least 25 BX to read out enitre DAQ data packets" + Colors.ENDC)
         sys.exit()
     else:
         print ("Gap between consecutive L1A or CalPulses = %d BX = %.2f us" %(l1a_bxgap, l1a_timegap))

@@ -10,8 +10,8 @@ def lpgbt_vfat_bert(system, oh_select, vfat_list, set_cal_mode, cal_dac, nl1a, r
     file_out = open("vfat_daq_test_output.txt", "w+")
 
     if nl1a!=0:
-        print ("LPGBT VFAT Bit Error Ratio Test with %.2e L1A"\n" % (nl1a))
-        file_out.write("LPGBT VFAT Bit Error Ratio Test with %.2e L1A"s\n\n" % (nl1a))
+        print ("LPGBT VFAT Bit Error Ratio Test with %.2e L1As\n" % (nl1a))
+        file_out.write("LPGBT VFAT Bit Error Ratio Test with %.2e L1As\n\n" % (nl1a))
     elif runtime!=0:
         print ("LPGBT VFAT Bit Error Ratio Test for %.2f minutes\n" % (runtime))
         file_out.write("LPGBT VFAT Bit Error Ratio Test for %.2f minutes\n\n" % (runtime))
@@ -233,8 +233,8 @@ def lpgbt_vfat_bert(system, oh_select, vfat_list, set_cal_mode, cal_dac, nl1a, r
                     real_calpulse_counter = expected_l1a
                 else:
                     calpulse_counter = 0
-        print ("VFAT#: %02d, Time: %.2f minutes,  L1A rate: %.2f kHz, Expected L1A"s (effi=%.3f): %.2e, Nr. of L1A"s: %.2e,  Nr. of Calpulses: %.2e  \nDAQ Events: %.2e,  DAQ CRC Errors: %d" %(vfat, total_time/60.0, l1a_rate/1000.0, efficiency, expected_l1a, real_l1a_counter, real_calpulse_counter, daq_event_count_diff[vfat], daq_crc_error_count_diff[vfat]))
-        file_out.write("VFAT#: %02d, Time: %.2f minutes,  L1A rate: %.2f kHz, Expected L1A"s (effi=%.3f): %.2e, Nr. of L1A"s: %.2e,  Nr. of Calpulses: %.2e  \nDAQ Events: %.2e,  DAQ CRC Errors: %d\n" %(vfat, total_time/60.0, l1a_rate/1000.0, efficiency, expected_l1a, real_l1a_counter, real_calpulse_counter, daq_event_count_diff[vfat], daq_crc_error_count_diff[vfat]))
+        print ("VFAT#: %02d, Time: %.2f minutes,  L1A rate: %.2f kHz, Expected L1As (effi=%.3f): %.2e, Nr. of L1As: %.2e,  Nr. of Calpulses: %.2e  \nDAQ Events: %.2e,  DAQ CRC Errors: %d" %(vfat, total_time/60.0, l1a_rate/1000.0, efficiency, expected_l1a, real_l1a_counter, real_calpulse_counter, daq_event_count_diff[vfat], daq_crc_error_count_diff[vfat]))
+        file_out.write("VFAT#: %02d, Time: %.2f minutes,  L1A rate: %.2f kHz, Expected L1As (effi=%.3f): %.2e, Nr. of L1As: %.2e,  Nr. of Calpulses: %.2e  \nDAQ Events: %.2e,  DAQ CRC Errors: %d\n" %(vfat, total_time/60.0, l1a_rate/1000.0, efficiency, expected_l1a, real_l1a_counter, real_calpulse_counter, daq_event_count_diff[vfat], daq_crc_error_count_diff[vfat]))
 
         daq_data_packet_size = 176 # 176 bits
         if daq_event_count_diff[vfat]==0:
@@ -275,7 +275,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
     parser.add_argument("-n", "--nl1a", action="store", dest="nl1a", help="nl1a = fixed number of L1A cycles")
     parser.add_argument("-t", "--time", action="store", dest="time", help="time = time (in minutes) to perform the DAQ test")
-    parser.add_argument("-b", "--bxgap", action="store", dest="bxgap", default="500", help="bxgap = Nr. of BX between two L1A"s (default = 500 i.e. 12.5 us)")
+    parser.add_argument("-b", "--bxgap", action="store", dest="bxgap", default="500", help="bxgap = Nr. of BX between two L1As (default = 500 i.e. 12.5 us)")
     parser.add_argument("-c", "--calpulse", action="store_true", dest="calpulse", help="if calpulsing for all channels should be enabled")
     parser.add_argument("-m", "--cal_mode", action="store", dest="cal_mode", default = "voltage", help="cal_mode = voltage or current (default = voltage), only required when calpulsing")
     parser.add_argument("-d", "--cal_dac", action="store", dest="cal_dac", help="cal_dac = Value of CAL_DAC register (default = 50 for voltage pulse mode and 150 for current pulse mode)")
@@ -357,7 +357,7 @@ if __name__ == "__main__":
     l1a_bxgap = int(args.bxgap)
     l1a_timegap = l1a_bxgap * 25 * 0.001 # in microseconds
     if l1a_bxgap<25:
-        print (Colors.YELLOW + "Gap between L1A"s should be at least 25 BX to read out enitre DAQ data packets" + Colors.ENDC)
+        print (Colors.YELLOW + "Gap between L1As should be at least 25 BX to read out enitre DAQ data packets" + Colors.ENDC)
         sys.exit()
     else:
         print ("Gap between consecutive L1A or CalPulses = %d BX = %.2f us" %(l1a_bxgap, l1a_timegap))

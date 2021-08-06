@@ -464,7 +464,7 @@ def reset_lpgbt(readback):
 
 def configure_eport_dlls(readback):
     print ("Configuring eport dlls...")
-    #2.2.2. Uplink: ePort Inputs DLL"s
+    #2.2.2. Uplink: ePort Inputs DLLs
     #[0x034] EPRXDllConfig
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDLLCURRENT"), 0x1, readback)
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDLLCONFIRMCOUNT"), 0x1, readback)

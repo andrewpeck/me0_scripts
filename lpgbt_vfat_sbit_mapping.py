@@ -98,7 +98,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap):
                     calpulse_counter = read_backend_reg(calpulse_node)
 
                     if system!="dryrun" and l1a_counter != nl1a:
-                        print (Colors.RED + "ERROR: Number of L1A"s incorrect" + Colors.ENDC)
+                        print (Colors.RED + "ERROR: Number of L1As incorrect" + Colors.ENDC)
                         rw_terminate()
                     if system!="dryrun" and elink_sbit_counter_final == 0:
                         print (Colors.YELLOW + "WARNING: Elink %02d did not register any S-bit for calpulse on channel %02d"%(elink, channel) + Colors.ENDC)
@@ -213,8 +213,8 @@ if __name__ == "__main__":
             sys.exit()
         vfat_list.append(v_int)
 
-    nl1a = 100 # Nr. of L1A"s
-    l1a_bxgap = 500 # Gap between 2 L1A"s in nr. of BX"s
+    nl1a = 100 # Nr. of L1As
+    l1a_bxgap = 500 # Gap between 2 L1As in nr. of BXs
         
     # Parsing Registers XML File
     print("Parsing xml file...")

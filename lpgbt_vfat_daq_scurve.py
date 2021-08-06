@@ -193,7 +193,7 @@ if __name__ == "__main__":
     parser.add_argument("-x", "--threshold", action="store", dest="threshold", help="threshold = the CFG_THR_ARM_DAC value (default=configured value of VFAT)")
     parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for SCurve scan (default=1)")
     parser.add_argument("-n", "--nl1a", action="store", dest="nl1a", help="nl1a = fixed number of L1A cycles")
-    parser.add_argument("-b", "--bxgap", action="store", dest="bxgap", default="500", help="bxgap = Nr. of BX between two L1A"s (default = 500 i.e. 12.5 us)")
+    parser.add_argument("-b", "--bxgap", action="store", dest="bxgap", default="500", help="bxgap = Nr. of BX between two L1As (default = 500 i.e. 12.5 us)")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -281,7 +281,7 @@ if __name__ == "__main__":
     l1a_bxgap = int(args.bxgap)
     l1a_timegap = l1a_bxgap * 25 * 0.001 # in microseconds
     if l1a_bxgap<25:
-        print (Colors.YELLOW + "Gap between L1A"s should be at least 25 BX to read out enitre DAQ data packets" + Colors.ENDC)
+        print (Colors.YELLOW + "Gap between L1As should be at least 25 BX to read out enitre DAQ data packets" + Colors.ENDC)
         sys.exit()
     else:
         print ("Gap between consecutive L1A or CalPulses = %d BX = %.2f us" %(l1a_bxgap, l1a_timegap))
