@@ -40,8 +40,7 @@ if boardType is None:
     boardType = "cvp13"
 if boardIdx is None:
     boardIdx = "0"
-else:
-    boardIdx = int(boardIdx)
+boardIdx = int(boardIdx)
 DEVICE = get_config("CONFIG_RWREG")[boardType][boardIdx]['DEVICE']
 if sys.version_info[0] == 3:
     DEVICE = get_config("CONFIG_RWREG")[boardType][boardIdx]['DEVICE'].encode()
