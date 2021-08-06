@@ -461,7 +461,7 @@ def simple_read_backend_reg(node, error_value):
     output_value = 0
     if system=="backend":
         output = rw_reg.read_reg(node)
-        if output != -1:
+        if output != 0xdeaddead:
             output_value = output
         else:
             output_value = error_value
@@ -481,13 +481,13 @@ def read_backend_reg(node):
     output = 0
     if system=="backend":
         output = rw_reg.read_reg(node)
-        if output==-1:
+        if output==0xdeaddead:
             print (Colors.YELLOW + "ERROR: Bus Error, Trying again" + Colors.ENDC)
             output = rw_reg.read_reg(node)
-            if output==-1:
+            if output==0xdeaddead:
                 print (Colors.YELLOW + "ERROR: Bus Error, Trying again" + Colors.ENDC)
                 output = rw_reg.read_reg(node)
-                if output==-1:
+                if output==0xdeaddead:
                     print (Colors.RED + "ERROR: Bus Error" + Colors.ENDC)
                     rw_terminate()
     return output
