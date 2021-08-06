@@ -530,7 +530,7 @@ def mpeek(address):
     elif system=="backend":
         #write_backend_reg(NODE_IC_READ_WRITE_LENGTH, 1)
         #write_backend_reg(NODE_IC_ADDR, address)
-        #write_backend_reg(NODE_IC_EXECUTE_READ, 1)
+        #write_backend_reg(NODE_IC_EXEC_READ, 1)
         #data = read_backend_reg(NODE_IC_READ_DATA)
         #return data
         return reg_list_dryrun[address]
@@ -553,7 +553,7 @@ def mpoke(address, value):
         write_backend_reg(NODE_IC_READ_WRITE_LENGTH, 1)
         write_backend_reg(NODE_IC_ADDR, address)
         write_backend_reg(NODE_IC_WRITE_DATA, value)
-        write_backend_reg(NODE_IC_EXECUTE_WRITE, 1)
+        write_backend_reg(NODE_IC_EXEC_WRITE, 1)
         reg_list_dryrun[address] = value
     #elif system=="dongle":
     #    gbt_dongle.gbtx_write_register(address,value)
