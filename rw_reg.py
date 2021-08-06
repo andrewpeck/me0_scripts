@@ -35,11 +35,13 @@ nodes = OrderedDict()
 val_cache = {}
 
 boardType = os.environ.get('BOARD_TYPE')
-boardIdx = int(os.environ.get('BOARD_IDX'))
+boardIdx = os.environ.get('BOARD_IDX')
 if boardType is None:
     boardType = "cvp13"
 if boardIdx is None:
     boardIdx = "0"
+else:
+    boardIdx = int(boardIdx)
 DEVICE = get_config("CONFIG_RWREG")[boardType][boardIdx]['DEVICE']
 if sys.version_info[0] == 3:
     DEVICE = get_config("CONFIG_RWREG")[boardType][boardIdx]['DEVICE'].encode()
