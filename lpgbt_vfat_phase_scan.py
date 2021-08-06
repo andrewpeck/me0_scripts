@@ -161,7 +161,7 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, best_phase):
     print ("\nphase : 0123456789ABCDEF")
     bestphase_vfat = 24*[0]
     for vfat in vfat_list:
-        sys.stdout.write("VFAT%02d: " % (vfat))
+        phase_print = "VFAT%02d: " % (vfat)
         for phase in range(0, 16):
 
             if (widths[vfat]>0 and phase==centers[vfat]):
@@ -172,15 +172,14 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, best_phase):
             else:
                 char = Colors.YELLOW + "x" + Colors.ENDC
 
-            sys.stdout.write("%s" % char)
-            sys.stdout.flush()
+            phase_print += "%s" % char
         if widths[vfat]<3:
-            sys.stdout.write(Colors.RED + " (center=%d, width=%d) BAD\n" % (centers[vfat], widths[vfat]) + Colors.ENDC)
+            phase_print += Colors.RED + " (center=%d, width=%d) BAD" % (centers[vfat], widths[vfat]) + Colors.ENDC
         elif widths[vfat]<5:
-            sys.stdout.write(Colors.YELLOW + " (center=%d, width=%d) WARNING\n" % (centers[vfat], widths[vfat]) + Colors.ENDC)
+            phase_print += Colors.YELLOW + " (center=%d, width=%d) WARNING" % (centers[vfat], widths[vfat]) + Colors.ENDC
         else:
-            sys.stdout.write(Colors.GREEN + " (center=%d, width=%d) GOOD\n" % (centers[vfat], widths[vfat]) + Colors.ENDC)
-        sys.stdout.flush()
+            phase_print += Colors.GREEN + " (center=%d, width=%d) GOOD" % (centers[vfat], widths[vfat]) + Colors.ENDC
+        print(phase_print)
 
     # set phases for all vfats under test
     print ("\nSetting all VFAT phases to best phases: ")
