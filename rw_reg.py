@@ -7,7 +7,7 @@ import re
 import math
 import time
 from collections import OrderedDict
-from common.utils import *
+from utils import *
 
 print('Loading shared library: librwreg.so')
 lib_DEFAULT = "./lib/librwreg_backup.so"
