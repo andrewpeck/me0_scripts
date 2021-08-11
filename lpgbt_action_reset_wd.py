@@ -18,7 +18,7 @@ def main(system, boss, action, oh_select, gbt_select):
         t0 = time()
         while not check_ready:
             check_ready = read_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%s.GBT%s_READY" % (oh_select, gbt_select)))
-        print ("Time taken for lpGBT to get back to READY state: %.4f sec"%(time()-t0))
+        print ("Time taken for lpGBT to get back to READY state: %.4f sec\n"%(time()-t0))
 
     elif action=="enable":
         #if boss:
