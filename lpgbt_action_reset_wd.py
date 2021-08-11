@@ -3,7 +3,7 @@ from time import sleep, time
 import sys
 import argparse
 
-def main(system, boss, action):
+def main(system, boss, action, oh_select, gbt_select):
     print ("")
     if boss:
         print ("Performing action for boss lpGBT\n")
@@ -13,6 +13,12 @@ def main(system, boss, action):
     if action=="reset":
         print ("Reset lpGBT\n")
         mpoke(0x12C, 0x80)
+
+        check_ready = 0
+        t0 = time()
+        while not check_ready:
+            check_ready = check_lpgbt_link_ready(oh_select, gbt_select)
+        print ("Time taken for lpGBT to get back to READY state: %.4f sec"%(time()-t0))
 
     elif action=="enable":
         #if boss:
@@ -119,7 +125,7 @@ if __name__ == "__main__":
 
     # Configuring LPGBT
     try:
-        main(args.system, boss, args.action)
+        main(args.system, boss, args.action, args.ohid, args.gbtid)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
