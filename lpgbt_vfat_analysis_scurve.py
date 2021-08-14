@@ -190,7 +190,6 @@ if __name__ == "__main__":
     plot_filename_prefix = (directoryName.split("/"))[1]
     file = open(args.filename)
 
-
     try:
         os.makedirs(directoryName) # create directory for scurve analysis results
     except FileExistsError: # skip if directory already exists

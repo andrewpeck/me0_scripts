@@ -110,22 +110,22 @@ def main(oh_select, type, write):
             vfatCalInfo_results.append(result)
         vfatCalInfo_mod = pd.DataFrame(vfatCalInfo_results)
 
-        calDataDir = "vfat_data/vfat_cal_data"
+        calDataDir = "vfat_data/vfat_calib_data"
         try:
             os.makedirs(calDataDir) # create directory for calibration datas
         except FileExistsError: # skip if directory already exists
             pass
         
-        calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_vref.txt"%(oh_select)
+        calInfoFile = calDataDir + "/ME0_OH%d_vfat_calib_info_vref.txt"%(oh_select)
         vfatCalInfo_mod.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "vref_adc"], index = False)
 
-        calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_iref.txt"%(oh_select)
+        calInfoFile = calDataDir + "/ME0_OH%d_vfat_calib_info_iref.txt"%(oh_select)
         vfatCalInfo_mod.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "iref"], index = False)
         
-        calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_adc0.txt"%(oh_select)
+        calInfoFile = calDataDir + "/ME0_OH%d_vfat_calib_info_adc0.txt"%(oh_select)
         vfatCalInfo_mod.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "adc0m", "adc0b"], index = False)
 
-        calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_calDac.txt"%(oh_select)
+        calInfoFile = calDataDir + "/ME0_OH%d_vfat_calib_info_calDac.txt"%(oh_select)
         vfatCalInfo_mod.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "cal_dacm", "cal_dacb"], index = False)
         #fileName = calDataDir + "/NominalValues_IREF.txt" 
         #vfatCalInfo_mod.to_csv(
