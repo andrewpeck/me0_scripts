@@ -4,18 +4,15 @@ import argparse
 import cx_Oracle
 import pandas as pd
 import os
-
-geb_asiago_vfat_map = { # wide mapping not yet implemented in the firmware - update
-    "narrow": {"0": [0, 1, 8, 9, 16, 17], "1": [2, 3, 10, 11, 18, 19]},
-    "wide":   {"0": [0, 1, 8, 9, 16, 17], "1": [2, 3, 10, 11, 18, 19]}
-}   
+from collections import OrderedDict
 
 def getVfatList(inFile): # parse input file
+    vfatList = OrderedDict()
     with open(inFile) as file:
-        vfatList = file.readlines()
-        vfatList = [line.rstrip('\n') for line in vfatList] 
-        vfatList = [int(x) for x in vfatList] 
-    
+        vfatList_line = file.readlines()
+        vfatList_line = [line.rstrip('\n') for line in vfatList_line]
+        for x in vfatList_line:
+            vfatList[x.split()[0]] = x.split()[1]
     return vfatList
 
 def checkEnvVars(): # check if environment variables set for DB access
@@ -25,27 +22,23 @@ def checkEnvVars(): # check if environment variables set for DB access
     except KeyError:
         print("Please set the following environment variables:\n GEM_ONLINE_DB_NAME\nGEM_ONLINE_DB_CONN")
         sys.exit()
-
     return name, conn
 
-def main(geb, asiago, inFile, write):
+def main(oh_select, type, write):
 
-    serialN  = {}
+    serialN = OrderedDict()
     vfat_oh_link_reset()
     sleep(0.1)
 
-
-    for vfat in geb_asiago_vfat_map[geb][asiago]:
-        register = get_rwreg_node("BEFE.GEM_AMC..OH.OH0.GEB.VFAT%d.HW_CHIP_ID" % vfat)
+    for vfat in range(0,24):
+        register = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.HW_CHIP_ID"%(oh_select) % vfat)
         serialN[vfat] = simple_read_backend_reg(register, -9999)
-        #print(data_read)
-    	#serialN[vfat] = read_reg('BEFE.GEM_AMC..OH.OH0.GEB.VFAT%s.HW_CHIP_ID' % vfat)
     print("=" * 31)
     print("====== VFAT Chip Numbers ======")
     print("=" * 31)
     print("VFAT\t|\t Chip Number")
     print("-" * 31)
-    for vfat in geb_asiago_vfat_map[geb][asiago]:
+    for vfat in range(0,24):
         if serialN[vfat] == -9999:
             print(Colors.RED + "%s" % vfat + Colors.ENDC + "\t|\t" + Colors.RED + "Link bad" + Colors.ENDC)
         else:
@@ -57,7 +50,6 @@ def main(geb, asiago, inFile, write):
     #    vfatInfo = str(serialN)
     #    vfatFile.write(vfatInfo)
     #    vfatFile.close()
-
     #serialN = {key:val for key, val in serialN.items() if val != -9999} # remove vfats with no serial number 
     
     name, conn = checkEnvVars() # get environment variables
@@ -66,12 +58,23 @@ def main(geb, asiago, inFile, write):
     vfatQueryString0 = ('SELECT data.* FROM CMS_GEM_MUON_VIEW.GEM_VFAT3_PROD_SUMMARY_V_RH data '
             'INNER JOIN (SELECT vfat3_barcode, MAX(run_number) AS run_number FROM CMS_GEM_MUON_VIEW.GEM_VFAT3_PROD_SUMMARY_V_RH GROUP BY vfat3_barcode) data_select '
             'ON data.vfat3_barcode = data_select.vfat3_barcode AND data.run_number = data_select.run_number') # form query
-
     vfatQueryString1 = " AND ("
-    vfatList = getVfatList(inFile) # get list of vfats from input file
-    
-    for idx, serialNum in enumerate(vfatList): # format query with vfat chip IDs
-        if idx == 0:
+
+    if type=="hw_id":
+        vfatList = serialN
+    elif type=="file":
+        inFile = "vfat_data/ME0_OH%d_vfatID.txt"%(oh_select)
+        if not os.path.isfile(inFile):
+            print (Colors.YELLOW + "Missing vfatID file for OH %d"%(oh_select) + Colors.ENDC)
+            sys.exit()
+        vfatList = getVfatList(inFile) # get list of vfats from input file
+
+    for vfat in vfatList: # format query with vfat chip IDs
+        serialNum = vfatList[vfat]
+        if serialNum == -9999:
+            vfatList.pop(vfat)
+            continue
+        if vfat == 0:
             vfatQueryString1 += " data.VFAT3_SER_NUM='0x{:x}'".format(serialNum)
         else:
             vfatQueryString1 += " OR data.VFAT3_SER_NUM='0x{:x}'".format(serialNum)
@@ -90,23 +93,25 @@ def main(geb, asiago, inFile, write):
     
     if write: # write data to output files
         vfatCalInfo["vfat3_ser_num"] = vfatCalInfo["vfat3_ser_num"].transform(lambda x: int(x, 0)) # convert hex serial number into decimal
-        calDataDir = "vfat_cal_data"
+        vfatCalInfo["vfat"] = vfatList # adding VFAT#
+
+        calDataDir = "vfat_data/vfat_cal_data"
         try:
             os.makedirs(calDataDir) # create directory for calibration datas
         except FileExistsError: # skip if directory already exists
             pass
         
-        calInfoFile = calDataDir + "/vfat_cal_info_vref.txt" 
-        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat3_ser_num", "vref_adc"], index = False)
+        calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_vref.txt"%(oh_select)
+        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "vref_adc"], index = False)
 
-        calInfoFile = calDataDir + "/vfat_cal_info_iref.txt"
-        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat3_ser_num", "iref"], index = False)
+        calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_iref.txt"%(oh_select)
+        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "iref"], index = False)
         
-        calInfoFile = calDataDir + "/vfat_cal_info_adc0.txt"
-        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat3_ser_num", "adc0m", "adc0b"], index = False)
+        calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_adc0.txt"%(oh_select)
+        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "adc0m", "adc0b"], index = False)
 
-        calInfoFile = calDataDir + "/vfat_cal_info_calDac.txt"
-        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat3_ser_num", "cal_dacm", "cal_dacb"], index = False)
+        calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_calDac.txt"%(oh_select)
+        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "cal_dacm", "cal_dacb"], index = False)
         #fileName = calDataDir + "/NominalValues_IREF.txt" 
         #vfatCalInfo.to_csv(
         #        path_or_buf=fileName,
@@ -118,19 +123,55 @@ def main(geb, asiago, inFile, write):
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Retrieve VFAT calibration info from database.')
-    parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun (only backend currently supported)")
-    parser.add_argument("-l", "--layer", action="store", dest="layer", default = "0", help="ME0 layer (only layer 0 currently supported)")
-    parser.add_argument("-g", "--geb", action="store", dest="geb", help="geb = [wide, narrow]")
-    parser.add_argument("-a", "--asiago", action="store", dest="asiago", help="ASIAGO number = [0, 1]")
-    parser.add_argument("-w", "--write", action="store_true", dest="write", help="write chip serial numbers to file")    
-    parser.add_argument("-i", "--inFile", action="store", dest="inFile", help="list of VFAT serial numbers")
+    parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
+    parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
+    parser.add_argument("-w", "--write", action="store_true", dest="write", help="write chip serial numbers to file")
+    parser.add_argument("-t", "--type", action="store", dest="type", help="type = hw_id or file")
+    #parser.add_argument("-i", "--inFile", action="store", dest="inFile", help="input file with list of VFAT serial numbers")
     args = parser.parse_args()
-    
+
+    if args.system == "chc":
+        #print ("Using Rpi CHeeseCake for S-bit test")
+        print (Colors.YELLOW + "Only Backend or dryrun supported" + Colors.ENDC)
+        sys.exit()
+    elif args.system == "backend":
+        print ("Using Backend for S-bit test")
+        #print ("Only chc (Rpi Cheesecake) or dryrun supported at the moment")
+        #sys.exit()
+    elif args.system == "dongle":
+        #print ("Using USB Dongle for S-bit test")
+        print (Colors.YELLOW + "Only Backend or dryrun supported" + Colors.ENDC)
+        sys.exit()
+    elif args.system == "dryrun":
+        print ("Dry Run - not actually running vfat bert")
+    else:
+        print (Colors.YELLOW + "Only valid options: backend, dryrun" + Colors.ENDC)
+        sys.exit()
+
+    if args.ohid is None:
+        print(Colors.YELLOW + "Need OHID" + Colors.ENDC)
+        sys.exit()
+    if int(args.ohid) > 1:
+        print(Colors.YELLOW + "Only OHID 0-1 allowed" + Colors.ENDC)
+        sys.exit()
+
+    #if args.type not in ["hw_id", "file"]:
+    if args.type is not "file":
+        print(Colors.YELLOW + "Input type can only file" + Colors.ENDC)
+        #print(Colors.YELLOW + "Input type can only be hw_id or file" + Colors.ENDC)
+        sys.exit()
+
+    # Parsing Registers XML File
+    print("Parsing xml file...")
     parseXML()
+    print("Parsing complete...")
+
+    # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
+    print("Initialization Done\n")
 
     try: 
-        main(args.geb, args.asiago, args.inFile, args.write)
+        main(int(args.ohid), args.type, args.write)
     except KeyboardInterrupt:
         print(Colors.YELLOW + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

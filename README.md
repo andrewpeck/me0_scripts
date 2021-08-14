@@ -128,6 +128,8 @@ python lpgbt_efuse.py -s chc -l sub -f input_file -i config_sub.txt -c 1
 
 Use -h option for any script to check usage
 
+```get_cal_info_vfat.py```: get calibration data for VFATs
+
 ```lpgbt_action_reset_wd.py```: either reset or disable/enable watchdog for lpGBT
 
 ```lpgbt_asense_monitor.py```: monitor asense on ME0 GEB
@@ -229,18 +231,18 @@ and source:
 ```
 source ~/.bash_profile
 ```
-3. Add the script `cheesecake_integration_devel/tnsnames.ora` to `/etc`. This file specifies the connection information for the Oracle database.
+3. Add the script `dbUtilities/tnsnames.ora` to `/etc`. This file specifies the connection information for the Oracle database.
 4. Edit the last line of `DBconnect.sh` with your lxplus username.
 5. In a separate shell session, open the tunnel to CERN's network with:
 ```
-$ ./DBconnect.sh .
+$ ./dbUtilities/DBconnect.sh .
 ```
 and login using your CERN credentials. (To execute from any directory, place `DBconnectsh` in `/usr/local/bin`.)
 
-6. Update the VFAT text file (example file provided at `cheesecake_integration_devel/ME0WP_vfatID.txt`) with your list of plugin cards you want to retrieve calibration data for.
+6. Update the VFAT text file (example file provided at `vfat_data/ME0_OH0_vfatID.txt`) with your list of 24 plugin cards (for 1 layer) you want to retrieve calibration data for. Use -9999 as serial number for VFATs not connected
  
 7. Execute the script:
 ```
-# python3 get_cal_info_vfat.py -s backend -l <me0_layer> -g <geb_type> -a <asiago_number> -i <input_text_file>.txt -w
+# python3 get_cal_info_vfat.py -s backend -o <oh_id> -t <input_type> -w
 ```
 For more information on usage, run `# python3 get_cal_info_vfat.py -h`.
