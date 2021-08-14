@@ -135,11 +135,11 @@ if __name__ == '__main__':
         print (Colors.YELLOW + "Only Backend or dryrun supported" + Colors.ENDC)
         sys.exit()
     elif args.system == "backend":
-        print ("Using Backend for S-bit test")
+        print ("Using Backend")
         #print ("Only chc (Rpi Cheesecake) or dryrun supported at the moment")
         #sys.exit()
     elif args.system == "dongle":
-        #print ("Using USB Dongle for S-bit test")
+        #print ("Using USB Dongle")
         print (Colors.YELLOW + "Only Backend or dryrun supported" + Colors.ENDC)
         sys.exit()
     elif args.system == "dryrun":
@@ -156,7 +156,7 @@ if __name__ == '__main__':
         sys.exit()
 
     #if args.type not in ["hw_id", "file"]:
-    if args.type is not "file":
+    if args.type != "file":
         print(Colors.YELLOW + "Input type can only file" + Colors.ENDC)
         #print(Colors.YELLOW + "Input type can only be hw_id or file" + Colors.ENDC)
         sys.exit()
