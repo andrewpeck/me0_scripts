@@ -6,7 +6,7 @@ import random
 import datetime
 
 REGISTER_DAC_MONITOR_MAP = {
-    "CFG_IREF": 0,
+    #"CFG_IREF": 0,
     "CFG_CAL_DAC_I": 1,
     "CFG_BIAS_PRE_I_BIT": 2,
     "CFG_BIAS_PRE_I_BLCC": 3,
@@ -18,7 +18,7 @@ REGISTER_DAC_MONITOR_MAP = {
     "CFG_BIAS_SD_I_BSF": 9,
     "CFG_BIAS_CFD_DAC_1": 10,
     "CFG_BIAS_CFD_DAC_2": 11,
-    "CFG_EN_HYST": 12,
+    "CFG_HYST": 12,
     "Imon CFD Ireflocal": 13, # ??
     "CFG_THR_ARM_DAC": 14,
     "CFG_THR_ZCC_DAC": 15,
@@ -33,6 +33,26 @@ REGISTER_DAC_MONITOR_MAP = {
     "CFG_VREF_ADC": 39,
     "CFG_MON_GAIN": 40,
     "SLVS Vref": 41 # ??
+}
+
+MAX_DAC_SIZE = {
+     "CFG_CAL_DAC_I": 255,
+     "CFG_BIAS_PRE_I_BIT": 255,
+     "CFG_BIAS_PRE_I_BLCC": 63,
+     "CFG_BIAS_PRE_I_BSF": 63,
+     "CFG_BIAS_SH_I_BFCAS": 255,
+     "CFG_BIAS_SH_I_BDIFF": 255,
+     "CFG_BIAS_SD_I_BDIFF": 255,
+     "CFG_BIAS_SD_I_BFCAS": 255,
+     "CFG_BIAS_SD_I_BSF": 63,
+     "CFG_BIAS_CFD_DAC_1": 63,
+     "CFG_BIAS_CFD_DAC_2": 63,
+     "CFG_HYST": 63,
+     "CFG_THR_ARM_DAC": 255,
+     "CFG_THR_ZCC_DAC": 255,
+     "CFG_BIAS_PRE_VREF": 255,
+     "CFG_VREF_ADC": 3 
+
 }
 
 def parseList(inFile):
@@ -74,8 +94,8 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
         lpgbt, gbt_select, elink, gpio = vfat_to_gbt_elink_gpio(vfat)
         check_lpgbt_link_ready(oh_select, gbt_select)
 
-        link_good_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
-        sync_error_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
+        link_good_node[vfat] = get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
+        sync_error_node[vfat] = get_rwreg_node("GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
         link_good = read_backend_reg(link_good_node[vfat])
         sync_err = read_backend_reg(sync_error_node[vfat])
         if system!="dryrun" and (link_good == 0 or sync_err > 0):
@@ -86,28 +106,38 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
         for dac in dac_list:
             if dac in ["CFG_CAL_DAC_I", "CFG_CAL_DAC_V"]:
                 dac = "CFG_CAL_DAC"
-            dac_node[vfat][dac] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (oh_select, vfat, dac))
-        vfat_cfg_run_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN" % (oh_select, vfat))
-        vfat_cfg_calmode_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_CAL_MODE" % (oh_select, vfat))
-        adc_monitor_select_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_MONITOR_SELECT" % (oh_select, vfat))
-        adc0_cached_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC0_CACHED" % (oh_select, vfat))
-        adc0_update_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC0_UPDATE" % (oh_select, vfat))
-        adc1_cached_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC1_CACHED" % (oh_select, vfat))
-        adc1_update_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC1_UPDATE" % (oh_select, vfat))
+            dac_node[vfat][dac] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (oh_select, vfat, dac))
+        vfat_cfg_run_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN" % (oh_select, vfat))
+        vfat_cfg_calmode_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_CAL_MODE" % (oh_select, vfat))
+        adc_monitor_select_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_MONITOR_SELECT" % (oh_select, vfat))
+        adc0_cached_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC0_CACHED" % (oh_select, vfat))
+        adc0_update_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC0_UPDATE" % (oh_select, vfat))
+        adc1_cached_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC1_CACHED" % (oh_select, vfat))
+        adc1_update_node[vfat] = get_rwreg_node("GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC1_UPDATE" % (oh_select, vfat))
 
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%d.CFG_VREF_ADC" % (oh_select, vfat)) , vref)
+        write_backend_reg(get_rwreg_node("GEM_AMC.OH.OH%i.GEB.VFAT%d.CFG_VREF_ADC" % (oh_select, vfat)) , vref)
 
         dac_scan_results[vfat] = {}
         for dac in dac_list:
             dac_scan_results[vfat][dac] = {}
-            for reg in range(lower,upper+1,step):
+            for reg in range(lower, MAX_DAC_SIZE[dac] + 1, step):
                 dac_scan_results[vfat][dac][reg] = -9999
+       
+        dac_scan_error[vfat] = {}
+        for dac in dac_list:
+            dac_scan_error[vfat][dac] = {}
+            for reg in range(lower, MAX_DAC_SIZE[dac] + 1, step):
+                dac_scan_error[vfat][dac][reg] = -9999
 
     # Loop over VFATs
     for vfat in vfat_list:
         print ("VFAT %02d"%vfat)
+        write_backend_reg(get_rwreg_node("GEM_AMC.OH.OH0.GEB.VFAT%d.CFG_EN_HYST" % vfat), 0) # disable hysteresis for testing the DACs
         # Loop over DACs
         for dac in dac_list:
+            if upper > MAX_DAC_SIZE[dac]:
+                upper = MAX_DAC_SIZE[dac]
+
             print ("  Scanning DAC: " + dac)
 
             # Setup DAC Monitor
@@ -116,28 +146,43 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
                 write_backend_reg(vfat_cfg_calmode_node[vfat], 0x2)
             else:
                 write_backend_reg(vfat_cfg_calmode_node[vfat], 0x1)
-
+            
             # Set VFAT to Run Mode
             write_backend_reg(vfat_cfg_run_node[vfat], 0x1)
-
+            
+            numIt    = 10000
+            pedestal = 0
+            write_backend_reg(dac_node[vfat][dac], 0x0)
+            for ii in range(0, numIt):
+                if adc_ref == "internal": # use ADC0
+                    adc_update_read = read_backend_reg(adc0_update_node[vfat]) # read/write to this register triggers a cache update
+                    sleep(20e-6) # sleep for 20 us
+                    pedestal += read_backend_reg(adc0_cached_node[vfat])
+            pedestal = pedestal / numIt
+            
             # Looping over DAC values
-            for reg in range(lower,upper+1,step):
+            for reg in range(lower, upper + 1, step):
 
                 # Set DAC value
                 write_backend_reg(dac_node[vfat][dac], reg)
 
-                adc_value = 0
+                #adc_value = 0
+                adc_value = []
                 # Taking average
                 for i in range(0,niter):
                     if adc_ref == "internal": # use ADC0
                         adc_update_read = read_backend_reg(adc0_update_node[vfat]) # read/write to this register triggers a cache update
                         sleep(20e-6) # sleep for 20 us
-                        adc_value += read_backend_reg(adc0_cached_node[vfat])
+                        adc_value.append(read_backend_reg(adc0_cached_node[vfat]))
+                        #adc_value += read_backend_reg(adc0_cached_node[vfat]) 
+                        #adc_value += read_backend_reg(adc0_cached_node[vfat]) - pedestal
                     elif adc_ref == "external": # use ADC1
                         adc_update_read = read_backend_reg(adc1_update_node[vfat]) # read/write to this register triggers a cache update
                         sleep(20e-6) # sleep for 20 us
                         adc_value += read_backend_reg(adc1_cached_node[vfat])
-                dac_scan_results[vfat][dac][reg] = adc_value/niter
+                dac_scan_results[vfat][dac][reg] = sum(adc_value) / len(adc_value)
+                var = sum([((x - dac_scan_results[vfat][dac][reg] ** 2) for x in adc_value]) / len(adc_value)
+                dac_scan_error[vfat][dac][reg] = var ** 0.5
 
             # Set VFAT to Sleep Mode
             write_backend_reg(vfat_cfg_run_node[vfat], 0x0)
@@ -149,8 +194,8 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
     # Writing results in output file
     for dac in dac_list:
         for vfat in vfat_list:
-            for reg in range(lower,upper+1,step):
-                file_out.write("%d;%s;%d;%d;%d\n"%(oh_select,dac,vfat,reg,dac_scan_results[vfat][dac][reg]))
+            for reg in range(lower, upper + 1, step):
+                file_out.write("%d;%s;%d;%d;%d;%i\n"%(oh_select, dac, vfat, reg, dac_scan_results[vfat][dac][reg], dac_scan_error[vfat][dac][reg]))
 
     print ("DAC Scan completed\n")
     file_out.close()
@@ -239,7 +284,26 @@ if __name__ == "__main__":
     if lower>upper:
         print (Colors.YELLOW + "Upper limit has to be >= Lower limit" + Colors.ENDC)
         sys.exit()
-
+    if args.dacList is not None:
+        for dac in args.dacList:
+            if upper > MAX_DAC_SIZE[dac]:
+                print(Colors.YELLOW + "Max scannable DAC size for %s is %d" % (dac, MAX_DAC_SIZE[dac]) + Colors.ENDC)
+                print(Colors.YELLOW + "Since upper limit is larger than the max DAC size for %s, setting maximum DAC value to %d" % (dac, MAX_DAC_SIZE[dac]) + Colors.ENDC)
+                upper = MAX_DAC_SIZE[dac]
+            elif lower > MAX_DAC_SIZE[dac]:
+                print(Colors.YELLOW + "Lower limit is larger than the maximum DAC size. Please select a smaller lower limit or use the default" + Colors.ENDC)
+                sys.exit()    
+            
+    elif args.regs is not None:
+        for dac in args.regs:
+            if upper > MAX_DAC_SIZE[dac]:
+                print(Colors.YELLOW + "Max scannable DAC size for %s is %d" % (dac, MAX_DAC_SIZE[dac]) + Colors.ENDC)
+                print(Colors.YELLOW + "Since upper limit is larger than the max DAC size for %s, setting maximum DAC value to %d" % (dac, MAX_DAC_SIZE[dac]) + Colors.ENDC)
+                upper = MAX_DAC_SIZE[dac]
+            elif lower > MAX_DAC_SIZE[dac]:
+                print(Colors.YELLOW + "Lower limit is larger than the maximum DAC size. Please select a smaller lower limit or use the default" + Colors.ENDC)
+                sys.exit()
+    
     step = int(args.step)
     if step not in range(1,257):
         print (Colors.YELLOW + "Step size can only be between 1 and 256" + Colors.ENDC)
@@ -279,7 +343,5 @@ if __name__ == "__main__":
 
     # Termination
     rw_terminate()
-
-
 
 
