@@ -72,9 +72,8 @@ def main(oh_select, type, write):
     for vfat in vfatList: # format query with vfat chip IDs
         serialNum = vfatList[vfat]
         if serialNum == -9999:
-            vfatList.pop(vfat)
             continue
-        if vfat == 0:
+        if vfatQueryString1 == " AND (":
             vfatQueryString1 += " data.VFAT3_SER_NUM='0x{:x}'".format(serialNum)
         else:
             vfatQueryString1 += " OR data.VFAT3_SER_NUM='0x{:x}'".format(serialNum)
@@ -93,7 +92,23 @@ def main(oh_select, type, write):
     
     if write: # write data to output files
         vfatCalInfo["vfat3_ser_num"] = vfatCalInfo["vfat3_ser_num"].transform(lambda x: int(x, 0)) # convert hex serial number into decimal
-        vfatCalInfo["vfat"] = vfatList # adding VFAT#
+
+        vfatCalInfo_results = []
+        for vfat in vfatList:
+            result = {}
+            result["vfat"] = vfat
+            result["vfat3_ser_num"] = vfatList[vfat]
+            for i in vfatCalInfo.index:
+                if vfatCalInfo["vfat3_ser_num"][i] == vfatList[vfat]:
+                    result["vref_adc"] = vfatCalInfo["vref_adc"][i]
+                    result["iref"] = vfatCalInfo["iref"][i]
+                    result["adc0m"] = vfatCalInfo["adc0m"][i]
+                    result["adc0b"] = vfatCalInfo["adc0b"][i]
+                    result["cal_dacm"] = vfatCalInfo["cal_dacm"][i]
+                    result["cal_dacb"] = vfatCalInfo["cal_dacb"][i]
+                    break
+            vfatCalInfo_results.append(result)
+        vfatCalInfo_mod = pd.DataFrame(vfatCalInfo_results)
 
         calDataDir = "vfat_data/vfat_cal_data"
         try:
@@ -102,18 +117,18 @@ def main(oh_select, type, write):
             pass
         
         calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_vref.txt"%(oh_select)
-        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "vref_adc"], index = False)
+        vfatCalInfo_mod.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "vref_adc"], index = False)
 
         calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_iref.txt"%(oh_select)
-        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "iref"], index = False)
+        vfatCalInfo_mod.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "iref"], index = False)
         
         calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_adc0.txt"%(oh_select)
-        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "adc0m", "adc0b"], index = False)
+        vfatCalInfo_mod.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "adc0m", "adc0b"], index = False)
 
         calInfoFile = calDataDir + "/ME0_OH%d_vfat_cal_info_calDac.txt"%(oh_select)
-        vfatCalInfo.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "cal_dacm", "cal_dacb"], index = False)
+        vfatCalInfo_mod.to_csv(calInfoFile, sep = ";", columns = ["vfat", "vfat3_ser_num", "cal_dacm", "cal_dacb"], index = False)
         #fileName = calDataDir + "/NominalValues_IREF.txt" 
-        #vfatCalInfo.to_csv(
+        #vfatCalInfo_mod.to_csv(
         #        path_or_buf=fileName,
         #        sep=";",
         #        columns=['vfatN','iref'],
