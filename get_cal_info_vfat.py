@@ -74,6 +74,7 @@ def main(oh_select, type, write):
         if serialNum == -9999:
             vfatList.pop(vfat)
             continue
+        serialNum = str(serialNum)
         if vfat == 0:
             vfatQueryString1 += " data.VFAT3_SER_NUM='0x{:x}'".format(serialNum)
         else:
