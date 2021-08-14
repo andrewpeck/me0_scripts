@@ -12,7 +12,7 @@ def getVfatList(inFile): # parse input file
         vfatList_line = file.readlines()
         vfatList_line = [line.rstrip('\n') for line in vfatList_line]
         for x in vfatList_line:
-            vfatList[x.split()[0]] = x.split()[1]
+            vfatList[int(x.split()[0])] = int(x.split()[1])
     return vfatList
 
 def checkEnvVars(): # check if environment variables set for DB access
@@ -74,7 +74,6 @@ def main(oh_select, type, write):
         if serialNum == -9999:
             vfatList.pop(vfat)
             continue
-        serialNum = str(serialNum)
         if vfat == 0:
             vfatQueryString1 += " data.VFAT3_SER_NUM='0x{:x}'".format(serialNum)
         else:
