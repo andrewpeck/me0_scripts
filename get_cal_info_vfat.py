@@ -31,7 +31,7 @@ def main(oh_select, type, write):
     sleep(0.1)
 
     for vfat in range(0,24):
-        register = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.HW_CHIP_ID"%(oh_select) % vfat)
+        register = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.HW_CHIP_ID"%(oh_select, vfat))
         serialN[vfat] = simple_read_backend_reg(register, -9999)
     print("=" * 31)
     print("====== VFAT Chip Numbers ======")
