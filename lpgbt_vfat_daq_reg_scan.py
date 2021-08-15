@@ -104,10 +104,13 @@ def lpgbt_vfat_reg_scan(system, dac, oh_select, vfat_list, channel_list, lower, 
     # Looping over channels
     for channel in channel_list:
         print ("Channel: %d"%channel)
+        reg_initial = {}
         for vfat in vfat_list:
             enableVfatchannel(vfat, oh_select, channel, 0, 1) # unmask channel and enable calpulsing
+            # Initial value of register
+            reg_initial[vfat] = read_backend_reg(dac_node[vfat])
         write_backend_reg(daq_monitor_select_node, channel)
-        
+
         # Looping over register
         for reg in range(lower,upper+1,step):
             #print ("    %s: %d"%(dac,reg))
@@ -133,7 +136,11 @@ def lpgbt_vfat_reg_scan(system, dac, oh_select, vfat_list, channel_list, lower, 
                 daq_data[vfat][channel][reg]["fired"] = read_backend_reg(daq_monitor_fire_count_node[vfat])
             # End of VFAT loop
         # End of register loop
-        
+
+        # Setting register back to initial value
+        for vfat in vfat_list:
+            write_backend_reg(dac_node[vfat], reg_initial[vfat])
+
         for vfat in vfat_list:
             enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channel and disable calpulsing
     # End of channel loop

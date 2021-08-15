@@ -9,13 +9,13 @@ import json
 from lpgbt_vfat_config import configureVfat, enableVfatchannel
 
 def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, parallel, threshold, step, nl1a, l1a_bxgap, s_bit_channel_mapping):
-    if not os.path.exists("sbit_scurve_results"):
-        os.makedirs("sbit_scurve_results")
+    if not os.path.exists("vfat_data/vfat_sbit_scurve_results"):
+        os.makedirs("vfat_data/vfat_sbit_scurve_results")
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    foldername = "sbit_scurve_results/"
-    filename = foldername + "vfat_sbit_scurve_" + now + ".txt"
+    foldername = "vfat_data/vfat_sbit_scurve_results/"
+    filename = foldername + "ME0_OH%d_vfat_sbit_scurve_"%(oh_select) + now + ".txt"
     file_out = open(filename,"w+")
     file_out.write("vfat    channel    charge    fired    events\n")
 

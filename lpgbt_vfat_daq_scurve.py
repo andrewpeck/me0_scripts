@@ -8,13 +8,13 @@ from lpgbt_vfat_config import configureVfat, enableVfatchannel
 
 
 def lpgbt_vfat_scurve(system, oh_select, vfat_list, channel_list, set_cal_mode, parallel, threshold, step, nl1a, l1a_bxgap):
-    if not os.path.exists("daq_scurve_results"):
-        os.makedirs("daq_scurve_results")
+    if not os.path.exists("vfat_data/vfat_daq_scurve_results"):
+        os.makedirs("vfat_data/vfat_daq_scurve_results")
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    foldername = "daq_scurve_results/"
-    filename = foldername + "vfat_scurve_" + now + ".txt"
+    foldername = "vfat_data/vfat_daq_scurve_results/"
+    filename = foldername + "ME0_OH%d_vfat_scurve_"%(oh_select) + now + ".txt"
     file_out = open(filename,"w+")
     file_out.write("vfat    channel    charge    fired    events\n")
 

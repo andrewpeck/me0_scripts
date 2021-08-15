@@ -98,6 +98,7 @@ def main(oh_select, type, write):
             result = {}
             result["vfat"] = vfat
             result["vfat3_ser_num"] = vfatList[vfat]
+            serial_num_match = 0
             for i in vfatCalInfo.index:
                 if vfatCalInfo["vfat3_ser_num"][i] == vfatList[vfat]:
                     result["vref_adc"] = vfatCalInfo["vref_adc"][i]
@@ -106,7 +107,15 @@ def main(oh_select, type, write):
                     result["adc0b"] = vfatCalInfo["adc0b"][i]
                     result["cal_dacm"] = vfatCalInfo["cal_dacm"][i]
                     result["cal_dacb"] = vfatCalInfo["cal_dacb"][i]
+                    serial_num_match = 1
                     break
+            if not serial_num_match:
+                result["vref_adc"] = -9999
+                result["iref"] = -9999
+                result["adc0m"] = -9999
+                result["adc0b"] = -9999
+                result["cal_dacm"] = -9999
+                result["cal_dacb"] = -9999
             vfatCalInfo_results.append(result)
         vfatCalInfo_mod = pd.DataFrame(vfatCalInfo_results)
 

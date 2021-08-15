@@ -6,6 +6,48 @@ import numpy as np
 import os, sys, glob
 import argparse
 
+def getCalData(calib_path):
+    slope_adc = {}
+    intercept_adc = {}
+
+    if os.path.isfile(calib_path):
+        calib_file = open(calib_path)
+        for line in calib_file.readlines():
+            vfat = int(line.split(";")[0])
+            slope_adc[vfat] = float(line.split(";")[2])
+            intercept_adc[vfat] = float(line.split(";")[3])
+        calib_file.close()
+
+    return slope_adc, intercept_adc
+
+def DACToCharge(dac, slope_adc, intercept_adc, vfat, mode):
+    """
+    Slope and intercept for all VFATs from the CAL_DAC cal file.
+    If cal file not present, use default values here are a rough average of cal data.
+    """
+
+    slope = -9999
+    intercept = -9999
+
+    if vfat in slope_adc:
+        if slope_adc[vfat]!=-9999 and intercept_adc[vfat]!=-9999:
+            if mode=="voltage":
+                slope = slope_adc[vfat]
+                intercept = intercept_adc[vfat]
+            elif mode=="current":
+                slope = abs(slope_adc[vfat])
+                intercept = 0
+    if slope==-9999 or intercept==-9999: # use average values
+        print (Colors.YELLOW + "ADC Cal data not present for VFAT%d, using avergae values"%vfat + Colors.ENDC)
+        if mode=="voltage":
+            slope = -0.22 # fC/DAC
+            intercept = 56.1 # fC
+        elif mode=="current":
+            slope = 0.22 # fC/DAC
+            intercept = 0
+    charge = (dac * slope) + intercept
+    return charge
+
 if __name__ == "__main__":
 
     # Parsing arguments
@@ -28,19 +70,34 @@ if __name__ == "__main__":
     #    print(Colors.YELLOW + "Type can only be daq or sbit" + Colors.ENDC)
     #    sys.exit()
 
-    plot_filename_prefix = args.filename.split(".txt")[0]
+    directoryName        = args.filename.split(".txt")[0]
+    plot_filename_prefix = (directoryName.split("/"))[2]
+    oh = plot_filename_prefix.split("_vfat")[0]
     file = open(args.filename)
+
+    try:
+        os.makedirs(directoryName) # create directory for scurve analysis results
+    except FileExistsError: # skip if directory already exists
+        pass
+
+    calib_path = "vfat_data/vfat_calib_data/"+oh+"_vfat_calib_info_calDac.txt"
+    slope_adc, intercept_adc = getCalData(calib_path)
+
     scurve_result = {}
     for line in file.readlines():
         if "vfat" in line:
             continue
-        vfat = int(line.split()[0])
+
+        vfat    = int(line.split()[0])
         channel = int(line.split()[1])
-        charge = int(line.split()[2])
-        if args.mode == "voltage":
-            charge = 255 - charge
-        fired = int(line.split()[3])
-        events = int(line.split()[4])
+        charge  = int(line.split()[2])
+        fired   = int(line.split()[3])
+        events  = int(line.split()[4])
+
+        #if args.mode == "voltage":
+        #    charge = 255 - charge
+        charge = DACToCharge(charge, slope_adc, intercept_adc, vfat, args.mode) # convert to fC
+
         if vfat not in scurve_result:
             scurve_result[vfat] = {}
         if channel not in scurve_result[vfat]:
@@ -51,15 +108,18 @@ if __name__ == "__main__":
             scurve_result[vfat][channel][charge] = float(fired)/float(events)
     file.close()
 
+    channelNum = np.arange(0, 128, 1)
+    chargeVals = np.arange(0, 256, 1)
     for vfat in scurve_result:
         fig, axs = plt.subplots()
         plt.xlabel("Channel Number")
-        plt.ylabel("Injected Charge (DAC)")
+        plt.ylabel("Injected Charge (fC)")
         #plt.xlim(0,128)
         #plt.ylim(0,256)
 
         plot_data = []
-        for charge in range(0,256):
+        for dac in range(0,256):
+            charge = DACToCharge(dac, slope_adc, intercept_adc, vfat, args.mode)
             data = []
             for channel in range(0,128):
                 if channel not in scurve_result[vfat]:
@@ -69,17 +129,19 @@ if __name__ == "__main__":
                 else:
                     data.append(scurve_result[vfat][channel][charge])
             plot_data.append(data)
-        channelNum = np.arange(0, 128, 1)
-        chargeVals = np.arange(0, 256, 1)
-        plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(chargeVals), max(chargeVals)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
+
+        chargeVals_mod = chargeVals
+        for i in range(0,len(chargeVals_mod)):
+            chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, vfat, args.mode)
+        plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(chargeVals_mod), max(chargeVals_mod)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
         cbar = fig.colorbar(plot, ax=axs, pad=0.01)
         cbar.set_label("Fired Events / Total Events")
         plt.title("VFAT# %02d"%vfat)
-        plt.savefig((plot_filename_prefix+"_map_VFAT%02d.pdf")%vfat)
+        plt.savefig((directoryName+"/_scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat)
 
     for vfat in scurve_result:
         fig, ax = plt.subplots()
-        plt.xlabel("Injected Charge (DAC)")
+        plt.xlabel("Injected Charge (fC)")
         plt.ylabel("Fired Events / Total Events")
         #if args.type == "daq":
         #    plt.ylim(-0.1,1.1)
@@ -90,17 +152,18 @@ if __name__ == "__main__":
             if channel not in scurve_result[vfat]:
                 print (Colors.YELLOW + "Channel %d not in SCurve scan"%channel + Colors.ENDC)
                 continue
-            charge = range(0,256)
+            dac = range(0,256)
             charge_plot = []
             frac = []
-            for c in charge:
+            for d in dac:
+                c = DACToCharge(d, slope_adc, intercept_adc, vfat, args.mode)
                 if c in scurve_result[vfat][channel]:
                     charge_plot.append(c)
                     frac.append(scurve_result[vfat][channel][c])
             ax.plot(charge_plot, frac, "o", label="Channel %d"%channel)
         leg = ax.legend(loc="center right", ncol=2)
         plt.title("VFAT# %02d"%vfat)
-        plt.savefig((plot_filename_prefix+"_VFAT%02d.pdf")%vfat)
+        plt.savefig((directoryName+"/scurve_"+oh+"_VFAT%02d.pdf")%vfat)
 
 
 

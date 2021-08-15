@@ -34,26 +34,55 @@ def scurveFunc(injCharge, A, ch_pedestal, mean, sigma):
 
     return A * erf(np.true_divide((maxCharge - mean), sigma * sqrt(2))) + A
 
-def DACToCharge(injCharge):
-    """
-    Slope and intercept for all VFATs from the CAL_DAC 
-    cal file needs to be added. Default values here are
-    a rough average of cal data.
-    """
-    slope     = 0.22 # fC/DAC
-    intercept = 54   # fC
-    injCharge = np.multiply(slope, injCharge)
-    injCharge = injCharge + intercept 
+def getCalData(calib_path):
+    slope_adc = {}
+    intercept_adc = {}
 
-    return injCharge
+    if os.path.isfile(calib_path):
+        calib_file = open(calib_path)
+        for line in calib_file.readlines():
+            vfat = int(line.split(";")[0])
+            slope_adc[vfat] = float(line.split(";")[2])
+            intercept_adc[vfat] = float(line.split(";")[3])
+        calib_file.close()
 
-def fit_scurve(vfatList, scurve_result, plot_filename_prefix, directoryName, verbose , plotAll):
+    return slope_adc, intercept_adc
+
+def DACToCharge(dac, slope_adc, intercept_adc, vfat, mode):
+    """
+    Slope and intercept for all VFATs from the CAL_DAC cal file.
+    If cal file not present, use default values here are a rough average of cal data.
+    """
+
+    slope = -9999
+    intercept = -9999
+
+    if vfat in slope_adc:
+        if slope_adc[vfat]!=-9999 and intercept_adc[vfat]!=-9999:
+            if mode=="voltage":
+                slope = slope_adc[vfat]
+                intercept = intercept_adc[vfat]
+            elif mode=="current":
+                slope = abs(slope_adc[vfat])
+                intercept = 0
+    if slope==-9999 or intercept==-9999: # use average values
+        print (Colors.YELLOW + "ADC Cal data not present for VFAT%d, using avergae values"%vfat + Colors.ENDC)
+        if mode=="voltage":
+            slope = -0.22 # fC/DAC
+            intercept = 56.1 # fC
+        elif mode=="current":
+            slope = 0.22 # fC/DAC
+            intercept = 0
+    charge = (dac * slope) + intercept
+    return charge
+
+def fit_scurve(vfatList, scurve_result, oh, directoryName, verbose , channel_list):
     vfatCounter   = 0 
     scurveParams = np.ndarray((len(vfatList), 128, 2))
-    
+
     for vfat in vfatList:
         print("Fitting data for VFAT%2d" % vfat)
-        fitFileName = directoryName + "/" + plot_filename_prefix + ("_VFAT%02d_" % vfat) + "fitResults.txt"
+        fitFileName = directoryName + "/fitResults_" + oh + ("_VFAT%02d" % vfat) + ".txt"
         file_out = open(fitFileName, "w+")
         file_out.write("========= Results for VFAT%2d =========\n" % vfat)
         print("========= Processing data for VFAT%2d =========\n" % vfat)
@@ -61,7 +90,6 @@ def fit_scurve(vfatList, scurve_result, plot_filename_prefix, directoryName, ver
             
         for channel in tqdm(range(128)):
             scurveData      = dictToArray(scurve_result, vfat, channel) # transfer data from dictionary to array
-            scurveData[:,0] = DACToCharge(scurveData[:,0]) # convert to fC
         
             params, covMatrix = curve_fit(scurveFunc, scurveData[:,0], scurveData[:,1], p0=[1, 0, 60, 0.4], maxfev=100000) # fit data; returns optimized parameters and covariance matrix
             
@@ -74,8 +102,13 @@ def fit_scurve(vfatList, scurve_result, plot_filename_prefix, directoryName, ver
                 print("Channel %i Average mean: %.4f " % (channel, scurveParams[vfatCounter, channel, 1]))
             else:
                 pass
-            
-            if plotAll == True:
+
+            try:
+                os.makedirs(directoryName+"/scurveFit_"+oh+"_VFAT%d"%(vfat))
+            except FileExistsError:
+                pass
+
+            if channel in channel_list:
                 fig, ax = plt.subplots(figsize = (16,10))
                 plt.xlabel("Charge (fC)")
                 plt.ylabel("Fired Events / Total Events")
@@ -90,7 +123,7 @@ def fit_scurve(vfatList, scurve_result, plot_filename_prefix, directoryName, ver
                 leg = ax.legend(loc="center right", ncol=2)
                 plt.grid()
                 fig.tight_layout()
-                plt.savefig(directoryName + "/scurveFit_VFAT%d_channel%d.pdf" % (vfat, channel))
+                plt.savefig(directoryName + "/scurveFit_"+oh+"_VFAT%d/"%(vfat)+"scurveFit_"+oh+"_VFAT%d_channel%d.pdf" % (vfat, channel))
                 plt.close() # clear the plot
             else:
                 pass
@@ -114,7 +147,7 @@ def fit_scurve(vfatList, scurve_result, plot_filename_prefix, directoryName, ver
         
     return scurveParams
 
-def plotENCdistributions(vfatList, scurveParams, plot_filename_prefix, directoryName):
+def plotENCdistributions(vfatList, scurveParams, oh, directoryName):
     """
     Plots the ENC distribution of all channels for each VFAT.
     """
@@ -132,10 +165,10 @@ def plotENCdistributions(vfatList, scurveParams, plot_filename_prefix, directory
     ax.set_title("ENC Distributions")
     plt.grid()
     fig.tight_layout()
-    plt.savefig(directoryName + "/" + plot_filename_prefix + "_scurveENCdistribution.pdf")
-    print("\nENC distribution plot saved at %s" % directoryName + "/" + plot_filename_prefix + "_scurveENCdistribution.pdf")
+    plt.savefig(directoryName + "/scurveENCdistribution_"+oh+".pdf")
+    print("\nENC distribution plot saved at %s" % directoryName + "/scurveENCdistribution_"+oh+".pdf")
 
-def plot2Dhist(vfatList, directoryName, scurve_result):
+def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_adc, mode):
     """
     Formats data originally stored in the s-curve dictionary
     and plots the 2D s-curve histogram.
@@ -151,11 +184,16 @@ def plot2Dhist(vfatList, directoryName, scurve_result):
 
     channelNum = np.arange(0, 128, 1)
     chargeVals = np.arange(0, 256, 1)
+
     vfatCounter = 0
     for vfat in vfatList:
+        chargeVals_mod = chargeVals
+        for i in range(0,len(chargeVals_mod)):
+            chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, vfat, mode)
+
         fig, ax = plt.subplots(figsize = (10,10))
         hist = ax.imshow(hist2Ddata[vfatCounter,:,:],
-                   extent=[min(channelNum), max(channelNum), min(chargeVals), max(chargeVals)],cmap = cm.ocean_r,
+                   extent=[min(channelNum), max(channelNum), min(chargeVals_mod), max(chargeVals_mod)],cmap = cm.ocean_r,
                    origin="lower", interpolation="none", aspect="auto")
         cbar = fig.colorbar(hist, ax=ax, pad=0.01)
         cbar.set_label("Fired Events / Total Events")
@@ -164,8 +202,8 @@ def plot2Dhist(vfatList, directoryName, scurve_result):
         ax.set_title("S-curves for VFAT%d" % vfat)
         fig.tight_layout()
         plt.xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
-        fig.savefig(directoryName + "/scurve2Dhist_VFAT%d.pdf" % vfat, dpi=1000)
-        print(("\n2D histogram of scurves for VFAT%d " % vfat )+ ("saved at %s" % directoryName) + "/scurve2Dhist_VFAT%d.pdf" % vfat)
+        fig.savefig(directoryName + "/scurve2Dhist_"+oh+"_VFAT%d.pdf" % vfat, dpi=1000)
+        print(("\n2D histogram of scurves for VFAT%d " % vfat )+ ("saved at %s" % directoryName) + "/scurve2Dhist_"+oh+"_VFAT%d.pdf" % vfat)
         
         vfatCounter += 1
 
@@ -177,23 +215,33 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Plotting VFAT DAQ SCurve")
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="SCurve result filename")
     parser.add_argument("-c", "--channels", action="store", nargs="+", dest="channels", help="Channels to plot for each VFAT")
-    parser.add_argument("-p", "--plotAll", action="store_true", dest="plotAll", help="Plot Scurves and fit results for all channels in separate files")
     parser.add_argument("-m", "--mode", action="store", dest="mode", help="mode = voltage or current")
     parser.add_argument("-v", "--verbose", action="store_true", dest="verbose", help="Increase verbosity")
     args = parser.parse_args()
 
-    if args.channels is not None and args.plotAll == True:
-        print ("Must specifiy to plot all channels (-p) or certain channels (-c), not both.")
+    channel_list = []
+    if args.channels is None:
+        channel_list = range(0,128)
+    else:
+        for channel in args.channels:
+            channel_list.append(int(channel))
+
+    if args.mode not in ["voltage", "current"]:
+        print(Colors.YELLOW + "Mode can only be voltage or current" + Colors.ENDC)
         sys.exit()
 
     directoryName        = args.filename.split(".txt")[0]
-    plot_filename_prefix = (directoryName.split("/"))[1]
+    plot_filename_prefix = (directoryName.split("/"))[2]
+    oh = plot_filename_prefix.split("_vfat")[0]
     file = open(args.filename)
 
     try:
         os.makedirs(directoryName) # create directory for scurve analysis results
     except FileExistsError: # skip if directory already exists
         pass
+
+    calib_path = "vfat_data/vfat_calib_data/"+oh+"_vfat_calib_info_calDac.txt"
+    slope_adc, intercept_adc = getCalData(calib_path)
 
     scurve_result = {}
     for line in file.readlines():
@@ -202,10 +250,13 @@ if __name__ == "__main__":
         vfat    = int(line.split()[0])
         channel = int(line.split()[1])
         charge  = int(line.split()[2])
-        if args.mode == "voltage":
-            charge = 255 - charge
         fired   = int(line.split()[3])
         events  = int(line.split()[4])
+
+        #if args.mode == "voltage":
+        #    charge = 255 - charge
+        charge = DACToCharge(charge, slope_adc, intercept_adc, vfat, args.mode) # convert to fC
+
         if vfat not in scurve_result:
             scurve_result[vfat] = {}
         if channel not in scurve_result[vfat]:
@@ -217,9 +268,9 @@ if __name__ == "__main__":
     file.close()
     
     vfatList     = list(scurve_result.keys())
-    scurveParams = fit_scurve(vfatList, scurve_result, plot_filename_prefix, directoryName, args.verbose, args.plotAll)
+    scurveParams = fit_scurve(vfatList, scurve_result, oh, directoryName, args.verbose, channel_list)
 
-    plotENCdistributions(vfatList, scurveParams, plot_filename_prefix, directoryName)
-    plot2Dhist(vfatList, directoryName, scurve_result)
+    plotENCdistributions(vfatList, scurveParams, oh, directoryName)
+    plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_adc, args.mode)
 
 
