@@ -335,6 +335,8 @@ if __name__ == "__main__":
         if os.path.isfile(calib_path):
             calib_file = open(calib_path)
             for line in calib_file.readlines():
+                if "vfat" in line:
+                    continue
                 vfat = int(line.split(";")[0])
                 vref_calib[vfat] = int(line.split(";")[2])
             calib_file.close()

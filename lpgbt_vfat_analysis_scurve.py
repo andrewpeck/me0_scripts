@@ -41,6 +41,8 @@ def getCalData(calib_path):
     if os.path.isfile(calib_path):
         calib_file = open(calib_path)
         for line in calib_file.readlines():
+            if "vfat" in line:
+                continue
             vfat = int(line.split(";")[0])
             slope_adc[vfat] = float(line.split(";")[2])
             intercept_adc[vfat] = float(line.split(";")[3])
