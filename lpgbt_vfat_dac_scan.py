@@ -92,6 +92,7 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
     adc1_cached_node = {}
     adc1_update_node = {}
     dac_scan_results = {}
+    dac_scan_errors = {}
 
     # Check ready and get nodes
     for vfat in vfat_list:
@@ -131,11 +132,11 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
             for reg in range(lower, MAX_DAC_SIZE[dac] + 1, step):
                 dac_scan_results[vfat][dac][reg] = -9999
        
-        dac_scan_error[vfat] = {}
+        dac_scan_errors[vfat] = {}
         for dac in dac_list:
-            dac_scan_error[vfat][dac] = {}
+            dac_scan_errors[vfat][dac] = {}
             for reg in range(lower, MAX_DAC_SIZE[dac] + 1, step):
-                dac_scan_error[vfat][dac][reg] = -9999
+                dac_scan_errors[vfat][dac][reg] = -9999
 
     # Loop over VFATs
     for vfat in vfat_list:
@@ -191,7 +192,7 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
                         adc_value += read_backend_reg(adc1_cached_node[vfat])
                 dac_scan_results[vfat][dac][reg] = sum(adc_value) / len(adc_value)
                 var = sum([((x - dac_scan_results[vfat][dac][reg]) ** 2) for x in adc_value]) / len(adc_value)
-                dac_scan_error[vfat][dac][reg] = var ** 0.5
+                dac_scan_errors[vfat][dac][reg] = var ** 0.5
 
             # Set VFAT to Sleep Mode
             #write_backend_reg(vfat_cfg_run_node[vfat], 0x0)
@@ -205,7 +206,7 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
             # Writing results in output file
             file_out = open(filename,"a")
             for reg in range(lower, upper + 1, step):
-                file_out.write("%d;%s;%d;%d;%d;%i\n"%(oh_select, dac, vfat, reg, dac_scan_results[vfat][dac][reg], dac_scan_error[vfat][dac][reg]))
+                file_out.write("%d;%s;%d;%d;%d;%i\n"%(oh_select, dac, vfat, reg, dac_scan_results[vfat][dac][reg], dac_scan_errors[vfat][dac][reg]))
             file_out.close()
 
         write_backend_reg(vfat_hyst_en_node[vfat], 1)
