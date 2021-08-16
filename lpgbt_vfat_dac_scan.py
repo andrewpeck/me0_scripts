@@ -330,7 +330,7 @@ if __name__ == "__main__":
         for vfat in vfat_list:
             vref_list[vfat] = vref
     else:
-        calib_path = "vfat_data/vfat_calib_data/"+oh+"_vfat_calib_info_vref.txt"
+        calib_path = "vfat_data/vfat_calib_data/ME0_OH%s_vfat_calib_info_vref.txt"%args.ohid
         vref_calib = {}
         if os.path.isfile(calib_path):
             calib_file = open(calib_path)
