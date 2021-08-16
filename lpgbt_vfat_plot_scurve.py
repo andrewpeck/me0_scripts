@@ -139,7 +139,7 @@ if __name__ == "__main__":
         cbar = fig.colorbar(plot, ax=axs, pad=0.01)
         cbar.set_label("Fired Events / Total Events")
         plt.title("VFAT# %02d"%vfat)
-        plt.savefig((directoryName+"/_scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat)
+        plt.savefig((directoryName+"/scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat)
 
     for vfat in scurve_result:
         fig, ax = plt.subplots()

@@ -83,7 +83,7 @@ def fit_scurve(vfatList, scurve_result, oh, directoryName, verbose , channel_lis
     scurveParams = np.ndarray((len(vfatList), 128, 2))
 
     for vfat in vfatList:
-        print("Fitting data for VFAT%2d" % vfat)
+        print("Fitting data for VFAT%02d" % vfat)
         fitFileName = directoryName + "/fitResults_" + oh + ("_VFAT%02d" % vfat) + ".txt"
         file_out = open(fitFileName, "w+")
         file_out.write("========= Results for VFAT%2d =========\n" % vfat)
@@ -106,7 +106,7 @@ def fit_scurve(vfatList, scurve_result, oh, directoryName, verbose , channel_lis
                 pass
 
             try:
-                os.makedirs(directoryName+"/scurveFit_"+oh+"_VFAT%d"%(vfat))
+                os.makedirs(directoryName+"/scurveFit_"+oh+"_VFAT%02d"%(vfat))
             except FileExistsError:
                 pass
 
@@ -125,7 +125,7 @@ def fit_scurve(vfatList, scurve_result, oh, directoryName, verbose , channel_lis
                 leg = ax.legend(loc="center right", ncol=2)
                 plt.grid()
                 fig.tight_layout()
-                plt.savefig(directoryName + "/scurveFit_"+oh+"_VFAT%d/"%(vfat)+"scurveFit_"+oh+"_VFAT%d_channel%d.pdf" % (vfat, channel))
+                plt.savefig(directoryName + "/scurveFit_"+oh+"_VFAT%02d/"%(vfat)+"scurveFit_"+oh+"_VFAT%02d_channel%d.pdf" % (vfat, channel))
                 plt.close() # clear the plot
             else:
                 pass
@@ -200,11 +200,11 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         cbar = fig.colorbar(hist, ax=ax, pad=0.01)
         cbar.set_label("Fired Events / Total Events")
         ax.set_xlabel("Channel Number")
-        ax.set_ylabel("Injected Charge (DAC)")
+        ax.set_ylabel("Injected Charge (fC)")
         ax.set_title("S-curves for VFAT%d" % vfat)
         fig.tight_layout()
         plt.xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
-        fig.savefig(directoryName + "/scurve2Dhist_"+oh+"_VFAT%d.pdf" % vfat, dpi=1000)
+        fig.savefig(directoryName + "/scurve2Dhist_"+oh+"_VFAT%02d.pdf" % vfat, dpi=1000)
         print(("\n2D histogram of scurves for VFAT%d " % vfat )+ ("saved at %s" % directoryName) + "/scurve2Dhist_"+oh+"_VFAT%d.pdf" % vfat)
         
         vfatCounter += 1
