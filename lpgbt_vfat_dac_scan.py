@@ -170,7 +170,7 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
                     adc_update_read = read_backend_reg(adc0_update_node[vfat]) # read/write to this register triggers a cache update
                     sleep(20e-6) # sleep for 20 us
                     pedestal += read_backend_reg(adc0_cached_node[vfat])
-            pedestal = pedestal / numIt
+            pedestal = pedestal / niter
             
             # Looping over DAC values
             for reg in range(lower, upper + 1, step):
