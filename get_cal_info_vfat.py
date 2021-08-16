@@ -149,7 +149,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Retrieve VFAT calibration info from database.')
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
-    parser.add_argument("-w", "--write", action="store_true", dest="write", help="write chip serial numbers to file")
+    parser.add_argument("-w", "--write", action="store_true", dest="write", help="write calib data to file")
     parser.add_argument("-t", "--type", action="store", dest="type", help="type = hw_id or file")
     #parser.add_argument("-i", "--inFile", action="store", dest="inFile", help="input file with list of VFAT serial numbers")
     args = parser.parse_args()

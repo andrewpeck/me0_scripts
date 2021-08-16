@@ -3,6 +3,7 @@ from time import sleep, time
 import sys
 import argparse
 import random
+import datetime
 
         
 def lpgbt_vfat_bert(system, oh_select, vfat_list, reg_list, niter, runtime, verbose):

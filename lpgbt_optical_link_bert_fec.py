@@ -3,6 +3,7 @@ from time import time, sleep
 import sys
 import argparse
 import random
+import datetime
 
 
 def check_fec_errors(system, boss, path, opr, ohid, gbtid, runtime, vfat_list, verbose):

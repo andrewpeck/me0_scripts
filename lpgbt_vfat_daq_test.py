@@ -4,6 +4,7 @@ import sys
 import argparse
 import random
 from lpgbt_vfat_config import configureVfat, enableVfatchannel
+import datetime
 
 
 def lpgbt_vfat_bert(system, oh_select, vfat_list, set_cal_mode, cal_dac, nl1a, runtime, l1a_bxgap, calpulse):

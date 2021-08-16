@@ -6,6 +6,7 @@ import random
 import glob
 import json
 from lpgbt_vfat_config import configureVfat, enableVfatchannel
+import datetime
 
 
 def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list, parallel, set_cal_mode, cal_dac, nl1a, runtime, l1a_bxgap):
