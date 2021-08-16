@@ -189,7 +189,7 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
                         sleep(20e-6) # sleep for 20 us
                         adc_value += read_backend_reg(adc1_cached_node[vfat])
                 dac_scan_results[vfat][dac][reg] = sum(adc_value) / len(adc_value)
-                var = sum([((x - dac_scan_results[vfat][dac][reg] ** 2) for x in adc_value])) / len(adc_value)
+                var = sum([((x - dac_scan_results[vfat][dac][reg]) ** 2) for x in adc_value]) / len(adc_value)
                 dac_scan_error[vfat][dac][reg] = var ** 0.5
 
             # Set VFAT to Sleep Mode
