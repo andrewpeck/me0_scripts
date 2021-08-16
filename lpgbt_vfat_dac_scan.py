@@ -4,6 +4,7 @@ import sys
 import argparse
 import random
 import datetime
+from lpgbt_vfat_config import configureVfat, enableVfatchannel
 
 REGISTER_DAC_MONITOR_MAP = {
     #"CFG_IREF": 0,
