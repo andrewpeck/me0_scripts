@@ -142,21 +142,29 @@ def check_fec_errors(system, boss, path, opr, ohid, gbtid, runtime, vfat_list, v
             return
 
     data_rate=0
+    data_packet_size = 0
     if path=="uplink":
         print ("For Uplink:")
         file_out.write("For Uplink:\n")
         data_rate = 10.24 * 1e9
+        data_packet_size = 256
     elif path=="downlink":
         print ("For Downlink:")
         file_out.write("For Downlink:\n")
         data_rate = 2.56 * 1e9
+        data_packet_size = 64
     ber = float(fec_errors) / (data_rate * runtime * 60)
+    ineffi = ber * data_packet_size
     ber_ul = 1.0/ (data_rate * runtime * 60)
+    ineffi_ul = ber_ul * data_packet_size
     ber_str = ""
+    ineffi_str = ""
     if ber!=0:
         ber_str = "= {:.2e}".format(ber)
+        ineffi_str = "= {:.2e}".format(ineffi)
     else:
         ber_str = "< {:.2e}".format(ber_ul)
+        ineffi_str = "< {:.2e}".format(ineffi_ul)
     result_string = ""
     result_string_write = ""
     if fec_errors == 0:
@@ -165,8 +173,10 @@ def check_fec_errors(system, boss, path, opr, ohid, gbtid, runtime, vfat_list, v
         result_string += Colors.YELLOW
     result_string += "Number of FEC errors in " + str(runtime) + " minutes: " + str(fec_errors) + "\n"
     result_string += "Bit Error Ratio (BER) " + ber_str + Colors.ENDC + "\n"
+    result_string += "Inefficiency " + ineffi_str + Colors.ENDC + "\n"
     result_string_write += "Number of FEC errors in " + str(runtime) + " minutes: " + str(fec_errors) + "\n"
     result_string_write += "Bit Error Ratio (BER) " + ber_str + "\n"
+    result_string_write += "Inefficiency " + ineffi_str + "\n"
     print (result_string)
     file_out.write(result_string_write + "\n")
     file_out.close()

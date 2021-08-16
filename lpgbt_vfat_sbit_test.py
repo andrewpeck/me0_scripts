@@ -277,11 +277,11 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
                 channel_ber = float(channel_n_err)/s_bit_expected
                 channel_ber_ul = 1.0/s_bit_expected
             if channel_ber==0:
-                print (Colors.GREEN + "ELINK# %02d Channel %02d S-Bit %02d: Errors = %.2e,  Bit Error Ratio (BER) < "%(elink, channel, sbit_read, channel_n_err) + "{:.2e}".format(channel_ber_ul) + Colors.ENDC)
-                file_out.write("ELINK# %02d Channel %02d S-Bit %02d: Errors = %.2e,  Bit Error Ratio (BER) < "%(elink, channel, sbit_read, channel_n_err) + "{:.2e}\n".format(channel_ber_ul))
+                print (Colors.GREEN + "ELINK# %02d Channel %02d S-Bit %02d: Errors = %.2e,  Bit Error Ratio (BER) or Hit Loss Ratio < "%(elink, channel, sbit_read, channel_n_err) + "{:.2e}".format(channel_ber_ul) + Colors.ENDC)
+                file_out.write("ELINK# %02d Channel %02d S-Bit %02d: Errors = %.2e,  Bit Error Ratio (BER) or Hit Loss Ratio < "%(elink, channel, sbit_read, channel_n_err) + "{:.2e}\n".format(channel_ber_ul))
             else:
-                print (Colors.YELLOW + "ELINK# %02d Channel %02d S-Bit %02d: Errors = %.2e,  Bit Error Ratio (BER) = "%(elink, channel, sbit_read, channel_n_err) + "{:.2e}".format(channel_ber) + Colors.ENDC)
-                file_out.write("ELINK# %02d Channel %02d S-Bit %02d: Errors = %.2e,  Bit Error Ratio (BER) = "%(elink, channel, sbit_read, channel_n_err) + "{:.2e}\n".format(channel_ber))
+                print (Colors.YELLOW + "ELINK# %02d Channel %02d S-Bit %02d: Errors = %.2e,  Bit Error Ratio (BER) or Hit Loss Ratio = "%(elink, channel, sbit_read, channel_n_err) + "{:.2e}".format(channel_ber) + Colors.ENDC)
+                file_out.write("ELINK# %02d Channel %02d S-Bit %02d: Errors = %.2e,  Bit Error Ratio (BER) or Hit Loss Ratio = "%(elink, channel, sbit_read, channel_n_err) + "{:.2e}\n".format(channel_ber))
             print ("")
             file_out.write("\n")
 

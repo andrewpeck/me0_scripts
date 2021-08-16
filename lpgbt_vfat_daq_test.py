@@ -245,15 +245,18 @@ def lpgbt_vfat_bert(system, oh_select, vfat_list, set_cal_mode, cal_dac, nl1a, r
         daq_data_packet_size = 176 # 176 bits
         if daq_event_count_diff[vfat]==0:
             ber = 0
+            ineffi = 0
         else:
             ber = float(daq_crc_error_count_diff[vfat])/(daq_event_count_diff[vfat] * daq_data_packet_size)
+            ineffi = float(daq_crc_error_count_diff[vfat])/(daq_event_count_diff[vfat])
         ber_ul = 1.0/(daq_event_count_diff[vfat] * daq_data_packet_size)
+        ineffi_ul = 1.0/(daq_event_count_diff[vfat])
         if ber==0:
-            print (Colors.GREEN + "VFAT#: %02d, Errors = %d,  Bit Error Ratio (BER) < "%(vfat, daq_crc_error_count_diff[vfat]) + "{:.2e}".format(ber_ul) + Colors.ENDC)
-            file_out.write("VFAT#: %02d, Errors = %d,  Bit Error Ratio (BER) < "%(vfat, daq_crc_error_count_diff[vfat]) + "{:.2e}\n".format(ber_ul))
+            print (Colors.GREEN + "VFAT#: %02d, Errors = %d,  Bit Error Ratio (BER) < "%(vfat, daq_crc_error_count_diff[vfat]) + "{:.2e}".format(ber_ul) + ", Inefficiency < " + "{:.2e}".format(ineffi_ul) + Colors.ENDC)
+            file_out.write("VFAT#: %02d, Errors = %d,  Bit Error Ratio (BER) < "%(vfat, daq_crc_error_count_diff[vfat]) + "{:.2e}\n".format(ber_ul) + ", Inefficiency < " + "{:.2e}".format(ineffi_ul))
         else:
-            print (Colors.YELLOW + "VFAT#: %02d, Errors = %d,  Bit Error Ratio (BER) = "%(vfat, daq_crc_error_count_diff[vfat]) + "{:.2e}".format(ber) + Colors.ENDC)
-            file_out.write("VFAT#: %02d, Errors = %d,  Bit Error Ratio (BER) = "%(vfat, daq_crc_error_count_diff[vfat]) + "{:.2e}\n".format(ber))
+            print (Colors.YELLOW + "VFAT#: %02d, Errors = %d,  Bit Error Ratio (BER) = "%(vfat, daq_crc_error_count_diff[vfat]) + "{:.2e}".format(ber) + ", Inefficiency = " + "{:.2e}".format(ineffi) + Colors.ENDC)
+            file_out.write("VFAT#: %02d, Errors = %d,  Bit Error Ratio (BER) = "%(vfat, daq_crc_error_count_diff[vfat]) + "{:.2e}\n".format(ber) + ", Inefficiency = " + "{:.2e}".format(ineffi))
 
             print ("")
             file_out.write("\n")
