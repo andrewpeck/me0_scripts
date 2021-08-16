@@ -12,13 +12,13 @@ def main(system, boss, run_time_min, gain, voltage, ver):
     init_adc()
     print("ADC Readings:")
 
-    if not os.path.exists("rssi_data"):
-        os.makedirs("rssi_data")
+    if not os.path.exists("lpgbt_data/lpgbt_vtrx+_rssi_data"):
+        os.makedirs("lpgbt_data/lpgbt_vtrx+_rssi_data")
 
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    foldername = "rssi_data/"
+    foldername = "lpgbt_data/lpgbt_vtrx+_rssi_data/"
     filename = foldername + "rssi_data_" + now + ".txt"
 
     print(filename)
@@ -51,7 +51,7 @@ def main(system, boss, run_time_min, gain, voltage, ver):
 
             sleep(1)
 
-    figure_name = foldername + now + "_plot.pdf"
+    figure_name = foldername + "rssi_data_" + now + "_plot.pdf"
     fig.savefig(figure_name, bbox_inches="tight")
 
     powerdown_adc()

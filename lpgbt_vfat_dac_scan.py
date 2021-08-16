@@ -61,7 +61,7 @@ def parseList(inFile):
         dacList = [line.rstrip("\n") for line in dacList]
     return dacList
 
-def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, step, niter, adc_ref, vref):
+def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, step, niter, adc_ref, vref_list):
     if not os.path.exists("vfat_data/vfat_dac_scan_results"):
         os.makedirs("vfat_data/vfat_dac_scan_results")
     now = str(datetime.datetime.now())[:16]
@@ -69,7 +69,9 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
     now = now.replace(" ", "_")
     foldername = "vfat_data/vfat_dac_scan_results/"
     filename = foldername + "ME0_OH%d_vfat_dac_scan_output_"%(oh_select) + now + ".txt"
-    file_out = open(filename,"w+") # OH number, DAC register name, VFAT number, dac scan point, value
+    file_out = open(filename,"w+") # OH number, DAC register name, VFAT number, dac scan point, value, error
+    file_out.write("OH;DAC_reg;vfat;DAC_point;value;error\n")
+    file_out.close()
     print ("LPGBT VFAT DAC Scan for VFATs:")
     print (vfat_list)
     print ("")
@@ -120,7 +122,7 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
         adc1_cached_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC1_CACHED" % (oh_select, vfat))
         adc1_update_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC1_UPDATE" % (oh_select, vfat))
 
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%d.CFG_VREF_ADC" % (oh_select, vfat)) , vref)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%d.CFG_VREF_ADC" % (oh_select, vfat)) , vref_list[vfat])
 
         dac_scan_results[vfat] = {}
         for dac in dac_list:
@@ -199,6 +201,12 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
             # Reset DAC Monitor
             write_backend_reg(adc_monitor_select_node[vfat], 0)
 
+            # Writing results in output file
+            file_out = open(filename,"a")
+            for reg in range(lower, upper + 1, step):
+                file_out.write("%d;%s;%d;%d;%d;%i\n"%(oh_select, dac, vfat, reg, dac_scan_results[vfat][dac][reg], dac_scan_error[vfat][dac][reg]))
+            file_out.close()
+
         write_backend_reg(vfat_hyst_en_node[vfat], 1)
 
     for vfat in vfat_list:
@@ -206,14 +214,8 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
         configureVfat(0, vfat, oh_select, 0)
 
     print ("")
-    # Writing results in output file
-    for dac in dac_list:
-        for vfat in vfat_list:
-            for reg in range(lower, upper + 1, step):
-                file_out.write("%d;%s;%d;%d;%d;%i\n"%(oh_select, dac, vfat, reg, dac_scan_results[vfat][dac][reg], dac_scan_error[vfat][dac][reg]))
-
     print ("DAC Scan completed\n")
-    file_out.close()
+
 if __name__ == "__main__":
 
     # Parsing arguments
@@ -230,7 +232,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for DAC scan (default=1)")
     parser.add_argument("-n", "--niter", action="store", dest="niter", default="100", help="niter = Number of times to read ADC for averaging (default=100)")
     parser.add_argument("-f", "--ref", action="store", dest="ref", default = "internal", help="ref = ADC reference: internal or external (default=internal)")
-    parser.add_argument("-vr", "--vref", action="store", dest="vref", default = "3", help="vref = CFG_VREF_ADC (0-3) (default=3)")
+    parser.add_argument("-vr", "--vref", action="store", dest="vref", help="vref = CFG_VREF_ADC (0-3) (default = taken from calib file or 3)")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -319,10 +321,28 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "ADC reference can only be internal or external" + Colors.ENDC)
         sys.exit()
 
-    vref = int(args.vref)
-    if vref>3:
-        print (Colors.YELLOW + "Allowed VREF: 0-3" + Colors.ENDC)
-        sys.exit()
+    vref_list = {}
+    if args.vref is not None:
+        vref = int(args.vref)
+        if vref>3:
+            print (Colors.YELLOW + "Allowed VREF: 0-3" + Colors.ENDC)
+            sys.exit()
+        for vfat in vfat_list:
+            vref_list[vfat] = vref
+    else:
+        calib_path = "vfat_data/vfat_calib_data/"+oh+"_vfat_calib_info_vref.txt"
+        vref_calib = {}
+        if os.path.isfile(calib_path):
+            calib_file = open(calib_path)
+            for line in calib_file.readlines():
+                vfat = int(line.split(";")[0])
+                vref_calib[vfat] = int(line.split(";")[2])
+            calib_file.close()
+        for vfat in vfat_list:
+            if vfat in vref_calib:
+                vref_list[vfat] = vref_calib[vfat]
+            else:
+                vref_list[vfat] = 3
 
     # Parsing Registers XML File
     print("Parsing xml file...")
@@ -335,7 +355,7 @@ if __name__ == "__main__":
     
     # Running Phase Scan
     try:
-        lpgbt_vfat_dac_scan(args.system, int(args.ohid), vfat_list, dac_list, lower, upper, step, int(args.niter), args.ref, vref)
+        lpgbt_vfat_dac_scan(args.system, int(args.ohid), vfat_list, dac_list, lower, upper, step, int(args.niter), args.ref, vref_list)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

@@ -142,12 +142,12 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap):
         print ("")
         # End of VFAT loop
 
-    if not os.path.isdir("sbit_mapping_results"):
-        os.mkdir("sbit_mapping_results")
+    if not os.path.isdir("vfat_data/vfat_sbit_mapping_results"):
+        os.mkdir("vfat_data/vfat_sbit_mapping_results")
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    filename = "sbit_mapping_results/sbit_mapping_results_"+now+".py"
+    filename = "vfat_data/vfat_sbit_mapping_results/ME0_OH%d_vfat_sbit_mapping_results_"%oh_select+now+".py"
     with open(filename, "w") as file:
         file.write(json.dumps(s_bit_channel_mapping))
 

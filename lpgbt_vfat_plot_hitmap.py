@@ -17,8 +17,16 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Only hit or noise options allowed for type" + Colors.ENDC)
         sys.exit()
 
-    plot_filename_prefix = args.filename.split(".txt")[0]
+    directoryName        = args.filename.split(".txt")[0]
+    plot_filename_prefix = (directoryName.split("/"))[2]
+    oh = plot_filename_prefix.split("_vfat")[0]
     file = open(args.filename)
+
+    try:
+        os.makedirs(directoryName) # create directory for scurve analysis results
+    except FileExistsError: # skip if directory already exists
+        pass
+        
     hitmap_result = {}
     for line in file.readlines():
         if "vfat" in line:
@@ -50,7 +58,7 @@ if __name__ == "__main__":
             frac.append(hitmap_result[vfat][channel])
         ax.plot(channel_plot, frac, "o", label="VFAT %d"%vfat)
         leg = ax.legend(loc="center right", ncol=2)
-    plt.savefig(plot_filename_prefix+"_map.pdf")
+        plt.savefig((directoryName+"/hitmap_"+oh+"_VFAT%02d.pdf")%vfat)
 
 
 

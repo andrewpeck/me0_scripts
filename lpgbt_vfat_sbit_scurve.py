@@ -286,16 +286,19 @@ if __name__ == "__main__":
 
     s_bit_channel_mapping = {}
     print ("")
-    if not os.path.isdir("sbit_mapping_results"):
+    if not os.path.isdir("vfat_data/vfat_sbit_mapping_results"):
         print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
         sys.exit()
-    list_of_files = glob.glob("sbit_mapping_results/*.py")
-    if len(list_of_files)>1:
+    list_of_files = glob.glob("vfat_data/vfat_sbit_mapping_results/*.py")
+    if len(list_of_files)==0:
+        print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
+        sys.exit()
+    elif len(list_of_files)>1:
         print ("Mutliple S-bit mapping results found, using latest file")
     latest_file = max(list_of_files, key=os.path.getctime)
-    print ("Using S-bit mapping file: %s\n"%(latest_file.split("sbit_mapping_results/")[1]))
+    print ("Using S-bit mapping file: %s\n"%(latest_file.split("vfat_data/vfat_sbit_mapping_results/")[1]))
     with open(latest_file) as input_file:
-        s_bit_channel_mapping = json.load(input_file)
+        s_bit_channel_mapping = json.load(input_file)   
 
     # Parsing Registers XML File
     print("Parsing xml file...")

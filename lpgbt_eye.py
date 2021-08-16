@@ -104,9 +104,9 @@ def main(system, cap, r0, r1, r2, r3, count, boss):
     print ("\nEnd Loops \n")
 
     print ("Counter value max=%d" % cntvalmax)
-    if not os.path.isdir("eye_scan_results"):
-        os.mkdir("eye_scan_results")
-    f = open ("eye_scan_results/eye_data.txt", "w+")
+    if not os.path.isdir("lpgbt_data/lpgbt_eye_scan_results"):
+        os.mkdir("lpgbt_data/lpgbt_eye_scan_results")
+    f = open ("lpgbt_data/lpgbt_eye_scan_results/eye_data.txt", "w+")
     f.write ("eye_data=[\n")
     for y  in range (ymin,ymax):
         f.write ("    [")

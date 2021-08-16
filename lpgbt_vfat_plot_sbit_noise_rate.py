@@ -13,8 +13,16 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="Noise rate result filename")
     args = parser.parse_args()
 
-    plot_filename_prefix = args.filename.split(".txt")[0]
+    directoryName        = args.filename.split(".txt")[0]
+    plot_filename_prefix = (directoryName.split("/"))[2]
+    oh = plot_filename_prefix.split("_vfat")[0]
     file = open(args.filename)
+
+    try:
+        os.makedirs(directoryName) # create directory for scurve analysis results
+    except FileExistsError: # skip if directory already exists
+        pass
+        
     noise_result = {}
     time = 0
     for line in file.readlines():
@@ -56,7 +64,7 @@ if __name__ == "__main__":
         ax.plot(threshold, noise_rate, "o")
         #leg = ax.legend(loc="center right", ncol=2)
         plt.title("VFAT# %02d"%vfat)
-        plt.savefig((plot_filename_prefix+"_VFAT%02d.pdf")%vfat)
+        plt.savefig((directoryName+"/sbit_noise_rate_"+oh+"_VFAT%02d.pdf")%vfat)
 
 
 

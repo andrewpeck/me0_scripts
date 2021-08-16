@@ -36,12 +36,12 @@ def main(system, count, eq_attn, eq_cap, eq_res3, eq_res2, eq_res1, eq_res0, bos
     eq_res1_node = getNode("LPGBT.RWF.EQUALIZER.EQRES1")
     eq_res0_node = getNode("LPGBT.RWF.EQUALIZER.EQRES0")
 
-    if os.path.isdir("eye_scan_results"):
-        files = glob.glob("eye_scan_results/eye_data_eqa*.py", recursive=True)
+    if os.path.isdir("lpgbt_data/lpgbt_eye_scan_results"):
+        files = glob.glob("lpgbt_data/lpgbt_eye_scan_results/eye_data_eqa*.py", recursive=True)
         for f in files:
             os.remove(f)
     else:
-        os.mkdir("eye_scan_results")
+        os.mkdir("lpgbt_data/lpgbt_eye_scan_results")
 
     print ("\n")
     # Start Loop Over Equalizer Settings
@@ -118,7 +118,7 @@ def main(system, count, eq_attn, eq_cap, eq_res3, eq_res2, eq_res1, eq_res0, bos
                             sys.stdout.write("\n")
 
                             print ("Counter value max=%d \n" % cntvalmax)
-                            f = open("eye_scan_results/eye_data_eqa_"+eq_attn_setting+"_eqc_"+eq_cap_setting+"_eqr3_"+eq_res3_setting+"_eqr2_"+eq_res2_setting+"_eqr1_"+eq_res1_setting+"_eqr0_"+eq_res0_setting+".txt", "w+")
+                            f = open("lpgbt_data/lpgbt_eye_scan_results/eye_data_eqa_"+eq_attn_setting+"_eqc_"+eq_cap_setting+"_eqr3_"+eq_res3_setting+"_eqr2_"+eq_res2_setting+"_eqr1_"+eq_res1_setting+"_eqr0_"+eq_res0_setting+".txt", "w+")
                             f.write("eye_data=[\n")
                             for y  in range (ymin,ymax):
                                 f.write("    [")

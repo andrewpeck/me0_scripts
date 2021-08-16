@@ -12,8 +12,16 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="Cross talk result filename")
     args = parser.parse_args()
 
-    plot_filename_prefix = args.filename.split(".txt")[0]
+    directoryName        = args.filename.split(".txt")[0]
+    plot_filename_prefix = (directoryName.split("/"))[2]
+    oh = plot_filename_prefix.split("_vfat")[0]
     file = open(args.filename)
+
+    try:
+        os.makedirs(directoryName) # create directory for scurve analysis results
+    except FileExistsError: # skip if directory already exists
+        pass
+        
     hitmap_result = {}
     for line in file.readlines():
         if "vfat" in line:
@@ -50,7 +58,7 @@ if __name__ == "__main__":
         plot = axs.imshow(plot_data, cmap="jet")
         fig.colorbar(plot, ax=axs)
         plt.title("VFAT# %02d"%vfat)
-        plt.savefig((plot_filename_prefix+"_VFAT%02d.pdf")%vfat)
+        plt.savefig((directoryName+"/crosstalk_"+oh+"_VFAT%02d.pdf")%vfat)
 
 
 

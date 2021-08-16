@@ -8,13 +8,13 @@ from lpgbt_vfat_config import configureVfat, enableVfatchannel
 
 
 def lpgbt_vfat_crosstalk(system, oh_select, vfat_list, set_cal_mode, cal_dac, nl1a, l1a_bxgap):
-    if not os.path.exists("daq_crosstalk_results"):
-        os.makedirs("daq_crosstalk_results")
+    if not os.path.exists("vfat_data/vfat_daq_crosstalk_results"):
+        os.makedirs("vfat_data/vfat_daq_crosstalk_results")
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    foldername = "daq_crosstalk_results/"
-    filename = foldername + "vfat_crosstalk_caldac%d_"%cal_dac + now + ".txt"
+    foldername = "vfat_data/vfat_daq_crosstalk_results/"
+    filename = foldername + "ME0_OH%d_vfat_crosstalk_caldac%d_"%(oh_select,cal_dac) + now + ".txt"
     file_out = open(filename,"w+")
     file_out.write("vfat    channel_inj    channel_read    fired    events\n")
 

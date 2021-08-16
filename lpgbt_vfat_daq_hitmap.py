@@ -8,17 +8,17 @@ from lpgbt_vfat_config import configureVfat, enableVfatchannel
 
 
 def lpgbt_vfat_hitmap(system, oh_select, vfat_list, noise, low_thresh, set_cal_mode, cal_dac, nl1a, l1a_bxgap):
-    if not os.path.exists("daq_hitmap_results"):
-        os.makedirs("daq_hitmap_results")
+    if not os.path.exists("vfat_data/vfat_daq_hitmap_results"):
+        os.makedirs("vfat_data/vfat_daq_hitmap_results")
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    foldername = "daq_hitmap_results/"
+    foldername = "vfat_data/vfat_daq_hitmap_results/"
     filename = ""
     if not noise:
-        filename = foldername + "vfat_hitmap_caldac%d_"%cal_dac + now + ".txt"
+        filename = foldername + "ME0_OH%d_vfat_hitmap_caldac%d_"%(oh_select,cal_dac) + now + ".txt"
     else:
-        filename = foldername + "vfat_noisemap_" + now + ".txt"
+        filename = foldername + "ME0_OH%d_vfat_noisemap_"%oh_select + now + ".txt"
     file_out = open(filename,"w+")
     file_out.write("vfat    channel    fired    events\n")
 

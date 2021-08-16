@@ -201,9 +201,9 @@ def main(system, boss):
     
     # Writing lpGBT configuration to text file
     if boss:
-        lpgbt_write_config_file("status_boss.txt")
+        lpgbt_write_config_file("lpgbt_data/status_boss.txt")
     else:
-        lpgbt_write_config_file("status_sub.txt")
+        lpgbt_write_config_file("lpgbt_data/status_sub.txt")
 
 
 def init_adc():

@@ -134,8 +134,6 @@ Use -h option for any script to check usage
 
 ```lpgbt_asense_monitor.py```: monitor asense on ME0 GEB
 
-```lpgbt_bias_rssi_scan.py```: scan VTRX+ bias current vs RSSI
-
 ```lpgbt_config.py```: configure or unconfigure lpGBT
 
 ```lpgbt_efuse.py```: fuse registers on lpGBT

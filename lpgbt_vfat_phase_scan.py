@@ -4,8 +4,8 @@ import sys
 import argparse
 from lpgbt_vfat_config import configureVfat, enableVfatchannel
 
-config_boss_filename = "config_boss.txt"
-config_sub_filename = "config_sub.txt"
+config_boss_filename = "lpgbt_data/config_boss.txt"
+config_sub_filename = "lpgbt_data/config_sub.txt"
 config_boss = {}
 config_sub = {}
 

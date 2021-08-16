@@ -9,7 +9,12 @@ from lpgbt_vfat_config import configureVfat, enableVfatchannel
 
 
 def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list, parallel, set_cal_mode, cal_dac, nl1a, runtime, l1a_bxgap):
-    file_out = open("vfat_sbit_test_outtput.txt", "w")
+    if not os.path.exists("vfat_data/vfat_sbit_test_results"):
+        os.makedirs("vfat_data/vfat_sbit_test_results")
+    now = str(datetime.datetime.now())[:16]
+    now = now.replace(":", "_")
+    now = now.replace(" ", "_")
+    file_out = open("vfat_data/vfat_sbit_test_results/ME0_OH%d_vfat_sbit_test_output_"%oh_select + now + ".txt", "w")
     print ("LPGBT VFAT S-Bit Test\n")
     file_out.write("LPGBT VFAT S-Bit Test\n\n")
 
@@ -358,15 +363,19 @@ if __name__ == "__main__":
     s_bit_channel_mapping = {}
 
     if args.sbits is None:
+        s_bit_channel_mapping = {}
         print ("")
-        if not os.path.isdir("sbit_mapping_results"):
+        if not os.path.isdir("vfat_data/vfat_sbit_mapping_results"):
             print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
             sys.exit()
-        list_of_files = glob.glob("sbit_mapping_results/*.py")
-        if len(list_of_files)>1:
+        list_of_files = glob.glob("vfat_data/vfat_sbit_mapping_results/*.py")
+        if len(list_of_files)==0:
+            print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
+            sys.exit()
+        elif len(list_of_files)>1:
             print ("Mutliple S-bit mapping results found, using latest file")
         latest_file = max(list_of_files, key=os.path.getctime)
-        print ("Using S-bit mapping file: %s\n"%(latest_file.split("sbit_mapping_results/")[1]))
+        print ("Using S-bit mapping file: %s\n"%(latest_file.split("vfat_data/vfat_sbit_mapping_results/")[1]))
         with open(latest_file) as input_file:
             s_bit_channel_mapping = json.load(input_file)
 

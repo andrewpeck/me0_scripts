@@ -12,13 +12,13 @@ def main(system, boss, gbt, run_time_min, gain):
     init_adc()
     print("ADC Readings:")
 
-    if not os.path.exists("asense_data"):
-        os.makedirs("asense_data")
+    if not os.path.exists("lpgbt_data/lpgbt_asense_data"):
+        os.makedirs("lpgbt_data/lpgbt_asense_data")
 
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    foldername = "asense_data/"
+    foldername = "lpgbt_data/lpgbt_asense_data/"
     filename = foldername + "asense_data_" + now + ".txt"
 
     print(filename)

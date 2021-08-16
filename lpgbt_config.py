@@ -91,9 +91,9 @@ def main(system, boss, input_config_file, reset_before_config, minimal, readback
     # Writing lpGBT configuration to text file
     if not readback:
         if boss:
-            lpgbt_write_config_file("config_boss.txt")
+            lpgbt_write_config_file("lpgbt_data/config_boss.txt")
         else:
-            lpgbt_write_config_file("config_sub.txt")
+            lpgbt_write_config_file("lpgbt_data/config_sub.txt")
 
 def configLPGBT(readback):
     print ("Configuring Clock Generator, Line Drivers, Power Good for CERN configuration...")

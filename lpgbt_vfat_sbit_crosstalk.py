@@ -10,26 +10,29 @@ from lpgbt_vfat_config import configureVfat, enableVfatchannel
 
 s_bit_channel_mapping = {}
 print ("")
-if not os.path.isdir("sbit_mapping_results"):
+if not os.path.isdir("vfat_data/vfat_sbit_mapping_results"):
     print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
     sys.exit()
-list_of_files = glob.glob("sbit_mapping_results/*.py")
-if len(list_of_files)>1:
+list_of_files = glob.glob("vfat_data/vfat_sbit_mapping_results/*.py")
+if len(list_of_files)==0:
+    print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
+    sys.exit()
+elif len(list_of_files)>1:
     print ("Mutliple S-bit mapping results found, using latest file")
 latest_file = max(list_of_files, key=os.path.getctime)
-print ("Using S-bit mapping file: %s\n"%(latest_file.split("sbit_mapping_results/")[1]))
+print ("Using S-bit mapping file: %s\n"%(latest_file.split("vfat_data/vfat_sbit_mapping_results/")[1]))
 with open(latest_file) as input_file:
     s_bit_channel_mapping = json.load(input_file)
 
 
 def lpgbt_vfat_sbit(system, oh_select, vfat_list, set_cal_mode, cal_dac, nl1a, l1a_bxgap):
-    if not os.path.exists("sbit_crosstalk_results"):
-        os.makedirs("sbit_crosstalk_results")
+    if not os.path.exists("vfat_data/vfat_sbit_crosstalk_results"):
+        os.makedirs("vfat_data/vfat_sbit_crosstalk_results")
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    foldername = "sbit_crosstalk_results/"
-    filename = foldername + "vfat_sbit_crosstalk_" + now + ".txt"
+    foldername = "vfat_data/vfat_sbit_crosstalk_results/"
+    filename = foldername + "ME0_OH%d_vfat_sbit_crosstalk_"%oh_select + now + ".txt"
     file_out = open(filename,"w+")
     file_out.write("vfat    channel_inj    channel_read    fired    events\n")
 

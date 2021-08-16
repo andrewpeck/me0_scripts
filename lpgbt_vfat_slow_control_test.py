@@ -6,7 +6,12 @@ import random
 
         
 def lpgbt_vfat_bert(system, oh_select, vfat_list, reg_list, niter, runtime, verbose):
-    file_out = open("vfat_slow_control_test_output.txt", "w")
+    if not os.path.exists("vfat_data/vfat_slow_control_test_results"):
+        os.makedirs("vfat_data/vfat_slow_control_test_results")
+    now = str(datetime.datetime.now())[:16]
+    now = now.replace(":", "_")
+    now = now.replace(" ", "_")
+    file_out = open("vfat_data/vfat_slow_control_test_results/ME0_OH%d_vfat_slow_control_test_output_"%oh_select + now + ".txt", "w")
     if niter!=0:
         print ("LPGBT VFAT Bit Error Ratio Test with %d transactions\n" % (niter))
         file_out.write("LPGBT VFAT Bit Error Ratio Test with %d transactions\n\n" % (niter))

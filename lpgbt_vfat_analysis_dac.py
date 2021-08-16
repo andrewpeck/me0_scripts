@@ -58,7 +58,7 @@ nominalDacScalingFactors = {
 
 def main(inFile, calFile, directoryName, oh):
 	# read in DAC and cal data to dataframe
-	dacData = pd.read_csv(inFile, names=["OH", "DAC_reg", "vfat", "DAC_point","value"], sep=";", skiprows=[0])
+	dacData = pd.read_csv(inFile, names=["OH", "DAC_reg", "vfat", "DAC_point","value","error"], sep=";", skiprows=[0])
 	calData = pd.read_csv(calFile ,names=["vfat", "vfat_serial_num", "slope", "intercept"], sep=";", skiprows=[0])
 
 	numDacs  = dacData["DAC_reg"].nunique() # get number of dacs scanned

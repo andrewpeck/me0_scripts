@@ -9,13 +9,13 @@ from lpgbt_vfat_config import configureVfat, enableVfatchannel
 
 def lpgbt_vfat_reg_scan(system, dac, oh_select, vfat_list, channel_list, lower, upper, step, set_cal_mode, cal_dac, nl1a, l1a_bxgap):
     print ("Performing Register Scan for: %s\n"%dac)
-    if not os.path.exists("daq_reg_scan_results"):
-        os.makedirs("daq_reg_scan_results")
+    if not os.path.exists("vfat_data/vfat_daq_reg_scan_results"):
+        os.makedirs("vfat_data/vfat_daq_reg_scan_results")
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    foldername = "daq_reg_scan_results/"
-    filename = foldername + "vfat_reg_scan_" + dac + "_" + now + ".txt"
+    foldername = "vfat_data/vfat_daq_reg_scan_results/"
+    filename = foldername + "ME0_OH%d_vfat_reg_scan_"%oh_select + dac + "_" + now + ".txt"
     file_out = open(filename,"w+")
     file_out.write("vfat    channel    register    fired    events\n")
 

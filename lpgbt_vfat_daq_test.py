@@ -7,7 +7,12 @@ from lpgbt_vfat_config import configureVfat, enableVfatchannel
 
 
 def lpgbt_vfat_bert(system, oh_select, vfat_list, set_cal_mode, cal_dac, nl1a, runtime, l1a_bxgap, calpulse):
-    file_out = open("vfat_daq_test_output.txt", "w+")
+    if not os.path.exists("vfat_data/vfat_daq_test_results"):
+        os.makedirs("vfat_data/vfat_daq_test_results")
+    now = str(datetime.datetime.now())[:16]
+    now = now.replace(":", "_")
+    now = now.replace(" ", "_")
+    file_out = open("vfat_data/vfat_daq_test_results/ME0_OH%d_vfat_daq_test_output_"%oh_select + now + ".txt", "w+")
 
     if nl1a!=0:
         print ("LPGBT VFAT Bit Error Ratio Test with %.2e L1As\n" % (nl1a))

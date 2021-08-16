@@ -6,7 +6,12 @@ import random
 
 
 def check_fec_errors(system, boss, path, opr, ohid, gbtid, runtime, vfat_list, verbose):
-    file_out = open("optical_link_bert_fec_test_output.txt", "w")
+    if not os.path.exists("lpgbt_data/lpgbt_optical_link_bert_fec_results"):
+        os.makedirs("lpgbt_data/lpgbt_optical_link_bert_fec_results")
+    now = str(datetime.datetime.now())[:16]
+    now = now.replace(":", "_")
+    now = now.replace(" ", "_")
+    file_out = open("lpgbt_data/lpgbt_optical_link_bert_fec_results/ME0_OH%d_GBT%d_optical_link_bert_fec_test_output_"%(ohid,gbtid)+now+".txt", "w")
     print ("Checking FEC Errors for: " + path)
     file_out.write("Checking FEC Errors for: \n" + path)
     fec_errors = 0
