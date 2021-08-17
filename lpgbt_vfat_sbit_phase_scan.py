@@ -382,7 +382,7 @@ if __name__ == "__main__":
                 bestphase_list[vfat][elink] = int(args.bestphase,16)
     if args.bestphase_file is not None:
         file_in = open(args.bestphase_file)
-        for line in file.readlines():
+        for line in file_in.readlines():
             if "vfat" in line:
                 continue
             vfat = int(line.split()[0])
