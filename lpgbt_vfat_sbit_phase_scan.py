@@ -41,7 +41,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, bestphase_lis
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    filename = "vfat_data/vfat_sbit_phase_scan_results/ME0_OH%d_vfat_sbit_phase_scan_results_"%oh_select+now+".py"
+    filename = "vfat_data/vfat_sbit_phase_scan_results/ME0_OH%d_vfat_sbit_phase_scan_results_"%oh_select+now+".txt"
     file_out = open(filename, "w")
     file.write("vfat  elink  phase\n")
 

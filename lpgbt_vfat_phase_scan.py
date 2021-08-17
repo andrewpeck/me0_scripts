@@ -36,7 +36,7 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_lis
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    filename = "vfat_data/vfat_phase_scan_results/ME0_OH%d_vfat_phase_scan_results_"%oh_select+now+".py"
+    filename = "vfat_data/vfat_phase_scan_results/ME0_OH%d_vfat_phase_scan_results_"%oh_select+now+".txt"
     file_out = open(filename, "w")
     file_out.write("vfat  phase\n")
 
