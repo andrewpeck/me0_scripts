@@ -23,8 +23,27 @@ def getConfig (filename):
     return reg_map
 
 
-def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, best_phase):
+def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, bestphase_list):
     print ("LPGBT VFAT S-Bit Phase Scan\n")
+
+    if bestphase_list!={}:
+        print ("Setting phases for VFATs only, not scanning")
+        for vfat in vfat_list:
+            sbit_elinks = vfat_to_sbit_elink(vfat)
+            for elink in range(0,8):
+                set_bestphase = bestphase_vfat_elink[vfat][elink]
+                setVfatSbitPhase(system, oh_select, vfat, sbit_elinks[elink], set_bestphase)
+                print ("VFAT %02d: Phase set for ELINK %02d to: %s" % (vfat, elink, hex(set_bestphase)))
+        return
+
+    if not os.path.isdir("vfat_data/vfat_sbit_phase_scan_results"):
+        os.mkdir("vfat_data/vfat_sbit_phase_scan_results")
+    now = str(datetime.datetime.now())[:16]
+    now = now.replace(":", "_")
+    now = now.replace(" ", "_")
+    filename = "vfat_data/vfat_sbit_phase_scan_results/ME0_OH%d_vfat_sbit_phase_scan_results_"%oh_select+now+".py"
+    file_out = open(filename, "w")
+    file.write("vfat  elink  phase\n")
 
     errs = [[[0 for phase in range(16)] for elink in range(0,8)] for vfat in range(24)]
 
@@ -179,6 +198,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, best_phase):
         configureVfat(0, vfat, oh_select, 0)
         print ("")
 
+    bestphase_vfat_elink = [[0 for elink in range(8)] for vfat in range(24)]
     for vfat in vfat_list:
         centers = 8*[0]
         widths  = 8*[0]
@@ -186,13 +206,12 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, best_phase):
             centers[elink], widths[elink] = find_phase_center(errs[vfat][elink])
 
         print ("\nVFAT %02d :" %(vfat))
-        bestphase_elink = 8*[0]
         for elink in range(0,8):
             sys.stdout.write("  ELINK %02d: " % (elink))
             for phase in range(0, 16):
                 if (widths[elink]>0 and phase==centers[elink]):
                     char=Colors.GREEN + "+" + Colors.ENDC
-                    bestphase_elink[elink] = phase
+                    bestphase_vfat_elink[vfat][elink] = phase
                 elif (errs[vfat][elink][phase]):
                     char=Colors.RED + "-" + Colors.ENDC
                 else:
@@ -212,17 +231,17 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, best_phase):
         print ("\nVFAT %02d: Setting all ELINK phases to best phases: "%(vfat))
         sbit_elinks = vfat_to_sbit_elink(vfat)
         for elink in range(0,8):
-            set_bestphase = 0
-            if best_phase is None:
-                set_bestphase = bestphase_elink[elink]
-            else:
-                set_bestphase = int(best_phase,16)
+            set_bestphase = bestphase_vfat_elink[vfat][elink]
             setVfatSbitPhase(system, oh_select, vfat, sbit_elinks[elink], set_bestphase)
             print ("VFAT %02d: Phase set for ELINK %02d to: %s" % (vfat, elink, hex(set_bestphase)))
+    for vfat in range(0,24):
+        for elink in range(0,8):
+            file_out.write("%d  %d  0x%x\n"%(vfat,elink,bestphase_vfat_elink[vfat][elink]))
 
     sleep(0.1)
     vfat_oh_link_reset()
     print ("")
+    file_out.close()
 
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 0)
     print ("\nS-bit phase scan done\n")
@@ -304,6 +323,7 @@ if __name__ == "__main__":
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
     parser.add_argument("-b", "--bestphase", action="store", dest="bestphase", help="bestphase = Best value of the elinkRX phase (in hex), calculated from phase scan by default")
+    parser.add_argument("-f", "--bestphase_file", action="store", dest="bestphase_file", help="bestphase_file = Text file with best value of the elinkRX phase for each VFAT and ELINK (in hex), calculated from phase scan by default")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -345,6 +365,10 @@ if __name__ == "__main__":
     nl1a = 100 # Nr. of L1As
     l1a_bxgap = 500 # Gap between 2 L1As in nr. of BXs
 
+    if args.bestphase is not None and args.bestphase_file is not None:
+        print (Colors.YELLOW + "Provide either best phase (same for all VFATs) or text file of best phases for each VFAT" + Colors.ENDC)
+        sys.exit()
+    bestphase_list = {}
     if args.bestphase is not None:
         if "0x" not in args.bestphase:
             print (Colors.YELLOW + "Enter best phase in hex format" + Colors.ENDC)
@@ -352,6 +376,21 @@ if __name__ == "__main__":
         if int(args.bestphase, 16)>16:
             print (Colors.YELLOW + "Phase can only be 4 bits" + Colors.ENDC)
             sys.exit()
+        for vfat in range(0,24):
+            for elink in range(0,8):
+                bestphase_list[vfat][elink] = int(args.bestphase,16)
+    if args.bestphase_file is not None:
+        file_in = open(args.bestphase_file)
+        for line in file.readlines():
+            if "vfat" in line:
+                continue
+            vfat = int(line.split()[0])
+            elink = int(line.split()[1])
+            phase = int(line.split()[2],16)
+            if vfat not in bestphase_list:
+                bestphase_list[vfat] = {}
+            bestphase_list[vfat][elink] = phase
+        file_in.close()
         
     # Parsing Registers XML File
     print("Parsing xml file...")
@@ -375,7 +414,7 @@ if __name__ == "__main__":
 
     # Running Phase Scan
     try:
-        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, nl1a, l1a_bxgap, args.bestphase)
+        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, nl1a, l1a_bxgap, bestphase_list)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

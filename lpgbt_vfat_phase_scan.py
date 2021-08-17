@@ -18,25 +18,26 @@ def getConfig (filename):
         reg_map[reg] = data
     f.close()
     return reg_map
-        
-def lpgbt_communication_test(system, oh_select, vfat_list, depth):
-    print ("LPGBT VFAT Communication Check depth=%s transactions" % (str(depth)))
-    
-    vfat_oh_link_reset()
-    cfg_run = 24*[0]
-    for vfat in vfat_list:
-        lpgbt, gbt_select, elink, gpio = vfat_to_gbt_elink_gpio(vfat)
-           
-        check_lpgbt_link_ready(oh_select, gbt_select)
-        cfg_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN" % (oh_select, vfat))
-        for iread in range(depth):
-            vfat_cfg_run = read_backend_reg(cfg_node)
-            cfg_run[vfat] += (vfat_cfg_run != 0 and vfat_cfg_run != 1)
-        print ("\nVFAT#%02d: reads=%d, errs=%d" % (vfat, depth, cfg_run[vfat]))
-    print ("")
 
-def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, best_phase):
+def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_list):
     print ("LPGBT Phase Scan depth=%s transactions" % (str(depth)))
+
+    if bestphase_list!={}:
+        print ("Setting phases for VFATs only, not scanning")
+        for vfat in vfat_list:
+            set_bestphase = bestphase_list[vfat]
+            setVfatRxPhase(system, oh_select, vfat, set_bestphase)
+            print ("Phase set for VFAT#%02d to: %s" % (vfat, hex(set_bestphase)))
+        return
+
+    if not os.path.isdir("vfat_data/vfat_phase_scan_results"):
+        os.mkdir("vfat_data/vfat_phase_scan_results")
+    now = str(datetime.datetime.now())[:16]
+    now = now.replace(":", "_")
+    now = now.replace(" ", "_")
+    filename = "vfat_data/vfat_phase_scan_results/ME0_OH%d_vfat_phase_scan_results_"%oh_select+now+".py"
+    file_out = open(filename, "w")
+    file.write("vfat  phase\n")
 
     link_good    = [[0 for phase in range(16)] for vfat in range(24)]
     sync_err_cnt = [[0 for phase in range(16)] for vfat in range(24)]
@@ -184,16 +185,16 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, best_phase):
     # set phases for all vfats under test
     print ("\nSetting all VFAT phases to best phases: ")
     for vfat in vfat_list:
-        set_bestphase = 0
-        if best_phase is None:
-            set_bestphase = bestphase_vfat[vfat]
-        else:
-            set_bestphase = int(best_phase,16)
+        set_bestphase = bestphase_vfat[vfat]
         setVfatRxPhase(system, oh_select, vfat, set_bestphase)
         print ("Phase set for VFAT#%02d to: %s" % (vfat, hex(set_bestphase)))
+    for vfat in range(0,24):
+        file.write("%d  0x%x\n"%(vfat,bestphase_vfat[vfat]))
+
     sleep(0.1)
     vfat_oh_link_reset()
     print ("")
+    file_out.close()
 
     # Unconfigure VFATs
     #for vfat in vfat_list:
@@ -293,7 +294,7 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--daq_err", action="store_true", dest="daq_err", help="if you want to check for DAQ CRC errors")
     parser.add_argument("-d", "--depth", action="store", dest="depth", default="10000", help="depth = number of times to check for cfg_run error")
     parser.add_argument("-b", "--bestphase", action="store", dest="bestphase", help="bestphase = Best value of the elinkRX phase (in hex), calculated from phase scan by default")
-    parser.add_argument("-t", "--test", action="store", dest="test", default="0", help="test = enter 1 for only testing vfat communication, default is 0")
+    parser.add_argument("-f", "--bestphase_file", action="store", dest="bestphase_file", help="bestphase_file = Text file with best value of the elinkRX phase for each VFAT (in hex), calculated from phase scan by default")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -331,11 +332,11 @@ if __name__ == "__main__":
             print (Colors.YELLOW + "Invalid VFAT number, only allowed 0-23" + Colors.ENDC)
             sys.exit()
         vfat_list.append(v_int)
-    
-    if args.test not in ["0", "1"]:
-        print (Colors.YELLOW + "Test option can only be 0 or 1" + Colors.ENDC)
-        sys.exit()
 
+    if args.bestphase is not None and args.bestphase_file is not None:
+        print (Colors.YELLOW + "Provide either best phase (same for all VFATs) or text file of best phases for each VFAT" + Colors.ENDC)
+        sys.exit()
+    bestphase_list = {}
     if args.bestphase is not None:
         if "0x" not in args.bestphase:
             print (Colors.YELLOW + "Enter best phase in hex format" + Colors.ENDC)
@@ -343,6 +344,17 @@ if __name__ == "__main__":
         if int(args.bestphase, 16)>16:
             print (Colors.YELLOW + "Phase can only be 4 bits" + Colors.ENDC)
             sys.exit()
+        for vfat in range(0,24):
+            bestphase_list[vfat] = int(args.bestphase,16)
+    if args.bestphase_file is not None:
+        file_in = open(args.bestphase_file)
+        for line in file.readlines():
+            if "vfat" in line:
+                continue
+            vfat = int(line.split()[0])
+            phase = int(line.split()[1],16)
+            bestphase_list[vfat] = phase
+        file_in.close()
 
     # Parsing Registers XML File
     print("Parsing xml file...")
@@ -366,10 +378,7 @@ if __name__ == "__main__":
     
     # Running Phase Scan
     try:
-        if args.test == "1":
-            lpgbt_communication_test(args.system, int(args.ohid), vfat_list, int(args.depth))
-        else:
-            lpgbt_phase_scan(args.system, int(args.ohid), args.daq_err, vfat_list, int(args.depth), args.bestphase)
+        lpgbt_phase_scan(args.system, int(args.ohid), args.daq_err, vfat_list, int(args.depth), bestphase_list)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
