@@ -3,10 +3,76 @@ from time import sleep, time
 import sys
 import argparse
 import random
+import glob
 
+vfat_register_config = {}
+vfat_calib_iref = {}
+vfat_calib_vref = {}
+vfat_register_dac_scan = {}
+
+def initialize_vfat_config(oh_select, use_dac_scan_results):
+    global vfat_register_config
+    global vfat_calib_iref
+    global vfat_calib_vref
+    global vfat_register_dac_scan
+
+    # Generic register list
+    vfat_register_config_file_path = "vfat_data/ME0_OH%d_vfatConfig.txt"%oh_select
+    if os.path.isfile(vfat_register_config_file_path):
+        print (Colors.YELLOW + "VFAT config text file not present in vfat_data/" + Colors.ENDC)
+        sys.exit()
+    vfat_register_config_file = open(vfat_register_config_file_path)
+    for line in vfat_register_config_file.readlines():
+        vfat_register_config[line.split()[0]] = int(line.split()[1])
+    vfat_register_config_file.close()
+
+    # IREF from calib
+    vfat_calib_iref_path = "vfat_data/vfat_calib_data/ME0_OH%d_vfat_calib_info_iref.txt"%oh_select
+    vfat_calib_vref_path = "vfat_data/vfat_calib_data/ME0_OH%d_vfat_calib_info_vref.txt"%oh_select
+    if os.path.isfile(vfat_calib_iref_path):
+        print ("IREF calib file for VFATs not present, using default values")
+    else:
+        vfat_calib_iref_file = open(vfat_calib_iref_path)
+        for line in vfat_calib_iref_file.readlines():
+            if "vfat" in line:
+                continue
+            vfat_calib_iref[int(line.split(";")[0])] = int(line.split(";")[2])
+        vfat_calib_iref_file.close()
+
+    # VREF from calib
+    if os.path.isfile(vfat_calib_vref_path):
+        print ("VREF calib file for VFATs not present, using default values")
+    else:
+        vfat_calib_vref_file = open(vfat_calib_vref_path)
+        for line in vfat_calib_vref_file.readlines():
+            if "vfat" in line:
+                continue
+            vfat_calib_vref[int(line.split(";")[0])] = int(line.split(";")[2])
+        vfat_calib_vref_file.close()
+
+    # DAC Scan Results
+    if use_dac_scan_results:
+        dac_scan_results_base_path = "vfat_data/vfat_dac_scan_results"
+        if os.path.isdir(dac_scan_results_base_path):
+            list_of_dirs = []
+            for d in glob.glob(dac_scan_results_base_path+"/*"):
+                if os.path.isdir(d):
+                    list_of_dirs.append(d)
+            if len(list_of_dirs)>0:
+                latest_dir = max(list_of_dirs, key=os.path.getctime)
+                dac_scan_results_path = latest_dir
+                for f in glob.glob("nominalValues_ME0_OH%d_*.txt"%oh_select):
+                    reg = f.split("nominalValues_ME0_OH%d_"%oh_select)[1].split(".txt")[0]
+                    vfat_register_dac_scan[reg] = {}
+                    file_in = open(f)
+                    for line in file_in.readlines():
+                        vfat = int(line.split(";")[1])
+                        dac = int(line.split(";")[2])
+                        vfat_register_dac_scan[reg][vfat] = dac
+                    file_in.close()
 
 def enableVfatchannel(vfatN, ohN, channel, mask, enable_cal):
-    channel_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.VFAT_CHANNELS.CHANNEL%i"%(ohN,vfatN,channel))
+    channel_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.VFAT_CHANNELS.CHANNEL%i"%(ohN, vfatN, channel))
     if mask:
         write_backend_reg(channel_node, 0x4000) # mask and disable calpulsing
     else:
@@ -22,65 +88,34 @@ def configureVfat(configure, vfatN, ohN, low_thresh):
 
     if configure:
         #print ("Configuring VFAT")
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_PULSE_STRETCH"       % (ohN , vfatN)) , 7)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_SYNC_LEVEL_MODE"     % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_SELF_TRIGGER_MODE"   % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_DDR_TRIGGER_MODE"    % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_SPZS_SUMMARY_ONLY"   % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_SPZS_MAX_PARTITIONS" % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_SPZS_ENABLE"     % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_SZP_ENABLE"      % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_SZD_ENABLE"      % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_TIME_TAG"        % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_EC_BYTES"        % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BC_BYTES"        % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_FP_FE"           % (ohN , vfatN)) , 7) # why 7 (100 ns) and not 0 (25 ns)?
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_RES_PRE"         % (ohN , vfatN)) , 1)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAP_PRE"         % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_PT"              % (ohN , vfatN)) , 15) # why 15 (100 ns) and not 1 (25 ns)?
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_EN_HYST"         % (ohN , vfatN)) , 1)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_SEL_POL"         % (ohN , vfatN)) , 1) # why 1 (negative) and not 0 (positive)?
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_FORCE_EN_ZCC"    % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_FORCE_TH"        % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_SEL_COMP_MODE"       % (ohN , vfatN)) , 1) # why 1 (ARM) and not 0 (CFD)?
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_VREF_ADC"        % (ohN , vfatN)) , 3)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_MON_GAIN"        % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_MONITOR_SELECT"      % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_IREF"            % (ohN , vfatN)) , 32) # VFAT3b manual
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_THR_ZCC_DAC"     % (ohN , vfatN)) , 10) # ?? (11 in VFAT3b manual)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_THR_ARM_DAC"     % (ohN , vfatN)) , 100) # ?? (32 in VFAT3b manual)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_HYST"            % (ohN , vfatN)) , 5) # VFAT3b manual
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_LATENCY"         % (ohN , vfatN)) , 45)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_SEL_POL"     % (ohN , vfatN)) , 1) # 1 - negative
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_PHI"         % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_EXT"         % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DAC"         % (ohN , vfatN)) , 100)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"        % (ohN , vfatN)) , 1) # Do we need Current Pulse mode?
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_FS"          % (ohN , vfatN)) , 0) # VFAT3b manual
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"         % (ohN , vfatN)) , 200) # 201 BX
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_CFD_DAC_2"      % (ohN , vfatN)) , 40) # VFAT3b manual
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_CFD_DAC_1"      % (ohN , vfatN)) , 40) # VFAT3b manual
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_PRE_I_BSF"      % (ohN , vfatN)) , 13) # VFAT3b manual
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_PRE_I_BIT"      % (ohN , vfatN)) , 150) # VFAT3b manual
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_PRE_I_BLCC"     % (ohN , vfatN)) , 25) # VFAT3b manual
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_PRE_VREF"       % (ohN , vfatN)) , 86) # VFAT3b manual
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_SH_I_BFCAS"     % (ohN , vfatN)) , 130) # VFAT3b manual (old - 250)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_SH_I_BDIFF"     % (ohN , vfatN)) , 80) # VFAT3b manual (old - 150)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_SH_I_BFAMP"     % (ohN , vfatN)) , 0)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_SD_I_BDIFF"     % (ohN , vfatN)) , 140) # VFAT3b manual (old - 255)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_SD_I_BSF"       % (ohN , vfatN)) , 15) # VFAT3b manual
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_BIAS_SD_I_BFCAS"     % (ohN , vfatN)) , 135) # VFAT3b manual (old - 255)
+        register_written = []
+
+        if vfatN in vfat_calib_iref:
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_IREF"     % (ohN, vfatN)), vfat_calib_iref[vfatN])
+            register_written.push_back("CFG_IREF")
+        if vfatN in vfat_calib_vref:
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_VREF_ADC"     % (ohN, vfatN)), vfat_calib_vref[vfatN])
+            register_written.push_back("CFG_VREF_ADC")
+        for reg in vfat_register_dac_scan:
+            if vfatN in vfat_register_dac_scan[reg]:
+                write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s"     % (ohN, vfatN, reg)), vfat_register_dac_scan[reg][vfatN])
+                register_written.push_back(reg)
+        for reg in vfat_register_config:
+            if reg in register_written:
+                continue
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s"     % (ohN, vfatN, reg)), vfat_register_config[reg])
+            register_written.push_back(reg)
 
         if low_thresh:
             #print ("Set low threshold")
-            #write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_THR_ZCC_DAC"     % (ohN , vfatN)) , 0)
-            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_THR_ARM_DAC"     % (ohN , vfatN)) , 0)
+            #write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_THR_ZCC_DAC"     % (ohN, vfatN)) , 0)
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_THR_ARM_DAC"     % (ohN, vfatN)) , 0)
 
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_RUN"%(ohN,vfatN)), 1)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN"%(ohN, vfatN)), 1)
 
     else:
         #print ("Unconfiguring VFAT")
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_RUN"%(ohN,vfatN)), 0)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN"%(ohN, vfatN)), 0)
 
 
 def lpgbt_vfat_config(system, oh_select, vfat_list, low_thresh, configure):
@@ -111,6 +146,7 @@ if __name__ == "__main__":
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
     parser.add_argument("-c", "--config", action="store", dest="config", help="config = 1 for configure, 0 for unconfigure")
+    parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use DAC scan results")
     parser.add_argument("-lt", "--low_thresh", action="store_true", dest="low_thresh", help="low_thresh = to set low threshold for channels")
     args = parser.parse_args()
 
@@ -162,6 +198,7 @@ if __name__ == "__main__":
 
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
+    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results)
     print("Initialization Done\n")
     
     # Running Phase Scan

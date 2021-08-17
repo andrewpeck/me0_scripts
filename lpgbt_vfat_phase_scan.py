@@ -2,7 +2,7 @@ from rw_reg_lpgbt import *
 from time import sleep, time
 import sys
 import argparse
-from lpgbt_vfat_config import configureVfat, enableVfatchannel
+from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
 
 config_boss_filename = "lpgbt_data/config_boss.txt"
 config_sub_filename = "lpgbt_data/config_sub.txt"
@@ -292,6 +292,7 @@ if __name__ == "__main__":
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
     parser.add_argument("-c", "--daq_err", action="store_true", dest="daq_err", help="if you want to check for DAQ CRC errors")
+    parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use DAC scan results")
     parser.add_argument("-d", "--depth", action="store", dest="depth", default="10000", help="depth = number of times to check for cfg_run error")
     parser.add_argument("-b", "--bestphase", action="store", dest="bestphase", help="bestphase = Best value of the elinkRX phase (in hex), calculated from phase scan by default")
     parser.add_argument("-f", "--bestphase_file", action="store", dest="bestphase_file", help="bestphase_file = Text file with best value of the elinkRX phase for each VFAT (in hex), calculated from phase scan by default")
@@ -363,6 +364,7 @@ if __name__ == "__main__":
 
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
+    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results)
     print("Initialization Done\n")
 
     if not os.path.isfile(config_boss_filename):

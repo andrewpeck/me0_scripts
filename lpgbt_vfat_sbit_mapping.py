@@ -5,7 +5,7 @@ import sys
 import argparse
 import random
 import json
-from lpgbt_vfat_config import configureVfat, enableVfatchannel
+from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
 
 
 def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap):
@@ -175,6 +175,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
+    parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use DAC scan results")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -223,6 +224,7 @@ if __name__ == "__main__":
 
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
+    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results)
     print("Initialization Done\n")
 
     # Running Phase Scan

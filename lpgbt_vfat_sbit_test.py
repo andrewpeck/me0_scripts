@@ -5,7 +5,7 @@ import argparse
 import random
 import glob
 import json
-from lpgbt_vfat_config import configureVfat, enableVfatchannel
+from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
 import datetime
 
 
@@ -304,6 +304,7 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--cal_mode", action="store", dest="cal_mode", default = "current", help="cal_mode = voltage or current (default = current)")
     parser.add_argument("-d", "--cal_dac", action="store", dest="cal_dac", help="cal_dac = Value of CAL_DAC register (default = 50 for voltage pulse mode and 150 for current pulse mode)")
     parser.add_argument("-p", "--parallel", action="store", dest="parallel", help="parallel = all (inject calpulse in all channels) or select (inject calpulse in selected channels) simultaneously (only possible in voltage mode, not a preferred option)")
+    parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use DAC scan results")
     parser.add_argument("-n", "--nl1a", action="store", dest="nl1a", help="nl1a = fixed number of L1A cycles")
     parser.add_argument("-t", "--time", action="store", dest="time", help="time = time for which to run the S-bit testing (in minutes)")
     parser.add_argument("-b", "--bxgap", action="store", dest="bxgap", default="500", help="bxgap = Nr. of BX between two L1As (default = 500 i.e. 12.5 us)")
@@ -473,6 +474,7 @@ if __name__ == "__main__":
 
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
+    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results)
     print("Initialization Done\n")
 
     # Running Phase Scan

@@ -4,7 +4,7 @@ import sys
 import argparse
 import random
 import datetime
-from lpgbt_vfat_config import configureVfat, enableVfatchannel
+from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
 
 REGISTER_DAC_MONITOR_MAP = {
     #"CFG_IREF": 0,
@@ -227,13 +227,14 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
-    parser.add_argument("-r", "--regs", action="store", nargs="+", dest="regs", help="DACs to scan")
-    parser.add_argument("-d", "--dacList", action="store", dest="dacList", help="Input text file with list of DACs")
+    parser.add_argument("-x", "--regs", action="store", nargs="+", dest="regs", help="DACs to scan")
+    parser.add_argument("-f", "--dacList", action="store", dest="dacList", help="Input text file with list of DACs")
+    parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use DAC scan results")
     parser.add_argument("-ll", "--lower", action="store", dest="lower", default="0", help="lower = Lower limit for DAC scan (default=0)")
     parser.add_argument("-ul", "--upper", action="store", dest="upper", default="255", help="upper = Upper limit for DAC scan (default=255)")
     parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for DAC scan (default=1)")
     parser.add_argument("-n", "--niter", action="store", dest="niter", default="100", help="niter = Number of times to read ADC for averaging (default=100)")
-    parser.add_argument("-f", "--ref", action="store", dest="ref", default = "internal", help="ref = ADC reference: internal or external (default=internal)")
+    parser.add_argument("-e", "--ref", action="store", dest="ref", default = "internal", help="ref = ADC reference: internal or external (default=internal)")
     parser.add_argument("-vr", "--vref", action="store", dest="vref", help="vref = CFG_VREF_ADC (0-3) (default = taken from calib file or 3)")
     args = parser.parse_args()
 
@@ -355,6 +356,7 @@ if __name__ == "__main__":
 
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
+    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results)
     print("Initialization Done\n")
     
     # Running Phase Scan
