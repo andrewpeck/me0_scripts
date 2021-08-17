@@ -38,7 +38,7 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_lis
     now = now.replace(" ", "_")
     filename = "vfat_data/vfat_phase_scan_results/ME0_OH%d_vfat_phase_scan_results_"%oh_select+now+".py"
     file_out = open(filename, "w")
-    file.write("vfat  phase\n")
+    file_out.write("vfat  phase\n")
 
     link_good    = [[0 for phase in range(16)] for vfat in range(24)]
     sync_err_cnt = [[0 for phase in range(16)] for vfat in range(24)]
@@ -190,7 +190,7 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_lis
         setVfatRxPhase(system, oh_select, vfat, set_bestphase)
         print ("Phase set for VFAT#%02d to: %s" % (vfat, hex(set_bestphase)))
     for vfat in range(0,24):
-        file.write("%d  0x%x\n"%(vfat,bestphase_vfat[vfat]))
+        file_out.write("%d  0x%x\n"%(vfat,bestphase_vfat[vfat]))
 
     sleep(0.1)
     vfat_oh_link_reset()
