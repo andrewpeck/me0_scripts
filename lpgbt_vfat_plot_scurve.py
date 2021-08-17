@@ -114,15 +114,20 @@ if __name__ == "__main__":
     chargeVals = np.arange(0, 256, 1)
     for vfat in scurve_result:
         fig, axs = plt.subplots()
+        fig.tight_layout()
         plt.xlabel("Channel Number")
         plt.ylabel("Injected Charge (fC)")
         #plt.xlim(0,128)
         #plt.ylim(0,256)
 
         plot_data = []
+        plot_data_x = []
+        plot_data_y = []
         for dac in range(0,256):
             charge = DACToCharge(dac, slope_adc, intercept_adc, vfat, args.mode)
             data = []
+            data_x = []
+            data_y = []
             for channel in range(0,128):
                 if channel not in scurve_result[vfat]:
                     data.append(0)
@@ -130,16 +135,23 @@ if __name__ == "__main__":
                     data.append(0)
                 else:
                     data.append(scurve_result[vfat][channel][charge])
+                data_x.append(channel)
+                data_y.append(charge)
             plot_data.append(data)
+            plot_data_x.append(data_x)
+            plot_data_y.append(data_y)
 
-        chargeVals_mod = chargeVals
-        for i in range(0,len(chargeVals_mod)):
-            chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, vfat, args.mode)
-        plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(chargeVals_mod), max(chargeVals_mod)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
+        axs.set_aspect("equal")
+        cf = axs.contourf(plot_data_x,plot_data_y,plot_data)
+        #chargeVals_mod = chargeVals
+        #for i in range(0,len(chargeVals_mod)):
+        #    chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, vfat, args.mode)
+        #plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(chargeVals_mod), max(chargeVals_mod)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
         cbar = fig.colorbar(plot, ax=axs, pad=0.01)
         cbar.set_label("Fired Events / Total Events")
         plt.title("VFAT# %02d"%vfat)
-        plt.savefig((directoryName+"/scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat)
+        plt.xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
+        plt.savefig((directoryName+"/scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat, dpi=1000)
 
     for vfat in scurve_result:
         fig, ax = plt.subplots()
