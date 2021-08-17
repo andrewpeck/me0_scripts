@@ -138,7 +138,7 @@ if __name__ == "__main__":
                 plot_data_x.append(channel)
             plot_data.append(data)
 
-        cf = plt.colormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
+        cf = plt.pcolormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
         #chargeVals_mod = chargeVals
         #for i in range(0,len(chargeVals_mod)):
         #    chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, vfat, args.mode)
