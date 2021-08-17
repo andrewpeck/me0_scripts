@@ -114,7 +114,6 @@ if __name__ == "__main__":
     chargeVals = np.arange(0, 256, 1)
     for vfat in scurve_result:
         fig, axs = plt.subplots()
-        fig.tight_layout()
         plt.xlabel("Channel Number")
         plt.ylabel("Injected Charge (fC)")
         #plt.xlim(0,128)
@@ -125,6 +124,7 @@ if __name__ == "__main__":
         plot_data_y = []
         for dac in range(0,256):
             charge = DACToCharge(dac, slope_adc, intercept_adc, vfat, args.mode)
+            plot_data_y.append(charge)
             data = []
             data_x = []
             data_y = []
@@ -135,14 +135,10 @@ if __name__ == "__main__":
                     data.append(0)
                 else:
                     data.append(scurve_result[vfat][channel][charge])
-                data_x.append(channel)
-                data_y.append(charge)
+                plot_data_x.append(channel)
             plot_data.append(data)
-            plot_data_x.append(data_x)
-            plot_data_y.append(data_y)
 
-        axs.set_aspect("equal")
-        cf = axs.contourf(plot_data_x,plot_data_y,plot_data)
+        cf = plt.colormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
         #chargeVals_mod = chargeVals
         #for i in range(0,len(chargeVals_mod)):
         #    chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, vfat, args.mode)

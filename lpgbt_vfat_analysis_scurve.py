@@ -179,7 +179,6 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
     chargeVals = np.arange(0, 256, 1)
     for vfat in scurve_result:
         fig, axs = plt.subplots()
-        fig.tight_layout()
         plt.xlabel("Channel Number")
         plt.ylabel("Injected Charge (fC)")
         #plt.xlim(0,128)
@@ -190,6 +189,7 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         plot_data_y = []
         for dac in range(0,256):
             charge = DACToCharge(dac, slope_adc, intercept_adc, vfat, mode)
+            plot_data_y.append(charge)
             data = []
             data_x = []
             data_y = []
@@ -200,17 +200,13 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
                     data.append(0)
                 else:
                     data.append(scurve_result[vfat][channel][charge])
-                data_x.append(channel)
-                data_y.append(charge)
+                plot_data_x.append(channel)
             plot_data.append(data)
-            plot_data_x.append(data_x)
-            plot_data_y.append(data_y)
 
-        axs.set_aspect("equal")
-        cf = axs.contourf(plot_data_x,plot_data_y,plot_data)
+        cf = plt.colormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
         #chargeVals_mod = chargeVals
         #for i in range(0,len(chargeVals_mod)):
-        #    chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, vfat, args.mode)
+        #    chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, vfat, mode)
         #plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(chargeVals_mod), max(chargeVals_mod)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
         cbar = fig.colorbar(cf, ax=axs, pad=0.01)
         cbar.set_label("Fired Events / Total Events")
