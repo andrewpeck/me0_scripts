@@ -126,8 +126,6 @@ if __name__ == "__main__":
             charge = DACToCharge(dac, slope_adc, intercept_adc, vfat, args.mode)
             plot_data_y.append(charge)
             data = []
-            data_x = []
-            data_y = []
             for channel in range(0,128):
                 if channel not in scurve_result[vfat]:
                     data.append(0)
@@ -135,8 +133,9 @@ if __name__ == "__main__":
                     data.append(0)
                 else:
                     data.append(scurve_result[vfat][channel][charge])
-                plot_data_x.append(channel)
             plot_data.append(data)
+        for channel in range(0,128):
+            plot_data_x.append(channel)
 
         cf = plt.pcolormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
         #chargeVals_mod = chargeVals

@@ -200,8 +200,9 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
                     data.append(0)
                 else:
                     data.append(scurve_result[vfat][channel][charge])
-                plot_data_x.append(channel)
             plot_data.append(data)
+        for channel in range(0,128):
+            plot_data_x.append(channel)
 
         cf = plt.pcolormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
         #chargeVals_mod = chargeVals
