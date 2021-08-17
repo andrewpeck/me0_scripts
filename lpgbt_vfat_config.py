@@ -18,7 +18,7 @@ def initialize_vfat_config(oh_select, use_dac_scan_results):
 
     # Generic register list
     vfat_register_config_file_path = "vfat_data/ME0_OH%d_vfatConfig.txt"%oh_select
-    if os.path.isfile(vfat_register_config_file_path):
+    if not os.path.isfile(vfat_register_config_file_path):
         print (Colors.YELLOW + "VFAT config text file not present in vfat_data/" + Colors.ENDC)
         sys.exit()
     vfat_register_config_file = open(vfat_register_config_file_path)
@@ -29,7 +29,7 @@ def initialize_vfat_config(oh_select, use_dac_scan_results):
     # IREF from calib
     vfat_calib_iref_path = "vfat_data/vfat_calib_data/ME0_OH%d_vfat_calib_info_iref.txt"%oh_select
     vfat_calib_vref_path = "vfat_data/vfat_calib_data/ME0_OH%d_vfat_calib_info_vref.txt"%oh_select
-    if os.path.isfile(vfat_calib_iref_path):
+    if not os.path.isfile(vfat_calib_iref_path):
         print ("IREF calib file for VFATs not present, using default values")
     else:
         vfat_calib_iref_file = open(vfat_calib_iref_path)
@@ -40,7 +40,7 @@ def initialize_vfat_config(oh_select, use_dac_scan_results):
         vfat_calib_iref_file.close()
 
     # VREF from calib
-    if os.path.isfile(vfat_calib_vref_path):
+    if not os.path.isfile(vfat_calib_vref_path):
         print ("VREF calib file for VFATs not present, using default values")
     else:
         vfat_calib_vref_file = open(vfat_calib_vref_path)
@@ -61,7 +61,7 @@ def initialize_vfat_config(oh_select, use_dac_scan_results):
             if len(list_of_dirs)>0:
                 latest_dir = max(list_of_dirs, key=os.path.getctime)
                 dac_scan_results_path = latest_dir
-                for f in glob.glob("nominalValues_ME0_OH%d_*.txt"%oh_select):
+                for f in glob.glob(dac_scan_results_path+"/nominalValues_ME0_OH%d_*.txt"%oh_select):
                     reg = f.split("nominalValues_ME0_OH%d_"%oh_select)[1].split(".txt")[0]
                     vfat_register_dac_scan[reg] = {}
                     file_in = open(f)
@@ -92,19 +92,19 @@ def configureVfat(configure, vfatN, ohN, low_thresh):
 
         if vfatN in vfat_calib_iref:
             write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_IREF"     % (ohN, vfatN)), vfat_calib_iref[vfatN])
-            register_written.push_back("CFG_IREF")
+            register_written.append("CFG_IREF")
         if vfatN in vfat_calib_vref:
             write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_VREF_ADC"     % (ohN, vfatN)), vfat_calib_vref[vfatN])
-            register_written.push_back("CFG_VREF_ADC")
+            register_written.append("CFG_VREF_ADC")
         for reg in vfat_register_dac_scan:
             if vfatN in vfat_register_dac_scan[reg]:
                 write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s"     % (ohN, vfatN, reg)), vfat_register_dac_scan[reg][vfatN])
-                register_written.push_back(reg)
+                register_written.append(reg)
         for reg in vfat_register_config:
             if reg in register_written:
                 continue
             write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s"     % (ohN, vfatN, reg)), vfat_register_config[reg])
-            register_written.push_back(reg)
+            register_written.append(reg)
 
         if low_thresh:
             #print ("Set low threshold")
