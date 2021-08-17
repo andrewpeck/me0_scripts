@@ -212,7 +212,7 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         #for i in range(0,len(chargeVals_mod)):
         #    chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, vfat, args.mode)
         #plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(chargeVals_mod), max(chargeVals_mod)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
-        cbar = fig.colorbar(plot, ax=axs, pad=0.01)
+        cbar = fig.colorbar(cf, ax=axs, pad=0.01)
         cbar.set_label("Fired Events / Total Events")
         plt.title("VFAT# %02d"%vfat)
         plt.xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
