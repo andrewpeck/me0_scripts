@@ -3,6 +3,7 @@ from time import sleep, time
 import sys
 import argparse
 from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
+import datetime
 
 config_boss_filename = "lpgbt_data/config_boss.txt"
 config_sub_filename = "lpgbt_data/config_sub.txt"
