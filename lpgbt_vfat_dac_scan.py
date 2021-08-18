@@ -59,7 +59,7 @@ def parseList(inFile):
         dacList = [line.rstrip("\n") for line in dacList]
     return dacList
 
-def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, step, niter, adc_ref, vref_list):
+def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper_list, step, niter, adc_ref, vref_list):
     if not os.path.exists("vfat_data/vfat_dac_scan_results"):
         os.makedirs("vfat_data/vfat_dac_scan_results")
     now = str(datetime.datetime.now())[:16]
@@ -142,11 +142,9 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper, st
 
         # Loop over DACs
         for dac in dac_list:
-            if upper > MAX_DAC_SIZE[dac]:
-                upper = MAX_DAC_SIZE[dac]
-
             print ("  Scanning DAC: " + dac)
-
+            upper = upper_list[dac]
+            
             # Setup DAC Monitor
             write_backend_reg(adc_monitor_select_node[vfat], REGISTER_DAC_MONITOR_MAP[dac])
             if dac=="CFG_CAL_DAC_I":
@@ -306,6 +304,9 @@ if __name__ == "__main__":
                 upper = MAX_DAC_SIZE[dac]
         else:
             upper = MAX_DAC_SIZE[dac]
+        if lower>upper:
+            print (Colors.YELLOW + "Upper limit has to be >= Lower limit" + Colors.ENDC)
+            sys.exit()
         upper_list[dac] = upper
 
     if lower not in range(0,256):
@@ -315,9 +316,6 @@ if __name__ == "__main__":
         if upper_list[dac] not in range(0,256):
             print (Colors.YELLOW + "Upper limit can only be between 0 and 255" + Colors.ENDC)
             sys.exit()
-    if lower>upper:
-        print (Colors.YELLOW + "Upper limit has to be >= Lower limit" + Colors.ENDC)
-        sys.exit()
 
     step = int(args.step)
     if step not in range(1,257):
@@ -365,7 +363,7 @@ if __name__ == "__main__":
     
     # Running Phase Scan
     try:
-        lpgbt_vfat_dac_scan(args.system, int(args.ohid), vfat_list, dac_list, lower, upper, step, int(args.niter), args.ref, vref_list)
+        lpgbt_vfat_dac_scan(args.system, int(args.ohid), vfat_list, dac_list, lower, upper_list, step, int(args.niter), args.ref, vref_list)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
