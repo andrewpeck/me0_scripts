@@ -69,7 +69,7 @@ def main(inFile, calFile, directoryName, oh):
 
 	for DAC_reg in dacData.DAC_reg.unique(): # loop over dacs
 	    startTime = time()
-	    print(Colors.GREEN + "Working on DAC: %s \n" % DAC_reg + Colors.ENDC)
+	    print(Colors.GREEN + "\nWorking on DAC: %s \n" % DAC_reg + Colors.ENDC)
 	    dacFileName = directoryName + "/nominalValues_" + oh + "_" + DAC_reg + ".txt"
 	    file = open(dacFileName, "w")
 	    sel = dacData.DAC_reg == DAC_reg # select rows for specific DAC 
@@ -84,7 +84,7 @@ def main(inFile, calFile, directoryName, oh):
 	        fig, ax = plt.subplots(1, numVfats, figsize=(25, 15))
 	        ax.flatten()
 	    else:
-	    	fig, ax = plt.subplots(1, numVfats, figsize=(25, 15))
+	    	fig, ax = plt.subplots(numVfats, 1, figsize=(25, 15))
     
 	    for vfat in datareg.vfat.unique(): # loop over vfats
 	        print(Colors.GREEN + "Working on VFAT: %s\n" % vfat+ Colors.ENDC)
@@ -140,7 +140,7 @@ def main(inFile, calFile, directoryName, oh):
 	                ax[0, vfatCnt0].set_title("VFAT%02d" % vfat)
 	            elif vfatCnt0 > 2:
 	                if nominalDacValues[DAC_reg][1] == "uA":
-	                    ax[1, vfatCnt0].set_xlabel(r"ADC0 ($\mu$A)")
+	                    ax[1, vfatCnt1].set_xlabel(r"ADC0 ($\mu$A)")
 	                else:
 	                    ax[1, vfatCnt1].set_xlabel("ADC0 (%s)" % nominalDacValues[DAC_reg][1])
 	                #ax[1, vfatCnt1].set_xlabel("ADC0 (%s)" % nominalDacValues[DAC_reg][1])
