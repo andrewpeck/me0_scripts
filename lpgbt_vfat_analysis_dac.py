@@ -87,7 +87,7 @@ def main(inFile, calFile, directoryName, oh):
 	    	fig, ax = plt.subplots(numVfats, 1, figsize=(25, 15))
     
 	    for vfat in datareg.vfat.unique(): # loop over vfats
-	        print(Colors.GREEN + "Working on VFAT: %s\n" % vfat+ Colors.ENDC)
+	        print(Colors.GREEN + "\nWorking on VFAT: %s\n" % vfat+ Colors.ENDC)
 	        sel2 = datareg.vfat == vfat # select rows for the current vfat
 	        datavfat = datareg[sel2].reset_index() # reset starting index of sliced dataframe to 0
 	        slopeTemp = np.array(calData.loc[calData["vfat"] == vfat].slope) # get slope for VFAT
@@ -95,7 +95,7 @@ def main(inFile, calFile, directoryName, oh):
 	        print("VFAT: {}, slope: {}, intercept: {}".format(vfat, slopeTemp, interTemp))
 	        print("vfat data: {}".format(datavfat["value"]))
 
-	        datavfat["value"] = nominalDacScalingFactors[DAC_reg] * ((datavfat["value"] * slopeTemp) + interTemp) # transform data from DAC to uA/mV
+	        datavfat["value"] = (1.0/nominalDacScalingFactors[DAC_reg]) * ((datavfat["value"] * slopeTemp) + interTemp) # transform data from DAC to uA/mV
 	        print("vfat data after transformation: {}".format(datavfat["value"]))
 	        datavfat2 = datavfat
 	        
