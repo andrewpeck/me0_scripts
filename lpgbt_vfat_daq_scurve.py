@@ -95,7 +95,6 @@ def lpgbt_vfat_scurve(system, oh_select, vfat_list, channel_list, set_cal_mode, 
         daq_monitor_event_count_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.GEM_TESTS.VFAT_DAQ_MONITOR.VFAT%d.GOOD_EVENTS_COUNT"%(vfat))
         daq_monitor_fire_count_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.GEM_TESTS.VFAT_DAQ_MONITOR.VFAT%d.CHANNEL_FIRE_COUNT"%(vfat))
 
-    ttc_enable_node = get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE")
     ttc_reset_node = get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET")
     ttc_cyclic_start_node = get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_START")
     cyclic_running_node = get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_RUNNING")
@@ -139,7 +138,6 @@ def lpgbt_vfat_scurve(system, oh_select, vfat_list, channel_list, set_cal_mode, 
             write_backend_reg(daq_monitor_enable_node, 1)
 
             # Start the cyclic generator
-            write_backend_reg(ttc_enable_node, 1)
             write_backend_reg(ttc_cyclic_start_node, 1)
             cyclic_running = 1
             while (cyclic_running):
@@ -159,6 +157,7 @@ def lpgbt_vfat_scurve(system, oh_select, vfat_list, channel_list, set_cal_mode, 
             for vfat in vfat_list:
                 enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channel and disable calpulsing
     # End of channel loop
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 0)
     print ("")
 
     # Disable channels on VFATs

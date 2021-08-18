@@ -154,6 +154,7 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_lis
             print(result_str)
         write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET"), 1)
 
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 0)
     centers = 24*[0]
     widths  = 24*[0]
 

@@ -81,7 +81,6 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
     else:
         write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 2)
 
-    ttc_enable_node = get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE")
     ttc_reset_node = get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET")
     ttc_cyclic_start_node = get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_START")
     cyclic_running_node = get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_RUNNING")
@@ -142,7 +141,6 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
                 # Start the cyclic generator
                 global_reset()
                 write_backend_reg(reset_sbit_counter_node, 1)
-                write_backend_reg(ttc_enable_node, 1)
                 write_backend_reg(ttc_cyclic_start_node, 1)
                 cyclic_running = 1
                 while (cyclic_running):
@@ -158,6 +156,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
                 enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channel and disable calpulsing
         # End of VFAT loop
     # End of channel loop
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 0)
     print ("")
 
     # Disable channels on VFATs

@@ -191,6 +191,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, bestphase_lis
             print ("")
         # End of VFAT loop
     # End of Phase loop
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 0)
 
     for vfat in vfat_list:
         # Unconfigure the pulsing VFAT
