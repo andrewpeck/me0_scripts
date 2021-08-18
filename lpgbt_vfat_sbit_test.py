@@ -239,6 +239,12 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
     real_calpulse_counter = 0
 
     for elink in elink_list:
+        n_sbits_elink_expected = 1
+        if parallel == "all":
+            n_sbits_elink_expected = 8
+        elif parallel == "select":
+            n_sbits_elink_expected = len(set(sbit_list[elink]))
+
         for channel, sbit_read in zip(channel_list[elink], sbit_list[elink]):
             s_bit_expected = 0
             if system != "dryrun":
@@ -249,23 +255,23 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
                     s_bit_expected = real_calpulse_counter*2 # S-bit double counting
                 else:
                     s_bit_expected = real_calpulse_counter
-                print ("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f seconds (%.2f minutes), L1A rate: %.2f kHz, Nr. of L1As  (effi=%.3f): %.2e, Nr. of Calpulses: %.2e \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, total_time, total_time/60.0, l1a_rate/1000.0, efficiency, real_l1a_counter, real_calpulse_counter, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
-                file_out.write("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f seconds (%.2f minutes), L1A rate: %.2f kHz, Nr. of L1As (effi=%.3f): %.2e, Nr. of Calpulses: %.2e, \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e\n" %(elink, channel, sbit_read, total_time, total_time/60.0, l1a_rate/1000.0, efficiency, real_l1a_counter, real_calpulse_counter, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
+                print ("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f seconds (%.2f minutes), L1A rate: %.2f kHz, Nr. of L1As  (effi=%.3f): %.2e, Nr. of Calpulses: %.2e \nS-bits expected for Elink: %.2e, S-bits expected for Channel: %.2e \nS-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, total_time, total_time/60.0, l1a_rate/1000.0, efficiency, real_l1a_counter, real_calpulse_counter, s_bit_expected*n_sbits_elink_expected, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
+                file_out.write("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f seconds (%.2f minutes), L1A rate: %.2f kHz, Nr. of L1As  (effi=%.3f): %.2e, Nr. of Calpulses: %.2e \nS-bits expected for Elink: %.2e, S-bits expected for Channel: %.2e \nS-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, total_time, total_time/60.0, l1a_rate/1000.0, efficiency, real_l1a_counter, real_calpulse_counter, s_bit_expected*n_sbits_elink_expected, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
             else:
                 if nl1a != 0:
                     if cal_mode == "voltage":
                         s_bit_expected = expected_l1a*2 # S-bit double counting
                     else:
                         s_bit_expected = expected_l1a
-                    print ("ELINK# %02d Channel %02d S-Bit %02d, Number of L1A cycles: %.2e, \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, nl1a, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
-                    file_out.write("ELINK# %02d Channel %02d S-Bit %02d, Number of L1A cycles: %.2e, \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e\n" %(elink, channel, sbit_read, nl1a, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
+                    print ("ELINK# %02d Channel %02d S-Bit %02d, Number of L1A cycles: %.2e, \nS-bits expected for Elink: %.2e, S-bits expected for Channel: %.2e \nS-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, nl1a, s_bit_expected*n_sbits_elink_expected, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
+                    file_out.write("ELINK# %02d Channel %02d S-Bit %02d, Number of L1A cycles: %.2e, \nS-bits expected for Elink: %.2e, S-bits expected for Channel: %.2e \nS-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, nl1a, s_bit_expected*n_sbits_elink_expected, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
                 else:
                     if cal_mode == "voltage":
                         s_bit_expected = expected_l1a*2 # S-bit double counting
                     else:
                         s_bit_expected = expected_l1a
-                    print ("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f minutes, L1A rate: %.2f kHz, Nr. of L1As (effi=%.3f): %.2e, \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, runtime, l1a_rate/1000.0, efficiency, expected_l1a, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
-                    file_out.write("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f minutes, L1A rate: %.2f kHz, Nr. of L1As (effi=%.3f): %.2e, \nS-bits expected for both Elink and Channel: %.2e, S-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e\n" %(elink, channel, sbit_read, runtime, l1a_rate/1000.0, efficiency, expected_l1a, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
+                    print ("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f minutes, L1A rate: %.2f kHz, Nr. of L1As (effi=%.3f): %.2e, \nS-bits expected for Elink: %.2e, S-bits expected for Channel: %.2e \nS-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, runtime, l1a_rate/1000.0, efficiency, expected_l1a, s_bit_expected*n_sbits_elink_expected, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
+                    file_out.write("ELINK# %02d Channel %02d S-Bit %02d, Time: %.2f minutes, L1A rate: %.2f kHz, Nr. of L1As (effi=%.3f): %.2e, \nS-bits expected for Elink: %.2e, S-bits expected for Channel: %.2e \nS-bit counter for Elink: %.2e, S-bit counter for Channel: %.2e" %(elink, channel, sbit_read, runtime, l1a_rate/1000.0, efficiency, expected_l1a, s_bit_expected*n_sbits_elink_expected, s_bit_expected, elink_sbit_counter_list[elink][channel], channel_sbit_counter_list[elink][channel]))
 
             # BER for Channel S-bit
             channel_n_err = s_bit_expected - channel_sbit_counter_list[elink][channel]
