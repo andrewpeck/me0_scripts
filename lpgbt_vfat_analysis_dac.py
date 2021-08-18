@@ -117,8 +117,8 @@ def main(inFile, calFile, directoryName, oh):
 	            ax[vfatCnt0].grid()
 	            ax[vfatCnt0].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
 	        else:
-	            ax.grid()
-	            ax.plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none")
+	            ax[vfatCnt0].grid()
+	            ax[vfatCnt0].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none")
 	          
 	        fitData = np.polyfit(xdata, ydata, 5) # fit data to 5th degree polynomial
 	        
