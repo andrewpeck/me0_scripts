@@ -31,7 +31,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, bestphase_lis
         for vfat in vfat_list:
             sbit_elinks = vfat_to_sbit_elink(vfat)
             for elink in range(0,8):
-                set_bestphase = bestphase_vfat_elink[vfat][elink]
+                set_bestphase = bestphase_list[vfat][elink]
                 setVfatSbitPhase(system, oh_select, vfat, sbit_elinks[elink], set_bestphase)
                 print ("VFAT %02d: Phase set for ELINK %02d to: %s" % (vfat, elink, hex(set_bestphase)))
         return
