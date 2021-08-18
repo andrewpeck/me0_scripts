@@ -155,11 +155,11 @@ def main(inFile, calFile, directoryName, oh):
 	            ax[vfatCnt0].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
 	            ax[vfatCnt0].set_title("VFAT%02d" % vfat)
 	        else:
-	            ax.set_xlabel(r"ADC0 ($\mu$A)")
+	            ax[vfatCnt0].set_xlabel(r"ADC0 ($\mu$A)")
 	            #ax.set_xlabel("ADC0 (%s)" % nominalDacValues[DAC_reg][1])
-	            ax.set_ylabel("DAC")
-	            ax.plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
-	            ax.set_title("VFAT%02d" % vfat)
+	            ax[vfatCnt0].set_ylabel("DAC")
+	            ax[vfatCnt0].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
+	            ax[vfatCnt0].set_title("VFAT%02d" % vfat)
 
 
 	        if vfatCnt0 > 2 :
