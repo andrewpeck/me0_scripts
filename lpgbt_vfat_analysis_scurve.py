@@ -50,7 +50,7 @@ def getCalData(calib_path):
 
     return slope_adc, intercept_adc
 
-def DACToCharge(dac, slope_adc, intercept_adc, vfat, mode):
+def DACToCharge(dac, slope_adc, intercept_adc, current_pulse_sf, vfat, mode):
     """
     Slope and intercept for all VFATs from the CAL_DAC cal file.
     If cal file not present, use default values here are a rough average of cal data.
@@ -76,6 +76,8 @@ def DACToCharge(dac, slope_adc, intercept_adc, vfat, mode):
             slope = 0.22 # fC/DAC
             intercept = 0
     charge = (dac * slope) + intercept
+    if mode == "current":
+        charge = charge * current_pulse_sf
     return charge
 
 def fit_scurve(vfatList, scurve_result, oh, directoryName, verbose , channel_list):
@@ -170,7 +172,7 @@ def plotENCdistributions(vfatList, scurveParams, oh, directoryName):
     plt.savefig(directoryName + "/scurveENCdistribution_"+oh+".pdf")
     print("\nENC distribution plot saved at %s" % directoryName + "/scurveENCdistribution_"+oh+".pdf")
 
-def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_adc, mode):
+def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_adc, current_pulse_sf, mode):
     """
     Formats data originally stored in the s-curve dictionary
     and plots the 2D s-curve histogram.
@@ -188,7 +190,7 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         plot_data_x = []
         plot_data_y = []
         for dac in range(0,256):
-            charge = DACToCharge(dac, slope_adc, intercept_adc, vfat, mode)
+            charge = DACToCharge(dac, slope_adc, intercept_adc, current_pulse_sf, vfat, mode)
             plot_data_y.append(charge)
             data = []
             data_x = []
@@ -207,7 +209,7 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         cf = plt.pcolormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
         #chargeVals_mod = chargeVals
         #for i in range(0,len(chargeVals_mod)):
-        #    chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, vfat, mode)
+        #    chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, current_pulse_sf, vfat, mode)
         #plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(chargeVals_mod), max(chargeVals_mod)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
         cbar = fig.colorbar(cf, ax=axs, pad=0.01)
         cbar.set_label("Fired Events / Total Events")
@@ -223,8 +225,9 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="Plotting VFAT DAQ SCurve")
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="SCurve result filename")
-    parser.add_argument("-c", "--channels", action="store", nargs="+", dest="channels", help="Channels to plot for each VFAT")
+    parser.add_argument("-c", "--channels", action="store", nargs="+", dest="channels", help="Channels to plot for each VFAT, default = all 128 channels")
     parser.add_argument("-m", "--mode", action="store", dest="mode", help="mode = voltage or current")
+    parser.add_argument("-fs", "--cal_fs", action="store", dest="cal_fs", help="cal_fs = value of CAL_FS used (0-3), default = taken from VFAT config text file")
     parser.add_argument("-v", "--verbose", action="store_true", dest="verbose", help="Increase verbosity")
     args = parser.parse_args()
 
@@ -249,6 +252,36 @@ if __name__ == "__main__":
     except FileExistsError: # skip if directory already exists
         pass
 
+    cal_fs = -9999
+    if args.cal_fs is None:
+        vfat_config_path = "vfat_data/"+oh+"_vfatConfig.txt"
+        if not os.path.isfile(vfat_config_path):
+            print(Colors.YELLOW + "VFAT config file not present, provide CAL_FS used" + Colors.ENDC)
+            sys.exit()
+        file_config = open(vfat_config_path)
+        for line in file_config.readlines():
+            if "CFG_CAL_FS" in line:
+                cal_fs = int(line.split()[1])
+                break
+        file_config.close()
+    else:
+        cal_fs = int(args.cal_fs)
+        if cal_fs > 3:
+            print(Colors.YELLOW + "CAL_FS can be only 0-3" + Colors.ENDC)
+            sys.exit()
+    current_pulse_sf = -9999
+    if cal_fs == 0:
+        current_pulse_sf = 0.25
+    elif cal_fs == 1:
+        current_pulse_sf = 0.50
+    elif cal_fs == 2:
+        current_pulse_sf = 0.75
+    elif cal_fs == 3:
+        current_pulse_sf = 1.00
+    if current_pulse_sf == -9999:
+        print(Colors.YELLOW + "invalid Current Pulse SF" + Colors.ENDC)
+        sys.exit()
+
     calib_path = "vfat_data/vfat_calib_data/"+oh+"_vfat_calib_info_calDac.txt"
     slope_adc, intercept_adc = getCalData(calib_path)
 
@@ -264,7 +297,7 @@ if __name__ == "__main__":
 
         #if args.mode == "voltage":
         #    charge = 255 - charge
-        charge = DACToCharge(charge, slope_adc, intercept_adc, vfat, args.mode) # convert to fC
+        charge = DACToCharge(charge, slope_adc, intercept_adc, current_pulse_sf, vfat, args.mode) # convert to fC
 
         if vfat not in scurve_result:
             scurve_result[vfat] = {}
@@ -280,6 +313,6 @@ if __name__ == "__main__":
     scurveParams = fit_scurve(vfatList, scurve_result, oh, directoryName, args.verbose, channel_list)
 
     plotENCdistributions(vfatList, scurveParams, oh, directoryName)
-    plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_adc, args.mode)
+    plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_adc, current_pulse_sf, args.mode)
 
 

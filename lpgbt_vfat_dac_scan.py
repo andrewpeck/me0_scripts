@@ -7,7 +7,6 @@ import datetime
 from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
 
 REGISTER_DAC_MONITOR_MAP = {
-    #"CFG_IREF": 0,
     "CFG_CAL_DAC_I": 1,
     "CFG_BIAS_PRE_I_BIT": 2,
     "CFG_BIAS_PRE_I_BLCC": 3,
@@ -21,14 +20,12 @@ REGISTER_DAC_MONITOR_MAP = {
     "CFG_BIAS_CFD_DAC_2": 11,
     "CFG_HYST": 12,
     #"Imon CFD Ireflocal": 13, # ??
-    "CFG_THR_ARM_DAC": 14,
-    "CFG_THR_ZCC_DAC": 15,
     #"Imon SLVS Ibias": 16, # ??
     #"Vmon BGR": 32, # ??
     "CFG_CAL_DAC_V": 33,
     "CFG_BIAS_PRE_VREF": 34,
-    #"Vmon Vth Arm": 35, # ?? 14?
-    #"Vmon Vth ZCC": 36, # ?? 15?
+    "CFG_THR_ARM_DAC": 35,
+    "CFG_THR_ZCC_DAC": 36,
     #"V Tsens Int": 37, # ??
     #"V Tsens Ext": 38, # ??
     "CFG_VREF_ADC": 39,
