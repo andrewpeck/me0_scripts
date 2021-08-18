@@ -23,6 +23,9 @@ def getConfig (filename):
 def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_list):
     print ("LPGBT Phase Scan depth=%s transactions" % (str(depth)))
 
+    if system!= "dryrun" and system!= "backend":
+        check_rom_readback()
+
     if bestphase_list!={}:
         print ("Setting phases for VFATs only, not scanning")
         for vfat in vfat_list:
@@ -70,6 +73,12 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_lis
         #    enableVfatchannel(vfat, oh_select, i, 0, 0) # unmask all channels and disable calpulsing
         #write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_RUN"%(oh_select,vfat)), 0)
 
+    # Configure TTC Generator
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET"), 1)
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 1)
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_GAP"), 500) # 80 kHz
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 0) # Disable Calpulse
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_COUNT"), 10000)
     cyclic_running_node = get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_RUNNING")
 
     for phase in range(0, 16):
@@ -78,13 +87,6 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_lis
         # set phases for all vfats under test
         for vfat in vfat_list:
             setVfatRxPhase(system, oh_select, vfat, phase)
-
-        # Configure TTC Generator
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET"), 1)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 1)
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_GAP"), 500) # 80 kHz
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 0) # Disable Calpulse
-        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_COUNT"), 10000)
 
         # read cfg_run some number of times, check link good status and sync errors
         print ("Checking errors: ")
@@ -261,11 +263,8 @@ def setVfatRxPhase(system, oh_select, vfat, phase):
     GBT_ELINK_SAMPLE_PHASE_BASE_REG = 0x0CC
     addr = GBT_ELINK_SAMPLE_PHASE_BASE_REG + elink
     value = (config[addr] & 0x0f) | (phase << 4)
-    
-    check_lpgbt_link_ready(oh_select, gbt_select)
+
     select_ic_link(oh_select, gbt_select)
-    if system!= "dryrun" and system!= "backend":
-        check_rom_readback()
     mpoke(addr, value)
     sleep(0.000001) # writing too fast for CVP13
     
