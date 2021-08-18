@@ -226,9 +226,9 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
     parser.add_argument("-x", "--regs", action="store", nargs="+", dest="regs", help="DACs to scan")
     parser.add_argument("-f", "--dacList", action="store", dest="dacList", help="Input text file with list of DACs")
-    parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use DAC scan results")
+    parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use previous DAC scan results for configuration")
     parser.add_argument("-ll", "--lower", action="store", dest="lower", default="0", help="lower = Lower limit for DAC scan (default=0)")
-    parser.add_argument("-ul", "--upper", action="store", dest="upper", default="255", help="upper = Upper limit for DAC scan (default=255)")
+    parser.add_argument("-ul", "--upper", action="store", dest="upper", help="upper = Upper limit for DAC scan (default=max size for each DAC)")
     parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for DAC scan (default=1)")
     parser.add_argument("-n", "--niter", action="store", dest="niter", default="100", help="niter = Number of times to read ADC for averaging (default=100)")
     parser.add_argument("-e", "--ref", action="store", dest="ref", default = "internal", help="ref = ADC reference: internal or external (default=internal)")
@@ -293,25 +293,32 @@ if __name__ == "__main__":
                 sys.exit()
 
     lower = int(args.lower)
-    upper = int(args.upper)
+    upper_list = {}
+    for dac in dac_list:
+        if lower > MAX_DAC_SIZE[dac]:
+            print(Colors.YELLOW + "Lower limit is larger than the maximum DAC size. Please select a smaller lower limit or use the default" + Colors.ENDC)
+            sys.exit()
+        if args.upper is not None:
+            upper = int(args.upper)
+            if upper > MAX_DAC_SIZE[dac]:
+                print(Colors.YELLOW + "Max scannable DAC size for %s is %d" % (dac, MAX_DAC_SIZE[dac]) + Colors.ENDC)
+                print(Colors.YELLOW + "Since upper limit is larger than the max DAC size for %s, setting maximum DAC value to %d" % (dac, MAX_DAC_SIZE[dac]) + Colors.ENDC)
+                upper = MAX_DAC_SIZE[dac]
+        else:
+            upper = MAX_DAC_SIZE[dac]
+        upper_list[dac] = upper
+
     if lower not in range(0,256):
         print (Colors.YELLOW + "Lower limit can only be between 0 and 255" + Colors.ENDC)
         sys.exit()
-    if upper not in range(0,256):
-        print (Colors.YELLOW + "Upper limit can only be between 0 and 255" + Colors.ENDC)
-        sys.exit()
+    for dac in upper_list:
+        if upper_list[dac] not in range(0,256):
+            print (Colors.YELLOW + "Upper limit can only be between 0 and 255" + Colors.ENDC)
+            sys.exit()
     if lower>upper:
         print (Colors.YELLOW + "Upper limit has to be >= Lower limit" + Colors.ENDC)
         sys.exit()
-    for dac in dac_list:
-        if upper > MAX_DAC_SIZE[dac]:
-            print(Colors.YELLOW + "Max scannable DAC size for %s is %d" % (dac, MAX_DAC_SIZE[dac]) + Colors.ENDC)
-            print(Colors.YELLOW + "Since upper limit is larger than the max DAC size for %s, setting maximum DAC value to %d" % (dac, MAX_DAC_SIZE[dac]) + Colors.ENDC)
-            upper = MAX_DAC_SIZE[dac]
-        elif lower > MAX_DAC_SIZE[dac]:
-            print(Colors.YELLOW + "Lower limit is larger than the maximum DAC size. Please select a smaller lower limit or use the default" + Colors.ENDC)
-            sys.exit()
-    
+
     step = int(args.step)
     if step not in range(1,257):
         print (Colors.YELLOW + "Step size can only be between 1 and 256" + Colors.ENDC)
