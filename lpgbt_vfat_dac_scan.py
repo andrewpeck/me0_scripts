@@ -138,13 +138,13 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper_lis
     # Loop over VFATs
     for vfat in vfat_list:
         print ("VFAT %02d"%vfat)
-        write_backend_reg(vfat_hyst_en_node[vfat], 0) # disable hysteresis for testing the DACs
+        #write_backend_reg(vfat_hyst_en_node[vfat], 0) # disable hysteresis for testing the DACs
 
         # Loop over DACs
         for dac in dac_list:
             print ("  Scanning DAC: " + dac)
             upper = upper_list[dac]
-            
+
             # Setup DAC Monitor
             write_backend_reg(adc_monitor_select_node[vfat], REGISTER_DAC_MONITOR_MAP[dac])
             if dac=="CFG_CAL_DAC_I":
@@ -204,7 +204,7 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper_lis
                 file_out.write("%d;%s;%d;%d;%d;%i\n"%(oh_select, dac, vfat, reg, dac_scan_results[vfat][dac][reg], dac_scan_errors[vfat][dac][reg]))
             file_out.close()
 
-        write_backend_reg(vfat_hyst_en_node[vfat], 1)
+        #write_backend_reg(vfat_hyst_en_node[vfat], 1)
 
     for vfat in vfat_list:
         print("Unconfiguring VFAT %d" % (vfat))

@@ -95,7 +95,7 @@ def main(inFile, calFile, directoryName, oh):
 	        print("VFAT: {}, slope: {}, intercept: {}".format(vfat, slopeTemp, interTemp))
 	        print("vfat data: {}".format(datavfat["value"]))
 
-	        datavfat["value"] = (1.0/nominalDacScalingFactors[DAC_reg]) * ((datavfat["value"] * slopeTemp) + interTemp) # transform data from DAC to uA/mV
+	        datavfat["value"] = (nominalDacScalingFactors[DAC_reg]) * ((datavfat["value"] * slopeTemp) + interTemp) # transform data from DAC to uA/mV
 	        print("vfat data after transformation: {}".format(datavfat["value"]))
 	        datavfat2 = datavfat
 	        
