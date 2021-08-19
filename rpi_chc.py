@@ -97,7 +97,29 @@ class rpi_chc:
             reset_success = 1
         except:
             print(Colors.RED + "ERROR: Unable to enable reset, check RPi connection" + Colors.ENDC)
-        return reset_success
+
+        # Setting GPIO 13 and 26 low, connected to config_select enabling I2C
+        config_channel = 13
+        config_success_13 = 0
+        try:
+            GPIO.setup(config_channel, GPIO.OUT)
+            GPIO.output(config_channel, 0)
+            print("GPIO 13 (config select) set to low")
+            config_success_13 = 1
+        except:
+            print(Colors.RED + "ERROR: Unable to set GPIO 13 to low, check RPi connection" + Colors.ENDC)
+
+        config_channel = 26
+        config_success_26 = 0
+        try:
+            GPIO.setup(config_channel, GPIO.OUT)
+            GPIO.output(config_channel, 0)
+            print("GPIO 26 (config select) set to low")
+            config_success_26 = 1
+        except:
+            print(Colors.RED + "ERROR: Unable to set GPIO 26 to low, check RPi connection" + Colors.ENDC)
+
+        return reset_success * config_success_13 * config_success_26
 
     def lpgbt_write_register(self, register, value):
         # Write to the LpGBT register given an address and value using I2C
