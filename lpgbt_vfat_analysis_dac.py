@@ -75,17 +75,15 @@ def main(inFile, calFile, directoryName, oh):
 	    sel = dacData.DAC_reg == DAC_reg # select rows for specific DAC 
 	    datareg = dacData[sel] # slice dataframe for specific DAC
 	    vfatCnt0 = 0 # Initialize vfat counter
-	    vfatCnt1 = 0 # Initialize vfat counter
-	    
-	    if numVfats == 6:
-	        fig, ax = plt.subplots(2, 3, figsize=(25,15))
-	    elif numVfats < 6 and numVfats != 1:
-	        temp = 6 - numVfats
-	        fig, ax = plt.subplots(1, numVfats, figsize=(25, 15))
-	        ax.flatten()
-	    else:
-	    	fig, ax = plt.subplots(numVfats, 1, figsize=(25, 15))
-    
+
+        if numVfats <= 3:
+            fig, ax = plt.subplots(1, numVfats, figsize=(25,15))
+            ax.flatten()
+        elif numVfats <= 6:
+            fig, ax = plt.subplots(2, 3, figsize=(25,15))
+        else:
+            fig, ax = plt.subplots(int(numVfats/6)+1, 6, figsize=(25,15))
+
 	    for vfat in datareg.vfat.unique(): # loop over vfats
 	        print(Colors.GREEN + "\nWorking on VFAT: %s\n" % vfat+ Colors.ENDC)
 	        sel2 = datareg.vfat == vfat # select rows for the current vfat
@@ -106,20 +104,17 @@ def main(inFile, calFile, directoryName, oh):
 	        if DAC_reg == "CFG_HYST" or DAC_reg == "CFG_BIAS_PRE_I_BLCC":
 	        	xdata = xdata / 1000 # convert to uA
 	        	datavfat["value"] = datavfat["value"] / 1000 
-	        if numVfats == 6:
-	            if vfatCnt0 <= 2:
-	                ax[0, vfatCnt0].grid()
-	                ax[0, vfatCnt0].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
-	            elif vfatCnt0 > 2:
-	                ax[1, vfatCnt1].grid()
-	                ax[1, vfatCnt1].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
-	        elif numVfats <  6 and numVfats != 1:
-	            ax[vfatCnt0].grid()
+
+            if numVfats <= 3:
+                ax[vfatCnt0].grid()
 	            ax[vfatCnt0].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
-	        else:
-	            ax[vfatCnt0].grid()
-	            ax[vfatCnt0].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none")
-	          
+            elif numVfats <= 6:
+                ax[int(vfatCnt0/3), vfatCnt0%3].grid()
+	            ax[int(vfatCnt0/3), vfatCnt0%3].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
+            else:
+                ax[int(vfatCnt0/6), vfatCnt0%6].grid()
+	            ax[int(vfatCnt0/6), vfatCnt0%6].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
+
 	        fitData = np.polyfit(xdata, ydata, 5) # fit data to 5th degree polynomial
 	        
 	        datavfat2["DAC_point"] = pd.DataFrame(poly5(xdata, *fitData), columns=["DAC_point"]) # adds fitted data to dataframe
@@ -127,46 +122,30 @@ def main(inFile, calFile, directoryName, oh):
 	        nominal_ADC0 = int(determine_nom(datavfat2, nml)) # find nominal value for specific vfat
 	        if nominal_ADC0 > max(datavfat.DAC_point):
 	            nominal_ADC0 = max(datavfat.DAC_point)
-	        
+
+            xlabel_plot = ""
+            if nominalDacValues[DAC_reg][1] == "uA":
+                xlabel_plot = "ADC0 ($\mu$A)"
+            else:
+                xlabel_plot = "ADC0 (%s)" % nominalDacValues[DAC_reg][1]
+
 	        # Plot fit
-	        if numVfats == 6:
-	            if vfatCnt0 <= 2:
-	                if nominalDacValues[DAC_reg][1] == "uA":
-	                    ax[0, vfatCnt0].set_xlabel(r"ADC0 ($\mu$A)")
-	                else:
-	                    ax[0, vfatCnt1].set_xlabel("ADC0 (%s)" % nominalDacValues[DAC_reg][1])
-	                ax[0, vfatCnt0].set_ylabel("DAC")
-	                ax[0, vfatCnt0].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
-	                ax[0, vfatCnt0].set_title("VFAT%02d" % vfat)
-	            elif vfatCnt0 > 2:
-	                if nominalDacValues[DAC_reg][1] == "uA":
-	                    ax[1, vfatCnt1].set_xlabel(r"ADC0 ($\mu$A)")
-	                else:
-	                    ax[1, vfatCnt1].set_xlabel("ADC0 (%s)" % nominalDacValues[DAC_reg][1])
-	                #ax[1, vfatCnt1].set_xlabel("ADC0 (%s)" % nominalDacValues[DAC_reg][1])
-	                ax[1, vfatCnt1].set_ylabel("DAC")
-	                ax[1, vfatCnt1].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
-	                ax[1, vfatCnt1].set_title("VFAT%02d" % vfat)
-
-	        elif numVfats < 6 and numVfats != 1:
-	            ax[vfatCnt0].set_xlabel(r"ADC0 ($\mu$A)")
-	            #ax[vfatCnt0].set_xlabel("ADC0 (%s)" % nominalDacValues[DAC_reg][1])
+            if numVfats <= 3:
+                ax[vfatCnt0].set_xlabel(xlabel_plot)
 	            ax[vfatCnt0].set_ylabel("DAC")
-	            ax[vfatCnt0].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
-	            ax[vfatCnt0].set_title("VFAT%02d" % vfat)
-	        else:
-	            ax[vfatCnt0].set_xlabel(r"ADC0 ($\mu$A)")
-	            #ax.set_xlabel("ADC0 (%s)" % nominalDacValues[DAC_reg][1])
-	            ax[vfatCnt0].set_ylabel("DAC")
-	            ax[vfatCnt0].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
-	            ax[vfatCnt0].set_title("VFAT%02d" % vfat)
+                ax[vfatCnt0].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
+                ax[vfatCnt0].set_title("VFAT%02d" % vfat)
+            elif numVfats <= 6:
+                ax[int(vfatCnt0/3), vfatCnt0%3].set_xlabel(xlabel_plot)
+                ax[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("DAC")
+                ax[int(vfatCnt0/3), vfatCnt0%3].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
+                ax[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT%02d" % vfat)
+            else:
+                ax[int(vfatCnt0/6), vfatCnt0%6].set_xlabel(xlabel_plot)
+                ax[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("DAC")
+                ax[int(vfatCnt0/6), vfatCnt0%6].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
+                ax[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT%02d" % vfat)
 
-
-	        if vfatCnt0 > 2 :
-	            vfatCnt1 += 1
-	        else:
-	            pass
-	        
 	        vfatCnt0 += 1
 
 	        file.write("%s;%i;%i\n" % (DAC_reg, vfat, nominal_ADC0))
