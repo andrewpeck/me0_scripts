@@ -18,7 +18,7 @@ def determine_nom(data, nominal_ADC0):
 nominalDacValues = {
         "CFG_CAL_DAC_I":(0,"uA"), # there is no nominal value
         "CFG_BIAS_PRE_I_BIT":(150,"uA"),
-        "CFG_BIAS_PRE_I_BLCC":(25,"uA"), # changed to uA because of conversion
+        "CFG_BIAS_PRE_I_BLCC":(25.0/1000.0,"uA"), # changed to uA from nA
         "CFG_BIAS_PRE_I_BSF":(26,"uA"),
         "CFG_BIAS_SH_I_BFCAS":(26,"uA"),
         "CFG_BIAS_SH_I_BDIFF":(16,"uA"),
@@ -27,7 +27,8 @@ nominalDacValues = {
         "CFG_BIAS_SD_I_BSF":(30,"uA"),
         "CFG_BIAS_CFD_DAC_1":(20,"uA"),
         "CFG_BIAS_CFD_DAC_2":(20,"uA"),
-        "CFG_HYST":(100,"uA"), # changed to uA because of conversion
+        "CFG_HYST":(100.0/1000.0,"uA"), # changed to uA from nA
+
         "CFG_THR_ARM_DAC":(64,"mV"),
         "CFG_THR_ZCC_DAC":(5.5,"mV"),
         "CFG_CAL_DAC_V":(0,"mV"), # there is no nominal value
@@ -67,6 +68,8 @@ def main(inFile, calFile, directoryName, oh):
     indices = dacData[dacData["DAC_reg"] == "CFG_MON_GAIN"].index
     dacData.drop(indices, inplace=True)
 
+    nominal_iref = 10*0.5 #the nominal reference current is 10 uA and it has a scaling factor of 0.5
+
     for DAC_reg in dacData.DAC_reg.unique(): # loop over dacs
         startTime = time()
         print(Colors.GREEN + "\nWorking on DAC: %s \n" % DAC_reg + Colors.ENDC)
@@ -93,27 +96,36 @@ def main(inFile, calFile, directoryName, oh):
             print("VFAT: {}, slope: {}, intercept: {}".format(vfat, slopeTemp, interTemp))
             print("vfat data: {}".format(datavfat["value"]))
 
-            datavfat["value"] = (nominalDacScalingFactors[DAC_reg]) * ((datavfat["value"] * slopeTemp) + interTemp) # transform data from DAC to uA/mV
+            datavfat["value"] = (datavfat["value"] * slopeTemp) + interTemp # transform data from DAC to mV
+            datavfat["error"] = (datavfat["error"] * slopeTemp)
+            if nominalDacValues[DAC_reg][1] == "uA":
+                datavfat["value"] /= 20.0 # change current DACs to uA (20kOhm resistor)
+                datavfat["error"] /= 20.0
+                if DAC_reg!="CFG_IREF":
+                    datavfat["value"] -= nominal_iref
+            datavfat["value"] /= nominalDacScalingFactors[DAC_reg] # use scale factor
+            datavfat["error"] /= nominalDacScalingFactors[DAC_reg]
             print("vfat data after transformation: {}".format(datavfat["value"]))
             datavfat2 = datavfat
 
             # convert data to np arrays for plotting
             xdata = datavfat["value"].to_numpy()
+            xerror = datavfat["error"].to_numpy()
             ydata = datavfat["DAC_point"].to_numpy()
 
-            if DAC_reg == "CFG_HYST" or DAC_reg == "CFG_BIAS_PRE_I_BLCC":
-                xdata = xdata / 1000 # convert to uA
-                datavfat["value"] = datavfat["value"] / 1000
+            #if DAC_reg == "CFG_HYST" or DAC_reg == "CFG_BIAS_PRE_I_BLCC":
+            #    xdata = xdata / 1000 # convert to uA
+            #    datavfat["value"] = datavfat["value"] / 1000
 
             if numVfats <= 3:
                 ax[vfatCnt0].grid()
-                ax[vfatCnt0].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
+                ax[vfatCnt0].errorbar(datavfat.value, datavfat.DAC_point, xerr=datavfat.error, fmt="ko", markersize=7, fillstyle="none") # plot transformed data
             elif numVfats <= 6:
                 ax[int(vfatCnt0/3), vfatCnt0%3].grid()
-                ax[int(vfatCnt0/3), vfatCnt0%3].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
+                ax[int(vfatCnt0/3), vfatCnt0%3].errorbar(datavfat.value, datavfat.DAC_point, xerr=datavfat.error, fmt="ko", markersize=7, fillstyle="none") # plot transformed data
             else:
                 ax[int(vfatCnt0/6), vfatCnt0%6].grid()
-                ax[int(vfatCnt0/6), vfatCnt0%6].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
+                ax[int(vfatCnt0/6), vfatCnt0%6].errorbar(datavfat.value, datavfat.DAC_point, xerr=datavfat.error, fmt="ko", markersize=7, fillstyle="none") # plot transformed data
 
             fitData = np.polyfit(xdata, ydata, 5) # fit data to 5th degree polynomial
 
