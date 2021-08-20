@@ -57,24 +57,24 @@ nominalDacScalingFactors = {
 }
 
 def main(inFile, calFile, directoryName, oh):
-	# read in DAC and cal data to dataframe
-	dacData = pd.read_csv(inFile, names=["OH", "DAC_reg", "vfat", "DAC_point","value","error"], sep=";", skiprows=[0])
-	calData = pd.read_csv(calFile ,names=["vfat", "vfat_serial_num", "slope", "intercept"], sep=";", skiprows=[0])
+    # read in DAC and cal data to dataframe
+    dacData = pd.read_csv(inFile, names=["OH", "DAC_reg", "vfat", "DAC_point","value","error"], sep=";", skiprows=[0])
+    calData = pd.read_csv(calFile ,names=["vfat", "vfat_serial_num", "slope", "intercept"], sep=";", skiprows=[0])
 
-	numDacs  = dacData["DAC_reg"].nunique() # get number of dacs scanned
-	numVfats = dacData["vfat"].nunique() # get number of vfats
+    numDacs  = dacData["DAC_reg"].nunique() # get number of dacs scanned
+    numVfats = dacData["vfat"].nunique() # get number of vfats
 
-	indices = dacData[dacData["DAC_reg"] == "CFG_MON_GAIN"].index
-	dacData.drop(indices, inplace=True)
+    indices = dacData[dacData["DAC_reg"] == "CFG_MON_GAIN"].index
+    dacData.drop(indices, inplace=True)
 
-	for DAC_reg in dacData.DAC_reg.unique(): # loop over dacs
-	    startTime = time()
-	    print(Colors.GREEN + "\nWorking on DAC: %s \n" % DAC_reg + Colors.ENDC)
-	    dacFileName = directoryName + "/nominalValues_" + oh + "_" + DAC_reg + ".txt"
-	    file = open(dacFileName, "w")
-	    sel = dacData.DAC_reg == DAC_reg # select rows for specific DAC 
-	    datareg = dacData[sel] # slice dataframe for specific DAC
-	    vfatCnt0 = 0 # Initialize vfat counter
+    for DAC_reg in dacData.DAC_reg.unique(): # loop over dacs
+        startTime = time()
+        print(Colors.GREEN + "\nWorking on DAC: %s \n" % DAC_reg + Colors.ENDC)
+        dacFileName = directoryName + "/nominalValues_" + oh + "_" + DAC_reg + ".txt"
+        file = open(dacFileName, "w")
+        sel = dacData.DAC_reg == DAC_reg # select rows for specific DAC
+        datareg = dacData[sel] # slice dataframe for specific DAC
+        vfatCnt0 = 0 # Initialize vfat counter
 
         if numVfats <= 3:
             fig, ax = plt.subplots(1, numVfats, figsize=(25,15))
@@ -84,44 +84,44 @@ def main(inFile, calFile, directoryName, oh):
         else:
             fig, ax = plt.subplots(int(numVfats/6)+1, 6, figsize=(25,15))
 
-	    for vfat in datareg.vfat.unique(): # loop over vfats
-	        print(Colors.GREEN + "\nWorking on VFAT: %s\n" % vfat+ Colors.ENDC)
-	        sel2 = datareg.vfat == vfat # select rows for the current vfat
-	        datavfat = datareg[sel2].reset_index() # reset starting index of sliced dataframe to 0
-	        slopeTemp = np.array(calData.loc[calData["vfat"] == vfat].slope) # get slope for VFAT
-	        interTemp = np.array(calData.loc[calData["vfat"] == vfat].intercept) # get intercept for VFAT
-	        print("VFAT: {}, slope: {}, intercept: {}".format(vfat, slopeTemp, interTemp))
-	        print("vfat data: {}".format(datavfat["value"]))
+        for vfat in datareg.vfat.unique(): # loop over vfats
+            print(Colors.GREEN + "\nWorking on VFAT: %s\n" % vfat+ Colors.ENDC)
+            sel2 = datareg.vfat == vfat # select rows for the current vfat
+            datavfat = datareg[sel2].reset_index() # reset starting index of sliced dataframe to 0
+            slopeTemp = np.array(calData.loc[calData["vfat"] == vfat].slope) # get slope for VFAT
+            interTemp = np.array(calData.loc[calData["vfat"] == vfat].intercept) # get intercept for VFAT
+            print("VFAT: {}, slope: {}, intercept: {}".format(vfat, slopeTemp, interTemp))
+            print("vfat data: {}".format(datavfat["value"]))
 
-	        datavfat["value"] = (nominalDacScalingFactors[DAC_reg]) * ((datavfat["value"] * slopeTemp) + interTemp) # transform data from DAC to uA/mV
-	        print("vfat data after transformation: {}".format(datavfat["value"]))
-	        datavfat2 = datavfat
-	        
-	        # convert data to np arrays for plotting
-	        xdata = datavfat["value"].to_numpy()
-	        ydata = datavfat["DAC_point"].to_numpy()
+            datavfat["value"] = (nominalDacScalingFactors[DAC_reg]) * ((datavfat["value"] * slopeTemp) + interTemp) # transform data from DAC to uA/mV
+            print("vfat data after transformation: {}".format(datavfat["value"]))
+            datavfat2 = datavfat
 
-	        if DAC_reg == "CFG_HYST" or DAC_reg == "CFG_BIAS_PRE_I_BLCC":
-	        	xdata = xdata / 1000 # convert to uA
-	        	datavfat["value"] = datavfat["value"] / 1000 
+            # convert data to np arrays for plotting
+            xdata = datavfat["value"].to_numpy()
+            ydata = datavfat["DAC_point"].to_numpy()
+
+            if DAC_reg == "CFG_HYST" or DAC_reg == "CFG_BIAS_PRE_I_BLCC":
+                xdata = xdata / 1000 # convert to uA
+                datavfat["value"] = datavfat["value"] / 1000
 
             if numVfats <= 3:
                 ax[vfatCnt0].grid()
-	            ax[vfatCnt0].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
+                ax[vfatCnt0].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
             elif numVfats <= 6:
                 ax[int(vfatCnt0/3), vfatCnt0%3].grid()
-	            ax[int(vfatCnt0/3), vfatCnt0%3].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
+                ax[int(vfatCnt0/3), vfatCnt0%3].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
             else:
                 ax[int(vfatCnt0/6), vfatCnt0%6].grid()
-	            ax[int(vfatCnt0/6), vfatCnt0%6].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
+                ax[int(vfatCnt0/6), vfatCnt0%6].plot(datavfat.value, datavfat.DAC_point, "ko", markersize = 7, fillstyle="none") # plot transformed data
 
-	        fitData = np.polyfit(xdata, ydata, 5) # fit data to 5th degree polynomial
-	        
-	        datavfat2["DAC_point"] = pd.DataFrame(poly5(xdata, *fitData), columns=["DAC_point"]) # adds fitted data to dataframe
-	        nml = nominalDacValues[DAC_reg][0] # store nominal DAC value
-	        nominal_ADC0 = int(determine_nom(datavfat2, nml)) # find nominal value for specific vfat
-	        if nominal_ADC0 > max(datavfat.DAC_point):
-	            nominal_ADC0 = max(datavfat.DAC_point)
+            fitData = np.polyfit(xdata, ydata, 5) # fit data to 5th degree polynomial
+
+            datavfat2["DAC_point"] = pd.DataFrame(poly5(xdata, *fitData), columns=["DAC_point"]) # adds fitted data to dataframe
+            nml = nominalDacValues[DAC_reg][0] # store nominal DAC value
+            nominal_ADC0 = int(determine_nom(datavfat2, nml)) # find nominal value for specific vfat
+            if nominal_ADC0 > max(datavfat.DAC_point):
+                nominal_ADC0 = max(datavfat.DAC_point)
 
             xlabel_plot = ""
             if nominalDacValues[DAC_reg][1] == "uA":
@@ -129,10 +129,10 @@ def main(inFile, calFile, directoryName, oh):
             else:
                 xlabel_plot = "ADC0 (%s)" % nominalDacValues[DAC_reg][1]
 
-	        # Plot fit
+            # Plot fit
             if numVfats <= 3:
                 ax[vfatCnt0].set_xlabel(xlabel_plot)
-	            ax[vfatCnt0].set_ylabel("DAC")
+                ax[vfatCnt0].set_ylabel("DAC")
                 ax[vfatCnt0].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
                 ax[vfatCnt0].set_title("VFAT%02d" % vfat)
             elif numVfats <= 6:
@@ -146,20 +146,20 @@ def main(inFile, calFile, directoryName, oh):
                 ax[int(vfatCnt0/6), vfatCnt0%6].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
                 ax[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT%02d" % vfat)
 
-	        vfatCnt0 += 1
+            vfatCnt0 += 1
 
-	        file.write("%s;%i;%i\n" % (DAC_reg, vfat, nominal_ADC0))
-	    fig.suptitle(DAC_reg, fontsize=32) # place DAC name for main title
-	    fig.subplots_adjust(top=0.88) # adjust main title so that it
-	    fig.tight_layout()
-	    plt.savefig(directoryName + "/DAC_summaryPlots_%s_%s.pdf"%(oh, DAC_reg))
-	    file.close()
-	    print("Total time to execute: %s s" % str(time() - startTime))
-	    plt.close() 
+            file.write("%s;%i;%i\n" % (DAC_reg, vfat, nominal_ADC0))
+        fig.suptitle(DAC_reg, fontsize=32) # place DAC name for main title
+        fig.subplots_adjust(top=0.88) # adjust main title so that it
+        fig.tight_layout()
+        plt.savefig(directoryName + "/DAC_summaryPlots_%s_%s.pdf"%(oh, DAC_reg))
+        file.close()
+        print("Total time to execute: %s s" % str(time() - startTime))
+        plt.close()
 
 if __name__ == "__main__":
 
-	# Parsing arguments
+    # Parsing arguments
     parser = argparse.ArgumentParser(description="LpGBT VFAT DAC Scan Results")
     parser.add_argument("-i", "--inFile", action="store", dest="inFile", help="Input file")
     args = parser.parse_args()
