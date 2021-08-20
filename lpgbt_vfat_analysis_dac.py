@@ -28,7 +28,6 @@ nominalDacValues = {
         "CFG_BIAS_CFD_DAC_1":(20,"uA"),
         "CFG_BIAS_CFD_DAC_2":(20,"uA"),
         "CFG_HYST":(100.0/1000.0,"uA"), # changed to uA from nA
-
         "CFG_THR_ARM_DAC":(64,"mV"),
         "CFG_THR_ZCC_DAC":(5.5,"mV"),
         "CFG_CAL_DAC_V":(0,"mV"), # there is no nominal value
