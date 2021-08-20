@@ -79,12 +79,18 @@ def main(inFile, calFile, directoryName, oh):
         datareg = dacData[sel] # slice dataframe for specific DAC
         vfatCnt0 = 0 # Initialize vfat counter
 
-        if numVfats <= 3:
-            fig, ax = plt.subplots(1, numVfats, figsize=(25,15))
+        if numVfats == 1:
+            fig, ax = plt.subplots(1, numVfats, figsize=(10,10))
+        elif numVfats <= 3:
+            fig, ax = plt.subplots(1, numVfats, figsize=(30,10))
         elif numVfats <= 6:
-            fig, ax = plt.subplots(2, 3, figsize=(25,15))
-        else:
-            fig, ax = plt.subplots(int(numVfats/6)+1, 6, figsize=(25,15))
+            fig, ax = plt.subplots(2, 3, figsize=(30,20))
+        elif numVfats <= 12:
+            fig, ax = plt.subplots(int(numVfats/6)+1, 6, figsize=(60,20))
+        elif numVfats <= 18:
+            fig, ax = plt.subplots(int(numVfats/6)+1, 6, figsize=(60,30))
+        elif numVfats <= 24:
+            fig, ax = plt.subplots(int(numVfats/6)+1, 6, figsize=(60,40))
 
         for vfat in datareg.vfat.unique(): # loop over vfats
             print(Colors.GREEN + "\nWorking on VFAT: %s\n" % vfat+ Colors.ENDC)
