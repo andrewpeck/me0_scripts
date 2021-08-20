@@ -81,7 +81,6 @@ def main(inFile, calFile, directoryName, oh):
 
         if numVfats <= 3:
             fig, ax = plt.subplots(1, numVfats, figsize=(25,15))
-            ax.flatten()
         elif numVfats <= 6:
             fig, ax = plt.subplots(2, 3, figsize=(25,15))
         else:
@@ -117,7 +116,10 @@ def main(inFile, calFile, directoryName, oh):
             #    xdata = xdata / 1000 # convert to uA
             #    datavfat["value"] = datavfat["value"] / 1000
 
-            if numVfats <= 3:
+            if numVfats == 1:
+                ax.grid()
+                ax.errorbar(datavfat.value, datavfat.DAC_point, xerr=datavfat.error, fmt="ko", markersize=7, fillstyle="none") # plot transformed data
+            elif numVfats <= 3:
                 ax[vfatCnt0].grid()
                 ax[vfatCnt0].errorbar(datavfat.value, datavfat.DAC_point, xerr=datavfat.error, fmt="ko", markersize=7, fillstyle="none") # plot transformed data
             elif numVfats <= 6:
@@ -142,7 +144,12 @@ def main(inFile, calFile, directoryName, oh):
                 xlabel_plot = "ADC0 (%s)" % nominalDacValues[DAC_reg][1]
 
             # Plot fit
-            if numVfats <= 3:
+            if numVfats == 1:
+                ax.set_xlabel(xlabel_plot)
+                ax.set_ylabel("DAC")
+                ax.plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
+                ax.set_title("VFAT%02d" % vfat)
+            elif numVfats <= 3:
                 ax[vfatCnt0].set_xlabel(xlabel_plot)
                 ax[vfatCnt0].set_ylabel("DAC")
                 ax[vfatCnt0].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
