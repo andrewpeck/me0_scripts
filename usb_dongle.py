@@ -223,7 +223,7 @@ class USB_dongle():
         # ret[0] - status
         # ret[1] - number of slaves
         # ret[2..] - slaves addresses
-        print "found %d I2C slave(s)" %(ret[1])
+        print ("found %d I2C slave(s)" %(ret[1]))
         devices= (ret[2+i] for i in range(ret[1]))
         return list (devices)
 
@@ -248,7 +248,7 @@ class USB_dongle():
 if __name__ == '__main__':
     my_interface=USB_dongle()
 
-    print my_interface.get_firmware_version()
+    print (my_interface.get_firmware_version())
     #my_interface.go_bootload()
 
 

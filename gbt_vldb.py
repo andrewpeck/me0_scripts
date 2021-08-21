@@ -67,7 +67,7 @@ class GBTx():
       f= open(config_file,"w+")
       for i in range (366):
          val =    self.gbtx_read_register(i)
-         print val
+         print (val)
          val_string = "%02X\n"%val
          f.write(val_string)
 

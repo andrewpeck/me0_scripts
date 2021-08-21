@@ -47,7 +47,16 @@
             <!-- this node is partial!! -->
             <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#calibration-data -->
             <node id="CALIBRATION" address="0x8" description="Calibration Data">
-                <!-- left out many tbd calibration registers-->
+                <!-- TODO left out many tbd calibration registers-->
+
+                <!-- [0x01c] VREFCNTR -->
+                <!-- Voltage reference control. -->
+                <node id="VREFENABLE" address="0x01c-0x8" permission="rw"
+                    description="Enable internal voltage reference."
+                    mask="0x80" />
+                <node id="VREFTUNE" address="0x01c-0x8" permission="rw"
+                    description="Tuning world for internal voltage reference."
+                    mask="0x3f" />
 
                 <!--[0x01f] EPRXLOCKFILTER-->
                 <node id="EPRXLOCKTHRESHOLD" address="0x17" permission="rw"
@@ -56,277 +65,242 @@
                 <node id="EPRXRELOCKTHRESHOLD" address="0x17" permission="rw"
                     description="Sets the relock threshold value of the instant lock low pass filter for ePortRx DLL's (default: 5)"
                     mask="0x0f" />
+            </node> <!--CALIBRATION-->
+
+            <!--Clock Generator-->
+            <node id="CLOCKGENERATOR" address="0x20" description="Clock Generator Settings">
 
                 <!--[0x020] CLKGConfig0 -->
-                <node id="CLKGBIASGENCONFIG" address="0x18" permission="rw"
-                    description="Bias DAC for the charge pumps [0 : 8 : 120] uA; default: 8"
-                    mask="0x0f" />
-                <node id="CLKGCALIBRATIONENDOFCOUNT" address="0x18" permission="rw"
+                <node id="CLKGCALIBRATIONENDOFCOUNT" address="0x00" permission="rw"
                     description="Selects the VCO calibration race goal in number of clock cycles between refClk (refClkCounter) and vco_40MHz (vcoClkCounter) (2^(CLKGCalibrationEndOfCount[3:0]+1)); default: 12"
                     mask="0xf0" />
+                <node id="CLKGBIASGENCONFIG" address="0x00" permission="rw"
+                    description="Bias DAC for the charge pumps [0 : 8 : 120] uA; default: 8"
+                    mask="0x0f" />
 
                 <!--[0x021] CLKGConfig1 -->
-                <node id="CLKGVCODAC" address="0x19" permission="rw"
-                    description="Current DAC for the VCO [0: 0.470 : 7.1] mA; default: 8"
-                    mask="0x0f" />
-                <node id="CLKGVCORAILMODE" address="0x19" permission="rw"
-                    description="VCO rail mode; [0: voltage mode, fixed to VDDRX; 1: current mode, value selectable using CLKGVcoDAC (default)]"
-                    mask="0x10" />
-                <node id="CLKGCDRRES" address="0x19" permission="rw"
-                    description="CDR's filter resistance; default: 1 when in RX/TRX mode, 0 when in TX mode"
-                    mask="0x20" />
-                <node id="CLKGDISABLEFRAMEALIGNERLOCKCONTROL" address="0x19" permission="rw"
-                    description="Disables the use of the frame aligner's lock status; default: 0"
-                    mask="0x40" />
-                <node id="CDRCONTROLOVERRIDEENABLE" address="0x19" permission="rw"
+                <node id="CDRCONTROLOVERRIDEENABLE" address="0x01" permission="rw"
                     description="Enables the control override of the state machine; default: 0"
                     mask="0x80" />
+                <node id="CLKGDISABLEFRAMEALIGNERLOCKCONTROL" address="0x01" permission="rw"
+                    description="Disables the use of the frame aligner's lock status; default: 0"
+                    mask="0x40" />
+                <node id="CLKGCDRRES" address="0x01" permission="rw"
+                    description="CDR's filter resistance; default: 1 when in RX/TRX mode, 0 when in TX mode"
+                    mask="0x20" />
+                <node id="CLKGVCORAILMODE" address="0x01" permission="rw"
+                    description="VCO rail mode; [0: voltage mode, fixed to VDDRX; 1: current mode, value selectable using CLKGVcoDAC (default)]"
+                    mask="0x10" />
+                <node id="CLKGVCODAC" address="0x01" permission="rw"
+                    description="Current DAC for the VCO [0: 0.470 : 7.1] mA; default: 8"
+                    mask="0x0f" />
 
                 <!-- [0x022] CLKGPllRes -->
-                <node id="CLKGPLLRESWHENLOCKED" address="0x1a" permission="rw"
+                <node id="CLKGPLLRESWHENLOCKED" address="0x02" permission="rw"
                     description="PLL's filter resistance when PLL is locked [R = 1/2 * 79.8k / CONFIG] Ohm; default: 4; set to 0 if RX or TRX mode"
                     mask="0xf0" />
-
-                <node id="CLKGPLLRES" address="0x1a" permission="rw"
+                <node id="CLKGPLLRES" address="0x02" permission="rw"
                     description="PLL's filter resistance when PLL is locking [R = 1/2 * 79.8k / CONFIG] Ohm; default: 4; set to 0 if RX or TRX mode"
                     mask="0x0f" />
 
                 <!-- [0x023] CLKGPLLIntCur -->
-                <node id="CLKGPLLINTCURWHENLOCKED" address="0x1b" permission="rw"
+                <node id="CLKGPLLINTCURWHENLOCKED" address="0x03" permission="rw"
                     description="PLL's integral current path when in locked state [0 : 1.1 : 8] uA; default: 5"
                     mask="0xf0" />
-
-                <node id="CLKGPLLINTCUR" address="0x1b" permission="rw"
+                <node id="CLKGPLLINTCUR" address="0x03" permission="rw"
                     description="PLL's integral current path when in locking state [0 : 1.1 : 8] uA; default: 5"
                     mask="0x0f" />
 
                 <!-- [0x024] CLKGPLLPropCur -->
-                <node id="CLKGPLLPROPCURWHENLOCKED" address="0x1c" permission="rw"
+                <node id="CLKGPLLPROPCURWHENLOCKED" address="0x04" permission="rw"
                     description="PLL's proportional current path when in locked state [0 : 5.46 : 82] uA; default: 5"
                     mask="0xf0" />
-
-                <node id="CLKGPLLPROPCUR" address="0x1c" permission="rw"
+                <node id="CLKGPLLPROPCUR" address="0x04" permission="rw"
                     description="PLL's proportional current path when in locking state [0 : 5.46 : 82] uA; default: 5"
                     mask="0x0f" />
 
                 <!-- [0x025] CLKGCDRPropCur -->
-                <node id="CLKGCDRPROPCURWHENLOCKED" address="0x1d" permission="rw"
+                <node id="CLKGCDRPROPCURWHENLOCKED" address="0x05" permission="rw"
                     description="CDR's Alexander phase detector proportional current path when in locked state [0 : 5.46 : 82] uA; default: 5"
                     mask="0xf0" />
-
-                <node id="CLKGCDRPROPCUR" address="0x1d" permission="rw"
+                <node id="CLKGCDRPROPCUR" address="0x05" permission="rw"
                     description="CDR's Alexander phase detector proportional current path when in locking state [0 : 5.46 : 82] uA; default: 5"
                     mask="0x0f" />
 
                 <!-- [0x026] CLKGCDRIntCur -->
-                <node id="CLKGCDRINTCURWHENLOCKED" address="0x1e" permission="rw"
+                <node id="CLKGCDRINTCURWHENLOCKED" address="0x06" permission="rw"
                     description="CDR's Alexander phase detector integral current path when in locked state [0 : 5.46 : 82] uA; default: 5"
                     mask="0xf0" />
-
-                <node id="CLKGCDRINTCUR" address="0x1e" permission="rw"
+                <node id="CLKGCDRINTCUR" address="0x06" permission="rw"
                     description="CDR's Alexander phase detector integral integral current path when in locking state [0 : 5.46 : 82] uA; default: 5"
                     mask="0x0f" />
 
                 <!-- [0x027] CLKGCDRFFPropCur -->
-                <node id="CLKGCDRFEEDFORWARDPROPCURWHENLOCKED" address="0x1f" permission="rw"
+                <node id="CLKGCDRFEEDFORWARDPROPCURWHENLOCKED" address="0x07" permission="rw"
                     description="CDR's proportional feed forward current path when in locked state [0 : 5.46 : 82] uA; default: 5"
                     mask="0xf0" />
-
-                <node id="CLKGCDRFEEDFORWARDPROPCUR" address="0x1f" permission="rw"
+                <node id="CLKGCDRFEEDFORWARDPROPCUR" address="0x07" permission="rw"
                     description="CDR's proportional feed forward current path when in locking state [0 : 5.46 : 82] uA; default: 5"
                     mask="0x0f" />
 
                 <!-- [0x028] CLKGFLLIntCur -->
-                <node id="CLKGFLLINTCURWHENLOCKED" address="0x20" permission="rw"
+                <node id="CLKGFLLINTCURWHENLOCKED" address="0x08" permission="rw"
                     description="CDR's frequency detector charge pump when in locked state [0 : 5.46 : 82] uA; default: 0"
                     mask="0xf0" />
-
-                <node id="CLKGFLLINTCUR" address="0x20" permission="rw"
+                <node id="CLKGFLLINTCUR" address="0x08" permission="rw"
                     description="CDR's frequency detector charge pump when in locking state [0 : 5.46 : 82] uA; default: 5"
                     mask="0x0f" />
 
                 <!-- [0x029] CLKGFFCAP -->
-                <node id="CDRCOCONNECTCDR" address="0x21" permission="rw"
+                <node id="CDRCOCONNECTCDR" address="0x09" permission="rw"
                     description="Enables the connectCDR switch [0 - disable, 1 - enable] (only when CDRControlOverrideEnable is 1)"
                     mask="0x80" />
-
-                <node id="CLKGCAPBANKOVERRIDEENABLE" address="0x21" permission="rw"
+                <node id="CLKGCAPBANKOVERRIDEENABLE" address="0x09" permission="rw"
                     description="Enables the override of the capacitor search during VCO calibration  disable, 1 - enable]; default: 0"
                     mask="0x40" />
-
-                <node id="CLKGFEEDFORWARDCAPWHENLOCKED" address="0x21" permission="rw"
+                <node id="CLKGFEEDFORWARDCAPWHENLOCKED" address="0x09" permission="rw"
                     description="CDR's feed forward filter's capacitance when in locked state [0: 44 : 308] fF; default: 3"
                     mask="0x38" />
-
-                <node id="CLKGFEEDFORWARDCAP" address="0x21" permission="rw"
+                <node id="CLKGFEEDFORWARDCAP" address="0x09" permission="rw"
                     description="CDR's feed forward filter's capacitance when in locking state [0: 44 : 308] fF; default: 3"
                     mask="0x07" />
 
                 <!-- [0x02a] CLKGCntOverride -->
-                <node id="CLKGCOOVERRIDEVC" address="0x22" permission="rw"
+                <node id="CLKGCOOVERRIDEVC" address="0x0A" permission="rw"
                     description="Forces the VCO's control voltage to be in mid range  disable, 1 - enable] (only when CDRControlOverrideEnable is 1)"
                     mask="0x80" />
-
-                <node id="CDRCOREFCLKSEL" address="0x22" permission="rw"
+                <node id="CDRCOREFCLKSEL" address="0x0A" permission="rw"
                     description="Forces the reference clock selection for the VCO calibration  data/4, 1 - external refClk] (only when CDRControlOverrideEnable is 1)"
                     mask="0x40" />
-
-                <node id="CDRCOENABLEPLL" address="0x22" permission="rw"
+                <node id="CDRCOENABLEPLL" address="0x0A" permission="rw"
                     description="Enables the enablePLL switch [0 - disable, 1 - enable] (only when CDRControlOverrideEnable is 1)"
                     mask="0x20" />
-
-                <node id="CDRCOENABLEFD" address="0x22" permission="rw"
+                <node id="CDRCOENABLEFD" address="0x0A" permission="rw"
                     description="Enables the frequency detector [0 - disable, 1 - enable] (only when CDRControlOverrideEnable is 1)"
                     mask="0x10" />
-
-                <node id="CDRCOENABLECDR" address="0x22" permission="rw"
+                <node id="CDRCOENABLECDR" address="0x0A" permission="rw"
                     description="Enables  the enableCDR switch [0 - disable, 1 - enable] (only when CDRControlOverrideEnable is 1)"
                     mask="0x8" />
-
-                <node id="CDRCODISDATACOUNTERREF" address="0x22" permission="rw"
+                <node id="CDRCODISDATACOUNTERREF" address="0x0A" permission="rw"
                     description="Enables  the data/4 ripple counter [0 - disable, 0 - enable] (only when CDRControlOverrideEnable is 1)"
                     mask="0x4" />
-
-                <node id="CDRCODISDESVBIASGEN" address="0x22" permission="rw"
+                <node id="CDRCODISDESVBIASGEN" address="0x0A" permission="rw"
                     description="Enables the vbias for the CDR [0 - disable, 0 - enable] (only when CDRControlOverrideEnable is 1)"
                     mask="0x2" />
-
-                <node id="CDRCOCONNECTPLL" address="0x22" permission="rw"
+                <node id="CDRCOCONNECTPLL" address="0x0A" permission="rw"
                     description="Enables the connectPLL switch [0 - disable, 1 - enable] (only when CDRControlOverrideEnable is 1)"
                     mask="0x1" />
 
                 <!-- [0x02b] CLKGOverrideCapBank -->
-                <node id="CLKGCAPBANKSELECT_7TO0" address="0x23" permission="rw"
+                <node id="CLKGCAPBANKSELECT_7TO0" address="0x0B" permission="rw"
                     description="Selects the capacitor bank value for the VCO [check attached table] (only when CLKGCapBankOverrideEnable is 1); default: n/a"
                     mask="0xff" />
 
                 <!-- [0x02c] CLKGWaitTime -->
-                <node id="CLKGWAITCDRTIME" address="0x24" permission="rw"
+                <node id="CLKGWAITCDRTIME" address="0x0C" permission="rw"
                     description="ljCDR state machine waiting for lock, RX/TRX mode, (16'h0001 shl waitCDRTime); (only when CLKGDisableFrameAlignerLockControl == 1); default: 8"
                     mask="0xf0" />
-
-                <node id="CLKGWAITPLLTIME" address="0x24" permission="rw"
+                <node id="CLKGWAITPLLTIME" address="0x0C" permission="rw"
                     description="ljCDR state machine waiting for lock, TX mode, (16'h0001 shl waitPLLTime); (only when lfEnable == 0); default: 8"
                     mask="0x0f" />
 
                 <!-- [0x02d] CLKGLFConfig0 -->
-                <node id="CLKGLOCKFILTERENABLE" address="0x25" permission="rw"
-                    description="Enables the lock filter on the instant lock signal; only in TX mode  disable, 1 enable; default: 1"
+                <node id="CLKGLOCKFILTERENABLE" address="0x0D" permission="rw"
+                    description="Enables the lock filter on the instant lock signal; only in TX mode, 0 disable, 1 enable; default: 1"
                     mask="0x80" />
-
-                <node id="CLKGCAPBANKSELECT_8" address="0x25" permission="rw"
+                <node id="CLKGCAPBANKSELECT_8" address="0x0D" permission="rw"
                     description="Selects the capacitor bank value for the VCO [check attached table] (only when CLKGCapBankOverrideEnable is 1); default: n/a"
                     mask="0x10" />
-
-                <node id="CLKGLOCKFILTERLOCKTHRCOUNTER" address="0x25" permission="rw"
+                <node id="CLKGLOCKFILTERLOCKTHRCOUNTER" address="0x0D" permission="rw"
                     description="Sets the lock threshold value of the instant lock low pass filter (16'h0001 shl lfLockThrCounter); only in TX mode; default: after SEU"
                     mask="0x0f" />
 
                 <!-- [0x02e] CLKGLFConfig1 -->
-                <node id="CLKGLOCKFILTERRELOCKTHRCOUNTER" address="0x26" permission="rw"
+                <node id="CLKGLOCKFILTERRELOCKTHRCOUNTER" address="0x0E" permission="rw"
                     description="Sets the relock threshold value of the instant lock low pass filter (16'h0001 shl lfReLockThrCounter); only in TX mode; default: after SEU"
                     mask="0xf0" />
-
-                <node id="CLKGLOCKFILTERUNLOCKTHRCOUNTER" address="0x26" permission="rw"
+                <node id="CLKGLOCKFILTERUNLOCKTHRCOUNTER" address="0x0E" permission="rw"
                     description="Sets the unlock threshold value of the instant lock low pass filter (16'h0001 shl lfUnLockThrCounter); only in TX mode; default: after SEU"
                     mask="0x0f" />
 
-                <!-- [0x02f] FAMaxHeaderFoundCount¶ -->
+                <!-- [0x02f] FAMaxHeaderFoundCount -->
                 <!-- Frame aligner configuration register. -->
-
-                <node id="FAMAXHEADERFOUNDCOUNT" address="0x27" permission="rw"
+                <node id="FAMAXHEADERFOUNDCOUNT" address="0x0F" permission="rw"
                     description="The number of consecutive valid frame headers that have to be detected before frame lock is assumed."
                     mask="0xff" />
 
                 <!-- [0x030] FAMaxHeaderFoundCountAfterNF -->
                 <!-- Frame aligner configuration register. -->
-
-                <node id="FAMAXHEADERFOUNDCOUNTAFTERNF" address="0x28" permission="rw"
+                <node id="FAMAXHEADERFOUNDCOUNTAFTERNF" address="0x10" permission="rw"
                     description="The number of consecutive detected valid headers to be found to clear the invalid frame count. The reset can happen only if the number of detected invalid headers does not exceed the FAMaxHeaderNotFoundCount[7:0]."
                     mask="0xff" />
 
                 <!-- [0x031] FAMaxHeaderNotFoundCount -->
                 <!-- Frame aligner configuration register. -->
-
-                <node id="FAMAXHEADERNOTFOUNDCOUNT" address="0x29" permission="rw"
+                <node id="FAMAXHEADERNOTFOUNDCOUNT" address="0x11" permission="rw"
                     description="The maximum number of invalid headers (consecutive or not) that can be received before the frame is considered misaligned."
                     mask="0xff" />
 
                 <!-- [0x032] FAFAMaxSkipCycleCountAfterNF -->
                 <!-- Frame aligner configuration register. -->
-
-                <node id="FAMAXSKIPCYCLECOUNTAFTERNF" address="0x2a" permission="rw"
+                <node id="FAMAXSKIPCYCLECOUNTAFTERNF" address="0x12" permission="rw"
                     description=""
                     mask="0xff" />
 
                 <!-- [0x033] PSDllConfig -->
-                <node id="EPRXUNLOCKTHRESHOLD" address="0x2b" permission="rw"
+                <node id="EPRXUNLOCKTHRESHOLD" address="0x13" permission="rw"
                     description=" 7:4 -  Sets the unlock threshold value of the instant lock low pass filter for ePortRx DLL's (default: 5)"
                     mask="0xf0" />
-
-                <node id="PSDLLCONFIRMCOUNT" address="0x2b" permission="rw"
+                <node id="PSDLLCONFIRMCOUNT" address="0x13" permission="rw"
                     description="Number of clock cycles (in the 40 MHz clock domain) to confirm locked state. 2d0=1, 2d1=4, 2d2=16, 2d3=31"
                     mask="0x0c" />
-
-                <node id="PSDLLCURRENTSEL" address="0x2b" permission="rw"
+                <node id="PSDLLCURRENTSEL" address="0x13" permission="rw"
                     description="Current for the DLL charge pump. 2d0=1 uA, 2d1=2 uA, 2d2=4 uA, 2d3=8 uA"
                     mask="0x03" />
 
                 <!-- [0x034] EPRXDllConfig -->
                 <!-- DLL configuration register -->
 
-                <node id="EPRXDLLCURRENT" address="0x2c" permission="rw"
+                <node id="EPRXDLLCURRENT" address="0x14" permission="rw"
                     description="Current for the DLL charge pump. 2d0=1 uA, 2d1=2 uA, 2d2=4 uA, 2d3=8 uA"
                     mask="0xc0" />
-
-                <node id="EPRXDLLCONFIRMCOUNT" address="0x2c" permission="rw"
+                <node id="EPRXDLLCONFIRMCOUNT" address="0x14" permission="rw"
                     description="Number of clock cycles (in the 40 MHz clock domain) to confirm locked state. 2d0=1, 2d1=4, 2d2=16, 2d3=31"
                     mask="0x30" />
-
-                <node id="EPRXDLLFSMCLKALWAYSON" address="0x2c" permission="rw"
+                <node id="EPRXDLLFSMCLKALWAYSON" address="0x14" permission="rw"
                     description="Force clock of ePortRx DLL state machine to be always enabled (disables clock gating)."
                     mask="0x8" />
-
-                <node id="EPRXDLLCOARSELOCKDETECTION" address="0x2c" permission="rw"
+                <node id="EPRXDLLCOARSELOCKDETECTION" address="0x14" permission="rw"
                     description="Use coarse detector for the DLL lock condition."
                     mask="0x4" />
-
-                <node id="EPRXENABLEREINIT" address="0x2c" permission="rw"
+                <node id="EPRXENABLEREINIT" address="0x14" permission="rw"
                     description="Allow re-initialization in ePortRxGroup when the tuning is out of range."
                     mask="0x2" />
-
-                <node id="EPRXDATAGATINGENABLE" address="0x2c" permission="rw"
+                <node id="EPRXDATAGATINGENABLE" address="0x14" permission="rw"
                     description="Enable data gating."
                     mask="0x1" />
 
-
                 <!-- [0x035] FORCEEnable -->
                 <!-- Enables user to enable specific sub-circuits regardless of the operation mode -->
-
-                <node id="FORCETXENABLE" address="0x2d" permission="rw"
+                <node id="FORCETXENABLE" address="0x15" permission="rw"
                     description="Enable the TX logic regardless of the operation mode"
                     mask="0x80" />
-
-                <node id="FORCERXENABLE" address="0x2d" permission="rw"
+                <node id="FORCERXENABLE" address="0x15" permission="rw"
                     description="Enable the RX logic regardless of the operation mode"
                     mask="0x40" />
-
-                <node id="LDFORCEENABLE" address="0x2d" permission="rw"
+                <node id="LDFORCEENABLE" address="0x15" permission="rw"
                     description="Enables the Line Driver, regardless of the operation mode, when one of the loop-backs is selected."
                     mask="0x20" />
-
-                <node id="TESTCLKFORCEENABLE" address="0x2d" permission="rw"
+                <node id="TESTCLKFORCEENABLE" address="0x15" permission="rw"
                     description="Enable the test clock input pad regardless of the operation mode."
                     mask="0x10" />
-
-                <node id="I2CMCLKALWAYSENABLE" address="0x2d" permission="rw"
+                <node id="I2CMCLKALWAYSENABLE" address="0x15" permission="rw"
                     description="I2C masters clock always enable (disable clock gating)."
                     mask="0x08" />
-
-                <node id="PSFSMCLKALWAYSON" address="0x2d" permission="rw"
+                <node id="PSFSMCLKALWAYSON" address="0x15" permission="rw"
                     description="Forces an initialization state machine clock to be always active (disables clock gating)"
                     mask="0x04" />
-            </node> <!--CALIBRATION-->
+            </node> <!--Clock Generator-->
 
             <!-- CHIP Config -->
             <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#chip-config -->
@@ -335,11 +309,9 @@
                 <node id="HIGHSPEEDDATAOUTINVERT" address="0x0" permission="rw"
                     description="Inverts high speed data output lines (equivalent to swapping HSOUTP and HSOUTN on the PCB)"
                     mask="0x80" />
-
                 <node id="HIGHSPEEDDATAININVERT" address="0x0" permission="rw"
                     description="Inverts high speed data input lines (equivalent to swapping HSINP and HSINN on the PCB)"
                     mask="0x40" />
-
                 <node id="CHIPADDRESSBAR" address="0x0" permission="rw"
                     description="Sets most significant bits of the chip address (see Section 3.3)."
                     mask="0x7" />
@@ -348,23 +320,20 @@
             <node id="EQUALIZER" address="0x37" description="LpGBT Equalizer">
                 <!-- [0x037] EQConfig -->
                 <!-- Main equalizer configuration register -->
-
                 <node id="EQATTENUATION" address="0x0" permission="rw"
                     description="4:3 -  Attenuation of the equalizer. Gain [V/V] 2d0 = 1/3, 2d1 = 2/3, 2d2 = 2/3, 2d3 = 1/1"
                     mask="0x18" />
-
                 <node id="EQCAP" address="0x0" permission="rw"
                     description="1:0 -  Capacitance select for the equalizer. Capacitance [fF]: 2d0 = 0, 2d1 = 70, 2d2 = 70, 2d3 = 140"
                     mask="0x3" />
 
                 <!-- [0x038] EQRes -->
                 <!-- Resistance configuration for the equalizer -->
-
                 <node id="EQRES3" address="0x1" permission="rw"
-                    description="Resistance to be used in the fourth stage of the data input equalizer. Resistance [kOhm]: 2d0=0, 2d1=3.0, 2d2=4.9, 2d3=7.1"
+                    description="Resistance to be used in the fourth stage of the data input equalizer. EQRes3[1:0] Resistance [kOhm]: 2d0=0, 2d1=0.4, 2d2=1.0, 2d3=1.6"
                     mask="0xc0" />
                 <node id="EQRES2" address="0x1" permission="rw"
-                    description="Resistance to be used in the third stage of the data input equalizer. EQRes2[1:0] Resistance [kOhm] 2d0=0, 2d1=3.0, 2d2=4.9, 2d3=7.1"
+                    description="Resistance to be used in the third stage of the data input equalizer. EQRes2[1:0] Resistance [kOhm] 2d0=0, 2d1=0.6, 2d2=1.2, 2d3=2.4"
                     mask="0x30" />
                 <node id="EQRES1" address="0x1" permission="rw"
                     description="Resistance to be used in the second stage of the data input equalizer. EQRes1[1:0] Resistance [kOhm] 2d0=0, 2d1=3.0, 2d2=4.9, 2d3=7.1"
@@ -383,18 +352,16 @@
                 <node id="LDEMPHASISENABLE" address="0x0" permission="rw"
                     description="Enable pre-emphasis in the line driver. The amplitude of the pre-emphasis is controlled by LDEmphasisAmp[6:0] and the duration by LDEmphasisShort."
                     mask="0x80" />
-
                 <node id="LDMODULATIONCURRENT" address="0x0" permission="rw"
                     description="Sets high-speed line driver modulation current: Im = 137 uA * LDModulationCurrent[6:0]"
                     mask="0x7f" />
 
-                <!-- 0x03a] LDConfigL -->
+                <!-- [0x03a] LDConfigL -->
                 <!-- Line driver configuration register -->
 
                 <node id="LDEMPHASISSHORT" address="0x1" permission="rw"
                     description="Sets the duration of the pre-emphasis pulse. Please not that pre-emphasis has to be enabled (LDEmphasisEnable) for this field to have any impact."
-                    mask="0x8" />
-
+                    mask="0x80" />
                 <node id="LDEMPHASISAMP" address="0x1" permission="rw"
                     description="Sets high-speed line driver pre-emphasis current: Ipre = 137 uA * LDEmphasisAmp[6:0]. Please note that pre-emphasis has to be enabled (LDEmphasisEnable) for these registers bits to be active."
                     mask="0x7f" />
@@ -405,15 +372,12 @@
                 <node id="TESTCLKSETCM" address="0x2" permission="rw"
                     description="Enable common mode generation for TSTCLKN/P input pads."
                     mask="0x10" />
-
                 <node id="REFCLKFORCEENABLE" address="0x2" permission="rw"
                     description="Enable the reference clock pad regardless of the operation mode."
                     mask="0x4" />
-
                 <node id="REFCLKACBIAS" address="0x2" permission="rw"
                     description="Enables the common mode generation for the REFCLK."
                     mask="0x2" />
-
                 <node id="REFCLKTERM" address="0x2" permission="rw"
                     description="Enables the 100 Ohm termination for the REFCLK input."
                     mask="0x1" />
@@ -429,6 +393,20 @@
             <!-- Reset  -->
             <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#reset -->
             <node id="RESET" address="0x3d" description="">
+                <!-- [0x03d] RESETConfig -->
+                <!-- Reset configuration. -->
+                <node id="RESETOUTDRIVESTRENGTH" address="0x0" permission="rw"
+                    description="Reset out pin driving strength."
+                    mask="0x80" />
+                <node id="RESETOUTLENGTH" address="0x0" permission="rw"
+                    description=""
+                    mask="0x60" />
+                <node id="BODENABLE" address="0x0" permission="rw"
+                    description="Enables brownout detector."
+                    mask="0x04" />
+                <node id="BODLEVEL" address="0x0" permission="rw"
+                    description=""
+                    mask="0x07" />
             </node>
 
             <!-- Power Good  -->
@@ -436,23 +414,121 @@
 
                 <!-- [0x03e] PGConfig -->
                 <!-- Power Good configuration. -->
-
                 <node id="PGENABLE" address="0x0" permission="rw"
                     description="7 -- Enable Power Good feature. For more details see Power-up state machine."
                     mask="0x80" />
-
-                <node id="PGDELAY" address="0x0" permission="rw"
+                <node id="PGLEVEL" address="0x0" permission="rw"
                     description="PGLevel Enable Power Good feature. For more details see Power-up state machine. Voltage level [V]: 0=0.70, 1=0.75, 2=0.80, 3=0.85, 4=0.90, 5=0.95, 6=1.00, 7=1.05"
                     mask="0x70" />
-
                 <node id="PGDELAY" address="0x0" permission="rw"
                     description="PGDelay Wait time. Wait time: 0 =disabled, 1 =1 us, 2 =5 us, 3 =10 us, 4 =50 us, 5 =100 us, 6 =500 us, 7 =1 ms, 8 =5 ms, 9 =10 ms, 10=20 ms, 11=50 ms, 12=100 ms, 13=200 ms, 14=500 ms, 15=1 s"
                     mask="0x0f" />
-
             </node>
 
             <!-- Masters  -->
             <node id="I2C_MASTERS" address="0x3f" description="">
+            
+                <!-- [0x03f] I2CMTransConfig -->
+                <node id="I2CMTransEnable" address="0x0" permission="rw"
+                    description=""
+                    mask="0x80" />
+                <node id="I2CMTransChannel" address="0x0" permission="rw"
+                    description=""
+                    mask="0x60" />
+                <node id="I2CMTransAddressExt" address="0x0" permission="rw"
+                    description=""
+                    mask="0x1c" />
+            
+                <!-- [0x040] I2CMTransAddress -->
+                <node id="I2CMTransAddress" address="0x1" permission="rw"
+                    description=""
+                    mask="0x7f" />
+                    
+                <!-- [0x041] I2CMTransCtrl -->
+                <node id="I2CMTransCtrl" address="0x2" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x042] I2CMTransData0 -->
+                <node id="I2CMTransData0" address="0x3" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x043] I2CMTransData1 -->
+                <node id="I2CMTransData1" address="0x4" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x044] I2CMTransData2 -->
+                <node id="I2CMTransData2" address="0x5" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x045] I2CMTransData3 -->
+                <node id="I2CMTransData3" address="0x6" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x046] I2CMTransData4 -->
+                <node id="I2CMTransData4" address="0x7" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x047] I2CMTransData5 -->
+                <node id="I2CMTransData5" address="0x8" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x048] I2CMTransData6 -->
+                <node id="I2CMTransData6" address="0x9" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x049] I2CMTransData7 -->
+                <node id="I2CMTransData7" address="0xa" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x04a] I2CMTransData8 -->
+                <node id="I2CMTransData8" address="0xb" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x04b] I2CMTransData9 -->
+                <node id="I2CMTransData9" address="0xc" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x04c] I2CMTransData10 -->
+                <node id="I2CMTransData10" address="0xd" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x04d] I2CMTransData11 -->
+                <node id="I2CMTransData11" address="0xe" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x04e] I2CMTransData12 -->
+                <node id="I2CMTransData12" address="0xf" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x04f] I2CMTransData13 -->
+                <node id="I2CMTransData13" address="0x10" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x050] I2CMTransData14 -->
+                <node id="I2CMTransData14" address="0x11" permission="rw"
+                    description=""
+                    mask="0xff" />
+                    
+                <!-- [0x051] I2CMTransData15 -->
+                <node id="I2CMTransData15" address="0x12" permission="rw"
+                    description=""
+                    mask="0xff" />
+
             </node>
 
             <!-- Parallel IO  -->
@@ -550,7 +626,7 @@
 
                 <node id="PS${PSCLK_IDX}DRIVESTRENGTH" address="0x0" permission="rw"
                     description="Sets the driving strength for clock ${PSCLK_IDX} output. Strength [mA]: 0=0, 1=1.0, 2=1.5, 3=2.0, 4=2.5, 5=3.0, 6=3.5, 7=4.0"
-                    mask="0x18" />
+                    mask="0x38" />
 
                 <node id="PS${PSCLK_IDX}FREQ" address="0x0" permission="rw"
                     description="Sets the frequency for clock ${PSCLK_IDX} output. Frequency [MHz]: 0=disabled, 1=40, 2=80, 3=160, 4=320, 5=640, 6=1280, 7="
@@ -568,7 +644,7 @@
 
                 <node id="PS${PSCLK_IDX}PREEMPHASISSTRENGTH" address="0x2" permission="rw"
                     description="Sets the pre-emphasis strength for phase-shifter clock ${PSCLK_IDX} output. Strength [mA]: 0=0, 1=1.0, 2=1.5, 3=2.0, 4=2.5, 5=3.0, 6=3.5, 7=4.0"
-                    mask="0xc0" />
+                    mask="0xe0" />
 
                 <node id="PS${PSCLK_IDX}PREEMPHASISMODE" address="0x2" permission="rw"
                     description="Sets the pre-emphasis mode for clock ${PSCLK_IDX}. Mode: 0=disabled, 1=disabled, 2=Self timed, 3=Clock timed"
@@ -597,9 +673,9 @@
                 <node id="VOLDACVALUEH" address="0x0" permission="rw"
                     description="Sets output voltage for the Voltage DAC. Bits [11:8]"
                     mask="0x0f" />
-                    <!-- [0x069] DACConfigL -->
-                    <!-- DACs configuration register. -->
 
+                <!-- [0x069] DACConfigL -->
+                <!-- DACs configuration register. -->
                 <node id="VOLDACVALUEL" address="0x1" permission="rw"
                     description="Sets output voltage for the Voltage DAC. Bits [7:0]"
                     mask="0xff" />
@@ -608,11 +684,17 @@
 
             <!-- Current DAC  -->
             <node id="CUR_DAC" address="0x6A" description="">
-                <!-- [0x06a] CURDACValue¶ -->
-                <!-- Output current -->
 
+                <!-- [0x06a] CURDACValue -->
+                <!-- Output current -->
                 <node id="CURDACSELECT" address="0x0" permission="rw"
                     description="Sets output current for the current DAC. Current = CURDACSelect * XX uA."
+                    mask="0xff" />
+
+                <!-- [0x06b] CURDACCHN -->
+                <!-- Current DAC output multiplexer. -->
+                <node id="CURDACCHNENABLE" address="0x1" permission="rw"
+                    description="Setting Nth bit in this register attaches current DAC to ADCN pin. Current source can be attached to any number of channels."
                     mask="0xff" />
 
             </node>
@@ -659,7 +741,7 @@
                     mask="0xc0" />
                 <node id="EPTX2DATARATE" address="0x0" permission="rw"
                     description="Data rate for ePortTx group 2. 0=disabled, 1=80Mbps, 2=160Mbps, 3=320Mbps"
-                    mask="0x3" />
+                    mask="0x30" />
                 <node id="EPTX1DATARATE" address="0x0" permission="rw"
                     description="Data rate for ePortTx group 1. 0=disabled, 1=80Mbps, 2=160Mbps, 3=320Mbps"
                     mask="0x0c" />
@@ -667,7 +749,7 @@
                     description="Data rate for ePortTx group 0. 0=disabled, 1=80Mbps, 2=160Mbps, 3=320Mbps"
                     mask="0x03" />
 
-                <!-- 0x0a8] EPTXControl -->
+                <!-- [0x0a8] EPTXControl -->
                 <!-- EportTx configuration register. -->
 
                 <node id="EPTXECPREEMPHASISWIDTH" address="0x1" permission="rw"
@@ -1091,7 +1173,7 @@
                         mask="0x4" />
 
                     <node id="EPRX${RX_CHN_IDX}TERM" address="0x0" permission="rw"
-                        description="Enables the 1${RX_CHN_IDX} Ohm termination for ${RX_CHN_IDX}."
+                        description="Enables the 100 Ohm termination for ${RX_CHN_IDX}."
                         mask="0x2" />
 
                     <node id="EPRX${RX_CHN_IDX}EQ1" address="0x0" permission="rw"
@@ -1263,7 +1345,7 @@
                     mask="0x10" />
                 <node id="PUSMPLLTIMEOUTCONFIG" address="0x0" permission="rw"
                     description="Determines the timeout duration in the WAIT_PLL_LOCK state in the power up state machine. For more details see Power-up state machine."
-                    mask="0xf" />
+                    mask="0x0f" />
 
                 <!-- [0x0ee] POWERUP1 -->
                 <node id="PUSMDLLTIMEOUTCONFIG" address="0x1" permission="rw"
@@ -1275,10 +1357,10 @@
 
                 <!-- [0x0ef] POWERUP2 -->
                 <node id="DLLCONFIGDONE" address="0x2" permission="rw"
-                    description="When asserted, the power up state machine is allowed to proceed to PLL initialization. Please refer Configuration for more details."
+                    description="When asserted, the power up state machine is allowed to proceed to initialization of components containing DLLs (ePortRx, phase-shifter). Please refer Configuration for more details."
                     mask="0x4" />
                 <node id="PLLCONFIGDONE" address="0x2" permission="rw"
-                    description="When asserted, the power up state machine is allowed to proceed to initialization of components containing DLLs (ePortRx, phase-shifter). Please refer Configuration for more details."
+                    description="When asserted, the power up state machine is allowed to proceed to PLL initialization. Please refer Configuration for more details."
                     mask="0x2" />
                 <node id="UPDATEENABLE" address="0x2" permission="rw"
                     description="When asserted, the power up state machine copies the values from fuses to configuration registers during power. Please refer Configuration for more details."
@@ -1364,15 +1446,15 @@
 
                 <node id="I2CM1SCLPULLUPENABLE" address="0x7" permission="rw"
                     description="Enable pull up for M1SCL pin."
-                    mask="0x80" />
+                    mask="0x40" />
 
                 <node id="I2CM1SCLDRIVESTRENGTH" address="0x7" permission="rw"
                     description="M1SCL drive strength (CMOS I/O Pin Characteristics)"
-                    mask="0x40" />
+                    mask="0x20" />
 
                 <node id="I2CM1SDAPULLUPENABLE" address="0x7" permission="rw"
                     description="Enable pull up for M1SDA pin."
-                    mask="0x20" />
+                    mask="0x10" />
 
                 <node id="I2CM1SDADRIVESTRENGTH" address="0x7" permission="rw"
                     description="M1SDA drive strength (CMOS I/O Pin Characteristics)."
@@ -1492,7 +1574,7 @@
 
             <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#rw-eportrx -->
 
-            <node id="EPRX_TRAIN" address="0x105-0xf0" permission="rw">
+            <node id="EPRX_TRAIN" address="0x105-0xf0" description="">
 
                 <!-- 15.2.2. ePortRx -->
                 <!-- [0x105] EPRXTrain10 -->
@@ -1542,7 +1624,7 @@
 
             <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#e-fuses -->
 
-            <node id="EFUSES" address="0x109-0xf0" permission="rw">
+            <node id="EFUSES" address="0x109-0xf0" description="">
 
                 <!-- [0x109] FUSEControl -->
                 <!-- Fuse control register. -->
@@ -1626,7 +1708,7 @@
                     description="Controls MUX for ADC Negative Input"
                     mask="0x0f" />
 
-                <!-- 0x112] ADCMon -->
+                <!-- [0x112] ADCMon -->
                 <!-- Control ADC's internal signals -->
 
                 <node id="TEMPSENSRESET" address="0x1" permission="rw"
@@ -1693,7 +1775,7 @@
                 <!-- [0x115] EOMConfigL -->
                 <node id="EOMPHASESEL" address="0x1" permission="rw"
                     description="Selects the sampling phase from the phase interpolation block; steps [0:1/(fvco*64):63/(fvco*64)]"
-                    mask="0x1f" />
+                    mask="0x3f" />
 
                 <!-- [0x116] EOMvofSel -->
                 <node id="EOMVOFSEL" address="0x2" permission="rw"
@@ -1702,47 +1784,28 @@
             </node>
 
             <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#process-monitor -->
-            <!-- [0x1a6] ProcessMonitorStatus -->
-            <!-- Process Monitor block status register. -->
-
-            <node id="PROCESS_MONITOR" address="0x1a6-0xf0" permission="rw">
-
-                <node id="PMDONE" address="0x0" permission="rw"
-                    description="Measurement done."
-                    mask="0x2" />
-
-                <node id="PMBUSY" address="0x0" permission="rw"
-                    description="Measurement in progress."
-                    mask="0x1" />
-
-                <!-- [0x1a7] PMFreqA -->
-                <!-- Process Monitor frequency measurement result. -->
-
-                <node id="PMFREQ2" address="0x1" permission="rw"
-                    description="Bits 23:16 of frequency measurement result."
-                    mask="0xff" />
-
-                <!-- [0x1a8] PMFreqB -->
-                <!-- Process Monitor frequency measurement result. -->
-
-                <node id="PMFREQ1" address="0x2" permission="rw"
-                    description="Bits 15:8 of frequency measurement result."
-                    mask="0xff" />
-
-                <!-- [0x1a9] PMFreqC -->
-                <!-- Process Monitor frequency measurement result. -->
-
-                <node id="PMFREQ0" address="0x3" permission="rw"
-                    description="Bits 7:0 of frequency measurement result."
-                    mask="0xff" />
-
+            <!-- 15.2.6. Process Monitor -->
+            <!-- [0x117] ProcessAndSeuMonitor -->
+            <node id="PROCESS_MONITOR" address="0x117-0x0f0" description="">
+                <node id="DLDPFECCOUNTERENABLE" address="0x0" permission="rw"
+                    description="Enable downlink FEC counter"
+                    mask="0x10" />
+                <node id="SEUENABLE" address="0x0" permission="rw"
+                    description="Enable SEU counter"
+                    mask="0x08" />
+                <node id="PMCHANNEL" address="0x0" permission="rw"
+                    description="Select process monitor channel to be measured"
+                    mask="0x06" />
+                <node id="PMENABLE" address="0x0" permission="rw"
+                    description="Enable process monitor block"
+                    mask="0x01" />
             </node>
 
             <!-- 15.2.7. Testing -->
             <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#testing -->
             <!-- Uplink data path test patterns. -->
 
-            <node id="TESTING" address="0x118-0x0f0" permission="rw">
+            <node id="TESTING" address="0x118-0x0f0" description="">
 
                 <!-- [0x118] ULDataSource0 -->
                 <node id="ULECDATASOURCE" address="0x0" permission="rw"
@@ -1796,7 +1859,7 @@
 
                 <node id="ULG1DATASOURCE" address="0x1" permission="rw"
                     description="Data source for uplink data group 1"
-                    mask="0x18" />
+                    mask="0x38" />
                 <!-- ULG1DataSource[2:0]	Name	Description -->
                 <!-- 3'd0	EPORTRX_DATA	Normal mode of operation, data from ePortRx -->
                 <!-- 3'd1	PRBS7	PRBS7 test pattern -->
@@ -1825,7 +1888,7 @@
 
                 <node id="ULG3DATASOURCE" address="0x2" permission="rw"
                     description="Data source for uplink data group 3"
-                    mask="0x18" />
+                    mask="0x38" />
                 <!-- ULG3DataSource[2:0]	Name	Description -->
                 <!-- 3'd0	EPORTRX_DATA	Normal mode of operation, data from ePortRx -->
                 <!-- 3'd1	PRBS7	PRBS7 test pattern -->
@@ -1848,12 +1911,13 @@
                 <!-- 3'd5	CONST_PATTERN_INV	Constant pattern inverted (~DPDataPattern[31:0]) -->
                 <!-- 3'd6	DLDATA_LOOPBACK	Loop back, downlink frame data -->
                 <!-- 3'd7	Reserved	Reserved -->
+
                 <!-- [0x11b] ULDataSource3 -->
                 <!-- Uplink data path test patterns. -->
 
                 <node id="ULG5DATASOURCE" address="0x3" permission="rw"
                     description="Data source for uplink data group 5"
-                    mask="0x18" />
+                    mask="0x38" />
                 <!-- ULG5DataSource[2:0]	Name	Description -->
                 <!-- 3'd0	EPORTRX_DATA	Normal mode of operation, data from ePortRx -->
                 <!-- 3'd1	PRBS7	PRBS7 test pattern -->
@@ -1886,7 +1950,7 @@
 
                 <node id="ULICDATASOURCE" address="0x4" permission="rw"
                     description=""
-                    mask="0x18" />
+                    mask="0x38" />
 
                 <node id="ULG6DATASOURCE" address="0x4" permission="rw"
                     description="Data source for uplink data group 6"
@@ -1904,7 +1968,7 @@
                 <!-- [0x11d] ULDataSource5 -->
                 <node id="DLG3DATASOURCE" address="0x5" permission="rw"
                     description="Controls the ePortTx group 3 data source"
-                    mask="0xc" />
+                    mask="0xc0" />
                 <!-- DLG3DataSource[1:0]	Name	Description -->
                 <!-- 2'd0	LINK_DATA	Normal mode of operation, data from ePortRx -->
                 <!-- 2'd1	PRBS7	PRBS7 patter on each channel -->
@@ -1940,7 +2004,35 @@
                 <!-- 2'd3	CONST_PATTERN	Constant pattern -->
             </node>
 
-            <node id="BERT" address="0x126-0x0f0">
+            <node id="DPDataPattern" address="0x11e-0x0f0" description="">
+
+                <!-- [0x11e] DPDataPattern3 -->
+                <!-- Constant pattern to be used in test pattern generation/checking -->
+                <node id="DPDataPattern3" address="0x0" permission="rw"
+                    description="Bits 31:24 of the canst pattern."
+                    mask="0xff" />
+
+                <!-- [0x11f] DPDataPattern2 -->
+                <!-- Constant pattern to be used in test pattern generation/checking -->
+                <node id="DPDataPattern2" address="0x1" permission="rw"
+                    description="Bits 23:16 of the canst pattern."
+                    mask="0xff" />
+
+                <!-- [0x120] DPDataPattern1 -->
+                <!-- Constant pattern to be used in test pattern generation/checking -->
+                <node id="DPDataPattern1" address="0x2" permission="rw"
+                    description="Bits 15:8 of the canst pattern."
+                    mask="0xff" />
+
+                <!-- [0x121] DPDataPattern0 -->
+                <!-- Constant pattern to be used in test pattern generation/checking -->
+                <node id="DPDataPattern0" address="0x3" permission="rw"
+                    description="Bits 7:0 of the canst pattern."
+                    mask="0xff" />
+
+            </node>
+
+            <node id="BERT" address="0x126-0x0f0" description="">
 
                 <!-- [0x126] BERTSource -->
                 <!-- Data source for the built-in BER checker. -->
@@ -1958,7 +2050,7 @@
 
                 <node id="BERTMEASTIME" address="0x1" permission="rw"
                     description="Test time. For more details please refer to Table 14.5"
-                    mask="0xf" />
+                    mask="0xf0" />
 
                 <node id="SKIPDISABLE" address="0x1" permission="rw"
                     description="Disable the skip cycle signal originating from the frame aligner. It is used when testing raw PRBS sequences on the downlink."
@@ -1978,21 +2070,21 @@
                 <!-- [0x129] BERTDataPattern2 -->
                 <!-- Fixed data pattern used by the BERT checker. -->
 
-                <node id="BERTDATAPATTERN2" address="0x2" permission="rw"
+                <node id="BERTDATAPATTERN2" address="0x3" permission="rw"
                     description="Bits 23:16 of the fixed pattern for BERT."
                     mask="0xff" />
 
                 <!-- [0x12a] BERTDataPattern1 -->
                 <!-- Fixed data pattern used by the BERT checker. -->
 
-                <node id="BERTDATAPATTERN1" address="0x2" permission="rw"
+                <node id="BERTDATAPATTERN1" address="0x4" permission="rw"
                     description="Bits 15:8 of the fixed pattern for BERT."
                     mask="0xff" />
 
                 <!-- [0x12b] BERTDataPattern0 -->
                 <!-- Fixed data pattern used by the BERT checker. -->
 
-                <node id="BERTDATAPATTERN0" address="0x2" permission="rw"
+                <node id="BERTDATAPATTERN0" address="0x5" permission="rw"
                     description="Bits 7:0 of the fixed pattern for BERT."
                     mask="0xff" />
 
@@ -2077,11 +2169,11 @@
 
                 <node id="SKIPFORCE" address="0x2" permission="rw"
                     description=""
-                    mask="0x8" />
+                    mask="0x80" />
 
                 <node id="RESETOUTFORCEACTIVE" address="0x2" permission="rw"
                     description="As long as this bit is set low, the resetOut signal is active (low level)."
-                    mask="0x4" />
+                    mask="0x40" />
 
                 <node id="RSTPS3DLL" address="0x2" permission="rw"
                     description="Resets DLL in 3 phase aligner channel."
@@ -2101,7 +2193,7 @@
             </node>
 
 
-            <node id="POWERUP" address="0x3F" description="">
+            <node id="POWERUP" address="0x12F-0x0f0" description="">
                 <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#power-up -->
 
                 <!-- [0x12f] POWERUP3 -->
@@ -2116,8 +2208,39 @@
                 <node id="PUSMFORCEMAGIC" address="0x1" permission="rw"
                     description="PUSMForceMagic Has to be set to 0xA3 (magic number) in order to enable PUSMForceState feature."
                     mask="0xff" />
-
             </node>
+
+            <node id="DEBUG" address="0x131-0x0f0" description="">
+
+                <!-- [0x132] DATAPATH -->
+                <node id="DLDPBYPASDEINTERLEVEAR" address="0x1" permission="rw"
+                    description="Bypass de-interleaver in the downlink data path"
+                    mask="0x80" />
+                <node id="DLDPBYPASFECDECODER" address="0x1" permission="rw"
+                    description="Bypass FEC decoder in the downlink data path"
+                    mask="0x40" />
+                <node id="DLDPBYPASSDESCRAMBLER" address="0x1" permission="rw"
+                    description="Bypass de-scrambler in the downlink data path"
+                    mask="0x20" />
+                <node id="DLDPFECERRCNTENA" address="0x1" permission="rw"
+                    description="Unused"
+                    mask="0x10" />
+                <node id="ULDPBYPASSINTERLEAVER" address="0x1" permission="rw"
+                    description=" Bypass interleaver in the uplink data path"
+                    mask="0x04" />
+                <node id="ULDPBYPASSSCRAMBLER" address="0x1" permission="rw"
+                    description="Bypass scrambler in the uplink data path"
+                    mask="0x02" />
+                <node id="ULDPBYPASSFECCODER" address="0x1" permission="rw"
+                    description="Bypass FEC coder in the uplink data path"
+                    mask="0x01" />
+
+                <!-- [0x133] TO0SEL -->
+                <node id="TO0SELECT" address="0x2" permission="rw"
+                    description="Selects a signal to be outputted on TSTOUT0 according to TOnSelect"
+                    mask="0xFF" />
+            </node>
+
         </node> <!-- /rw -->
 
         <node id="RO" address="0x140" description="Read Only" fw_is_module="false">
@@ -2148,6 +2271,355 @@
 
             </node>
 
+            <node id="I2CREAD" address="0x15f-0x140" description="I2C Read">
+            
+                <!-- [0x15f] I2CM0Ctrl -->
+                <node id="I2CM0CTRL" address="0x0" permission="r"
+                    description="Contents of control register written by user for I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x160] I2CM0Mask -->
+                <node id="I2CM0MASK" address="0x1" permission="r"
+                    description="Contents of mask register written by user for I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x161] I2CM0Status -->
+                <node id="I2CM0STATUS" address="0x2" permission="r"
+                    description="Contents of status register for I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x162] I2CM0TranCnt -->
+                <node id="I2CM0TRANCNT" address="0x3" permission="r"
+                    description="Contents of transaction counter for I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x163] I2CM0ReadByte -->
+                <node id="I2CM0READBYTE" address="0x4" permission="r"
+                    description="Data read from an I2C slave in a single-byte-read for I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x164] I2CM0Read0 -->
+                <node id="I2CM0READ0" address="0x5" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x165] I2CM0Read1 -->
+                <node id="I2CM0READ1" address="0x6" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                   
+                <!-- [0x166] I2CM0Read2 -->
+                <node id="I2CM0READ2" address="0x7" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x167] I2CM0Read3 -->
+                <node id="I2CM0READ3" address="0x8" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x168] I2CM0Read4 -->
+                <node id="I2CM0READ4" address="0x9" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x169] I2CM0Read5 -->
+                <node id="I2CM0READ5" address="0xa" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                   
+                <!-- [0x16a] I2CM0Read6 -->
+                <node id="I2CM0READ6" address="0xb" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x16b] I2CM0Read7 -->
+                <node id="I2CM0READ7" address="0xc" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x16c] I2CM0Read8 -->
+                <node id="I2CM0READ8" address="0xd" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x16d] I2CM0Read9 -->
+                <node id="I2CM0READ9" address="0xe" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                   
+                <!-- [0x16e] I2CM0Read10 -->
+                <node id="I2CM0READ10" address="0xf" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x16f] I2CM0Read11 -->
+                <node id="I2CM0READ11" address="0x10" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x170] I2CM0Read12 -->
+                <node id="I2CM0READ12" address="0x11" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x171] I2CM0Read13 -->
+                <node id="I2CM0READ13" address="0x12" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                   
+                <!-- [0x172] I2CM0Read14 -->
+                <node id="I2CM0READ14" address="0x13" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+                    
+                <!-- [0x173] I2CM0Read15 -->
+                <node id="I2CM0READ15" address="0x14" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 0"
+                    mask="0xff" />
+              
+                <!-- [0x174] I2CM1Ctrl -->
+                <node id="I2CM1CTRL" address="0x15" permission="r"
+                    description="Contents of control register written by user for I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x175] I2CM1Mask -->
+                <node id="I2CM1MASK" address="0x16" permission="r"
+                    description="Contents of mask register written by user for I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x176] I2CM1Status -->
+                <node id="I2CM1STATUS" address="0x17" permission="r"
+                    description="Contents of status register for I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x177] I2CM1TranCnt -->
+                <node id="I2CM1TRANCNT" address="0x18" permission="r"
+                    description="Contents of transaction counter for I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x178] I2CM1ReadByte -->
+                <node id="I2CM1READBYTE" address="0x19" permission="r"
+                    description="Data read from an I2C slave in a single-byte-read for I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x179] I2CM1Read0 -->
+                <node id="I2CM1READ0" address="0x1a" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x17a] I2CM1Read1 -->
+                <node id="I2CM1READ1" address="0x1b" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                   
+                <!-- [0x17b] I2CM1Read2 -->
+                <node id="I2CM1READ2" address="0x1c" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x17c] I2CM1Read3 -->
+                <node id="I2CM1READ3" address="0x1d" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x17d] I2CM1Read4 -->
+                <node id="I2CM1READ4" address="0x1e" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x17e] I2CM1Read5 -->
+                <node id="I2CM1READ5" address="0x1f" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                   
+                <!-- [0x17f] I2CM1Read6 -->
+                <node id="I2CM1READ6" address="0x20" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x180] I2CM1Read7 -->
+                <node id="I2CM1READ7" address="0x21" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x181] I2CM1Read8 -->
+                <node id="I2CM1READ8" address="0x22" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x182] I2CM1Read9 -->
+                <node id="I2CM1READ9" address="0x23" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                   
+                <!-- [0x183] I2CM1Read10 -->
+                <node id="I2CM1READ10" address="0x24" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x184] I2CM1Read11 -->
+                <node id="I2CM1READ11" address="0x25" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x185] I2CM1Read12 -->
+                <node id="I2CM1READ12" address="0x26" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x186] I2CM1Read13 -->
+                <node id="I2CM1READ13" address="0x27" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                   
+                <!-- [0x187] I2CM1Read14 -->
+                <node id="I2CM1READ14" address="0x28" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                    
+                <!-- [0x188] I2CM1Read15 -->
+                <node id="I2CM1READ15" address="0x29" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 1"
+                    mask="0xff" />
+                  
+                <!-- [0x189] I2CM2Ctrl -->
+                <node id="I2CM2CTRL" address="0x2a" permission="r"
+                    description="Contents of control register written by user for I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x18a] I2CM2Mask -->
+                <node id="I2CM2MASK" address="0x2b" permission="r"
+                    description="Contents of mask register written by user for I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x18b] I2CM2Status -->
+                <node id="I2CM2STATUS" address="0x2c" permission="r"
+                    description="Contents of status register for I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x18c] I2CM2TranCnt -->
+                <node id="I2CM2TRANCNT" address="0x2d" permission="r"
+                    description="Contents of transaction counter for I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x18d] I2CM2ReadByte -->
+                <node id="I2CM2READBYTE" address="0x2e" permission="r"
+                    description="Data read from an I2C slave in a single-byte-read for I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x18e] I2CM2Read0 -->
+                <node id="I2CM2READ0" address="0x2f" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x18f] I2CM2Read1 -->
+                <node id="I2CM2READ1" address="0x30" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                   
+                <!-- [0x190] I2CM2Read2 -->
+                <node id="I2CM2READ2" address="0x31" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x191] I2CM2Read3 -->
+                <node id="I2CM2READ3" address="0x32" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x192] I2CM2Read4 -->
+                <node id="I2CM2READ4" address="0x33" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x193] I2CM2Read5 -->
+                <node id="I2CM2READ5" address="0x34" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                   
+                <!-- [0x194] I2CM2Read6 -->
+                <node id="I2CM2READ6" address="0x35" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x195] I2CM2Read7 -->
+                <node id="I2CM2READ7" address="0x36" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x196] I2CM2Read8 -->
+                <node id="I2CM2READ8" address="0x37" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x197] I2CM2Read9 -->
+                <node id="I2CM2READ9" address="0x38" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                   
+                <!-- [0x198] I2CM2Read10 -->
+                <node id="I2CM2READ10" address="0x39" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x199] I2CM2Read11 -->
+                <node id="I2CM2READ11" address="0x3a" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x19a] I2CM2Read12 -->
+                <node id="I2CM2READ12" address="0x3b" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x19b] I2CM2Read13 -->
+                <node id="I2CM2READ13" address="0x3c" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                   
+                <!-- [0x19c] I2CM2Read14 -->
+                <node id="I2CM2READ14" address="0x3d" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />
+                    
+                <!-- [0x19d] I2CM2Read15 -->
+                <node id="I2CM2READ15" address="0x3e" permission="r"
+                    description="Data read from an I2C slave in a multi-byte-read by I2C Master 2"
+                    mask="0xff" />                   
+
+            </node>
+
+            <node id="PROCESS_MONITOR_STATUS" address="0x1a6-0x140" description="">
+
+                <!-- [0x1a6] ProcessMonitorStatus -->
+                <!-- Process Monitor block status register. -->
+                <node id="PMDONE" address="0x0" permission="r"
+                    description="Measurement done."
+                    mask="0x2" />
+                <node id="PMBUSY" address="0x0" permission="r"
+                    description="Measurement in progress."
+                    mask="0x1" />
+
+                <!-- [0x1a7] PMFreqA -->
+                <!-- Process Monitor frequency measurement result. -->
+                <node id="PMFREQ2" address="0x1" permission="r"
+                    description="Bits 23:16 of frequency measurement result."
+                    mask="0xff" />
+
+                <!-- [0x1a8] PMFreqB -->
+                <!-- Process Monitor frequency measurement result. -->
+                <node id="PMFREQ1" address="0x2" permission="r"
+                    description="Bits 15:8 of frequency measurement result."
+                    mask="0xff" />
+
+                <!-- [0x1a9] PMFreqC -->
+                <!-- Process Monitor frequency measurement result. -->
+                <node id="PMFREQ0" address="0x3" permission="r"
+                    description="Bits 7:0 of frequency measurement result."
+                    mask="0xff" />
+            </node>
+
             <node id="PUSM" address="0x1c7-0x140" description="">
 
                 <!-- 15.3.14. Power Up State Machine -->
@@ -2163,19 +2635,19 @@
 
                 <node id="PUSMPLLTIMEOUTACTION" address="0x1" permission="r"
                     description="This flag is set if the PLL timeout action has be executed since the last chip reset."
-                    mask="0x6" />
+                    mask="0x20" />
 
                 <node id="PUSMDLLTIMEOUTACTION" address="0x1" permission="r"
                     description="This flag is set if the DLL timeout action has be executed since the last chip reset."
-                    mask="0x5" />
+                    mask="0x10" />
 
                 <node id="PUSMCHANNELSTIMEOUTACTION" address="0x1" permission="r"
                     description="This flag is set if the wait for channels locked timeout action has be executed since the last chip reset."
-                    mask="0x4" />
+                    mask="0x8" />
 
                 <node id="PUSMBROWNOUTACTION" address="0x1" permission="r"
                     description="This flag is set if the brownout action has be executed since the last chip reset."
-                    mask="0x3" />
+                    mask="0x4" />
 
                 <node id="PUSMPLLWATCHDOGACTION" address="0x1" permission="r"
                     description="This flag is set if the PLL watchdog action has be executed since the last chip reset."
@@ -2191,7 +2663,7 @@
 
                 <node id="TOVAL" address="0x2" permission="r"
                     description="Current value of all test outputs"
-                    mask="0x1f" />
+                    mask="0x3f" />
 
                 <!-- [0x1ca] SCStatus -->
                 <!-- Serial interface (IC/EC) status register. -->
@@ -2232,9 +2704,61 @@
 
             </node>
 
+            <node id="FUSE_READ" address="0x1a1-0x140" description="">
+
+            <!-- [0x1a1] FUSEStatus -->
+            <node id="FUSEBLOWERROR" address="0x0" permission="r"
+                    description="Error flag (attempt to blow fuses without magic number)."
+                    mask="0x08" />
+            <node id="FUSEDATAVALID" address="0x0" permission="r"
+                    description="Fuse read sequence was successful, SelectedFuseValues[31:0] is valid."
+                    mask="0x04" />
+            <node id="FUSEBLOWDONE" address="0x0" permission="r"
+                    description="Fuse blowing sequence was successful."
+                    mask="0x02" />
+            <node id="FUSEBLOWBUSY" address="0x0" permission="r"
+                    description="Fuse block is busy (either read or blowing sequence)."
+                    mask="0x01" />
+
+            <!-- [0x1a2] FUSEValuesA -->
+            <node id="FUSEVALUESA" address="0x1" permission="r"
+                    description="Value of selected FUSE block. (should be accessed only if FuseDataValid bit is set in [0x1a1] FUSEStatus register). Bits 7:0 of the data word."
+                    mask="0xff" />
+
+            <!-- [0x1a3] FUSEValuesB -->
+            <node id="FUSEVALUESB" address="0x2" permission="r"
+                    description="Value of selected FUSE block. (should be accessed only if FuseDataValid bit is set in [0x1a1] FUSEStatus register). Bits 15:8 of the data word."
+                    mask="0xff" />
+
+            <!-- [0x1a4] FUSEValuesC -->
+            <node id="FUSEVALUESC" address="0x3" permission="r"
+                    description="Value of selected FUSE block. (should be accessed only if FuseDataValid bit is set in [0x1a1] FUSEStatus register). Bits 23:16 of the data word."
+                    mask="0xff" />
+
+            <!-- [0x1a5] FUSEValuesD -->
+            <node id="FUSEVALUESD" address="0x4" permission="r"
+                    description="Value of selected FUSE block. (should be accessed only if FuseDataValid bit is set in [0x1a1] FUSEStatus register). Bits 31:24 of the data word."
+                    mask="0xff" />
+
+            </node>
+
+            <node id="SEU" address="0x1aa-0x140" description="">
+                <!-- 15.3.7. SEU -->
+
+                <!-- [0x1aa] SEUCountH -->
+                <node id="SEUCOUNTH" address="0x0" permission="r"
+                    description="Bits 15:8 of SEU counter."
+                    mask="0xff" />
+
+                <!-- [0x1ab] SEUCountL -->
+                <node id="SEUCOUNTL" address="0x1" permission="r"
+                    description="Bits 7:0 of SEU counter."
+                    mask="0xff" />
+
+            </node>
 
             <node id="CLKG" address="0x1ac-0x140" description="">
-                <!-- 5.3.7. Clock Generator -->
+                <!-- 15.3.7. Clock Generator -->
                 <!-- [0x1ac] CLKGStatus0 -->
                 <node id="CLKG_PLL_R_CONFIG" address="0x0" permission="r"
                     description="Selected PLL's filter resistance value [min:step:max] Ohm"
@@ -2288,7 +2812,7 @@
 
                 <node id="CLKG_DATAMUXCFG" address="0x6" permission="r"
                     description="Selected data MUX loopback (test only). 2'd0=invalid state, 2'd1=Equalizer output data loopback, 2'd2=Data resampled by CDR loopback, 2'd3=disabled,"
-                    mask="0x6" />
+                    mask="0x60" />
 
                 <node id="CLKG_VCODAC" address="0x6" permission="r"
                     description="Selected current DAC for the VCO [min:step:max] uA"
@@ -2367,17 +2891,38 @@
             <!-- 15.3.12. ROM -->
             <!-- [0x1c5] ROM -->
             <!-- Register with fixed (non zero value). Can be used for testing purposes. -->
-
             <node id="ROMREG" address="0x1c5-0x140" permission="r"
                 description="All read requests for this register should yield value 0xA5."
                 mask="0xFF" />
 
+            <!-- 15.3.13. POR -->
+            <!-- [0x1c6] PORBOR -->
+            <!-- Status of POR and BOR instances -->
+            <node id="PORBOR" address="0x1c6-0x140" permission="r" description="All read requests for this register should yield value 0xA5.">
+                <node id="PORC" address="0x0" permission="r"
+                    description="State of PORC output"
+                    mask="0x40" />
+                <node id="PORB" address="0x0" permission="r"
+                    description="State of PORB output"
+                    mask="0x20" />
+                <node id="PORA" address="0x0" permission="r"
+                    description="State of PORA output"
+                    mask="0x10" />
+                <node id="BODC" address="0x0" permission="r"
+                    description="State of BODC output"
+                    mask="0x04" />
+                <node id="BODB" address="0x0" permission="r"
+                    description="State of BODB output"
+                    mask="0x02" />
+                <node id="BODA" address="0x0" permission="r"
+                    description="State of BODA output"
+                    mask="0x01" />
+            </node>
 
             <!-- 15.3.4. ECLK -->
             <!-- [0x19e] PSStatus -->
             <!-- Status of phase-shifter DLL initialization state machines -->
-
-            <node id="PSSTATUS" address="0x19e-0x140">
+            <node id="PSSTATUS" address="0x19e-0x140" description="">
                 <node id="PS3DllInitState" address="0x0" permission="r"
                     description="Status of the DLL initialization state machine for phase-shifter channel 3"
                     mask="0xc0" />
@@ -2398,7 +2943,7 @@
 
             <!-- 15.3.8. FEC -->
 
-            <node id="FEC" address="0x1b6-0x140">
+            <node id="FEC" address="0x1b6-0x140" description="">
 
                 <!-- [0x1b6] DLDPFecCorrectionCountH -->
                 <!-- Number of error reported by the FEC decoder in the downlink data path. -->
@@ -2416,8 +2961,29 @@
 
             </node>
 
+            <!--15.3.9. ADC-->
+            <node id="ADC" address="0x1b8-0x140" description="">
+                <!--[0x1b8] ADCStatusH-->
+                <!--ADC status register-->
+                <node id="ADCBUSY" address="0x0" permission="r"
+                    description="ADC core is performing conversion."
+                    mask="0x80" />
+                <node id="ADCDONE" address="0x0" permission="r"
+                    description="ADC conversion is done. Result of conversion can be accessed in ADCValue"
+                    mask="0x40" />
+                <node id="ADCVALUEH" address="0x0" permission="r"
+                    description="Result of the last conversion bits [9:8]."
+                    mask="0x3" />
+
+                <!--[0x1b9] ADCStatusL-->
+                <!--ADC status register-->
+                <node id="ADCVALUEL" address="0x1" permission="r"
+                    description="Result of the last conversion bits [7:0]."
+                    mask="0xff" />
+            </node>
+
             <!-- 15.3.10. Eye Opening Monitor -->
-            <node id="EOM" address="0x1ba-0x140">
+            <node id="EOM" address="0x1ba-0x140" description="">
                 <!-- [0x1ba] EOMStatus -->
                 <node id="EOMSMSTATE" address="0x0" permission="r"
                     description="EOM state machine"
@@ -2452,7 +3018,7 @@
                     mask="0xff" />
             </node>
 
-            <node id="BERT" address="0x1bf-0x140">
+            <node id="BERT" address="0x1bf-0x140" description="">
 
                 <!-- 15.3.11. BERT Tester -->
                 <!-- [0x1bf] BERTStatus -->
