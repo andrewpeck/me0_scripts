@@ -218,7 +218,7 @@ if __name__ == "__main__":
             ax1[vfatCnt0].set_ylabel("Injected Charge (fC)")
             ax1[vfatCnt0].set_title("VFAT# %02d"%vfat)
             cf1[vfatCnt0] = ax1[vfatCnt0].pcolormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
-            cbar1[vfatCnt0] = fig1[vfatCnt0].colorbar(cf1[vfatCnt0], ax=ax1[vfatCnt0], pad=0.01)
+            cbar1[vfatCnt0] = fig1, ax=ax1[vfatCnt0], pad=0.01)
             cbar1[vfatCnt0].set_label("Fired Events / Total Events")
             ax1[vfatCnt0].set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
         elif numVfats <= 6:
@@ -226,7 +226,7 @@ if __name__ == "__main__":
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("Injected Charge (fC)")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT# %02d"%vfat)
             cf1[int(vfatCnt0/3), vfatCnt0%3] = ax1[int(vfatCnt0/3), vfatCnt0%3].pcolormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
-            cbar1[int(vfatCnt0/3), vfatCnt0%3] = fig1[int(vfatCnt0/3), vfatCnt0%3].colorbar(cf1[int(vfatCnt0/3), vfatCnt0%3], ax=ax1[int(vfatCnt0/3), vfatCnt0%3], pad=0.01)
+            cbar1[int(vfatCnt0/3), vfatCnt0%3] = fig1.colorbar(cf1[int(vfatCnt0/3), vfatCnt0%3], ax=ax1[int(vfatCnt0/3), vfatCnt0%3], pad=0.01)
             cbar1[int(vfatCnt0/3), vfatCnt0%3].set_label("Fired Events / Total Events")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
         else:
@@ -234,7 +234,7 @@ if __name__ == "__main__":
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("Injected Charge (fC)")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT# %02d"%vfat)
             cf1[int(vfatCnt0/6), vfatCnt0%6] = ax1[int(vfatCnt0/6), vfatCnt0%6].pcolormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
-            cbar1[int(vfatCnt0/6), vfatCnt0%6] = fig1[int(vfatCnt0/6), vfatCnt0%6].colorbar(cf1[int(vfatCnt0/6), vfatCnt0%6], ax=ax1[int(vfatCnt0/6), vfatCnt0%6], pad=0.01)
+            cbar1[int(vfatCnt0/6), vfatCnt0%6] = fig1.colorbar(cf1[int(vfatCnt0/6), vfatCnt0%6], ax=ax1[int(vfatCnt0/6), vfatCnt0%6], pad=0.01)
             cbar1[int(vfatCnt0/6), vfatCnt0%6].set_label("Fired Events / Total Events")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
 

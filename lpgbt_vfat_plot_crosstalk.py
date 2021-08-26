@@ -93,7 +93,7 @@ if __name__ == "__main__":
             ax1[vfatCnt0].xlim(0,128)
             ax1[vfatCnt0].ylim(0,128)
             plot1[vfatCnt0] = ax1[vfatCnt0].imshow(plot_data, cmap="jet")
-            fig1[vfatCnt0].colorbar(plot1[vfatCnt0], ax=ax1[vfatCnt0])
+            fig1, ax=ax1[vfatCnt0])
         elif numVfats <= 6:
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_xlabel("Channel Injected")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("Channel Read")
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             ax1[int(vfatCnt0/3), vfatCnt0%3].xlim(0,128)
             ax1[int(vfatCnt0/3), vfatCnt0%3].ylim(0,128)
             plot1[int(vfatCnt0/3), vfatCnt0%3] = ax1[int(vfatCnt0/3), vfatCnt0%3].imshow(plot_data, cmap="jet")
-            fig1[int(vfatCnt0/3), vfatCnt0%3].colorbar(plot1[int(vfatCnt0/3), vfatCnt0%3], ax=ax1[int(vfatCnt0/3), vfatCnt0%3])
+            fig1, ax=ax1[int(vfatCnt0/3), vfatCnt0%3])
         else:
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_xlabel("Channel Injected")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("Channel Read")
@@ -109,7 +109,7 @@ if __name__ == "__main__":
             ax1[int(vfatCnt0/6), vfatCnt0%6].xlim(0,128)
             ax1[int(vfatCnt0/6), vfatCnt0%6].ylim(0,128)
             plot1[int(vfatCnt0/6), vfatCnt0%6] = ax1[int(vfatCnt0/6), vfatCnt0%6].imshow(plot_data, cmap="jet")
-            fig1[int(vfatCnt0/6), vfatCnt0%6].colorbar(plot1[int(vfatCnt0/6), vfatCnt0%6], ax=ax1[int(vfatCnt0/6), vfatCnt0%6])
+            fig1.colorbar(plot1[int(vfatCnt0/6), vfatCnt0%6], ax=ax1[int(vfatCnt0/6), vfatCnt0%6])
 
         vfatCnt0+=1
 

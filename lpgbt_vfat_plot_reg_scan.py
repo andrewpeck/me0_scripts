@@ -109,21 +109,21 @@ if __name__ == "__main__":
             ax1[vfatCnt0].set_ylabel(dac + " (DAC)")
             ax1[vfatCnt0].set_title("VFAT# %02d"%vfat)
             plot1[vfatCnt0] = ax1[vfatCnt0].imshow(plot_data, extent=[min(channelNum), max(channelNum), min(dacVals), max(dacVals)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
-            cbar1[vfatCnt0] = fig1[vfatCnt0].colorbar(plot1[vfatCnt0], ax=ax1[vfatCnt0], pad=0.01)
+            cbar1[vfatCnt0] = fig1, ax=ax1[vfatCnt0], pad=0.01)
             cbar1[vfatCnt0].set_label("Fired Events / Total Events")
         elif numVfats <= 6:
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_xlabel("Channel Number")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_ylabel(dac + " (DAC)")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT# %02d"%vfat)
             plot1[int(vfatCnt0/3), vfatCnt0%3] = ax1[int(vfatCnt0/3), vfatCnt0%3].imshow(plot_data, extent=[min(channelNum), max(channelNum), min(dacVals), max(dacVals)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
-            cbar1[int(vfatCnt0/3), vfatCnt0%3] = fig1[int(vfatCnt0/3), vfatCnt0%3].colorbar(plot1[int(vfatCnt0/3), vfatCnt0%3], ax=ax1[int(vfatCnt0/3), vfatCnt0%3], pad=0.01)
+            cbar1[int(vfatCnt0/3), vfatCnt0%3] = fig1.colorbar(plot1[int(vfatCnt0/3), vfatCnt0%3], ax=ax1[int(vfatCnt0/3), vfatCnt0%3], pad=0.01)
             cbar1[int(vfatCnt0/3), vfatCnt0%3].set_label("Fired Events / Total Events")
         else:
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_xlabel("Channel Number")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_ylabel(dac + " (DAC)")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT# %02d"%vfat)
             plot1[int(vfatCnt0/6), vfatCnt0%6] = ax1[int(vfatCnt0/6), vfatCnt0%6].imshow(plot_data, extent=[min(channelNum), max(channelNum), min(dacVals), max(dacVals)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
-            cbar1[int(vfatCnt0/6), vfatCnt0%6] = fig1[int(vfatCnt0/6), vfatCnt0%6].colorbar(plot1[int(vfatCnt0/6), vfatCnt0%6], ax=ax1[int(vfatCnt0/6), vfatCnt0%6], pad=0.01)
+            cbar1[int(vfatCnt0/6), vfatCnt0%6] = fig1.colorbar(plot1[int(vfatCnt0/6), vfatCnt0%6], ax=ax1[int(vfatCnt0/6), vfatCnt0%6], pad=0.01)
             cbar1[int(vfatCnt0/6), vfatCnt0%6].set_label("Fired Events / Total Events")
 
             vfatCnt0+=1
