@@ -77,6 +77,7 @@ if __name__ == "__main__":
             frac.append(hitmap_result[vfat][channel])
         ax.plot(channel_plot, frac, "o", label="VFAT %d"%vfat)
         leg = ax.legend(loc="center right", ncol=2)
+        fig.tight_layout()
         fig.savefig((directoryName+"/hitmap_"+oh+"_VFAT%02d.pdf")%vfat)
 
         if numVfats == 1:

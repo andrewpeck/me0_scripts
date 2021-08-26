@@ -95,7 +95,7 @@ def fit_scurve(vfatList, scurve_result, oh, directoryName, verbose , channel_lis
         for channel in tqdm(range(128)):
             scurveData      = dictToArray(scurve_result, vfat, channel) # transfer data from dictionary to array
         
-            params, covMatrix = curve_fit(scurveFunc, scurveData[:,0], scurveData[:,1], p0=[1, 0, 60, 0.4], maxfev=100000) # fit data; returns optimized parameters and covariance matrix
+            params, covMatrix = curve_fit(scurveFunc, scurveData[:,0], scurveData[:,1], p0=[1, 0, 20, 0.4], maxfev=100000) # fit data; returns optimized parameters and covariance matrix
             
             file_out.write("%d    %.4f    %.4f \n" % (channel, params[2], params[3]))
             scurveParams[vfatCounter, channel, 0] = params[3] # store channel ENC
@@ -239,6 +239,7 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         cbar.set_label("Fired Events / Total Events")
         axs.set_title("VFAT# %02d"%vfat)
         axs.set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
+        fig.tight_layout()
         fig.savefig((directoryName+"/scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat)
 
         if numVfats == 1:

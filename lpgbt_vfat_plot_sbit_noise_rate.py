@@ -77,6 +77,7 @@ if __name__ == "__main__":
         ax.plot(threshold, noise_rate, "o")
         #leg = ax.legend(loc="center right", ncol=2)
         ax.set_title("VFAT# %02d"%vfat)
+        fig.tight_layout()
         fig.savefig((directoryName+"/sbit_noise_rate_"+oh+"_VFAT%02d.pdf")%vfat)
 
         if numVfats == 1:

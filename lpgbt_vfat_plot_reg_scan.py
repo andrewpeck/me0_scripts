@@ -176,6 +176,7 @@ if __name__ == "__main__":
                 ax2[int(vfatCnt0/6), vfatCnt0%6].plot(reg_plot, frac, "o", label="Channel %d"%channel)
         leg = ax.legend(loc="center right", ncol=2)
         ax.set_title("VFAT# %02d"%vfat)
+        fig.tight_layout()
         fig.savefig((directoryName+"/register_"+oh+"_VFAT%02d.pdf")%vfat)
 
         if numVfats == 1:
