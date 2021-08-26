@@ -240,6 +240,8 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         #plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(chargeVals_mod), max(chargeVals_mod)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
         cbar = fig.colorbar(cf, ax=axs, pad=0.01)
         cbar.set_label("Fired Events / Total Events", fontsize=12)
+        for label in (cbar.get_xticklabels()):
+            label.set_fontsize(12)
         axs.set_title("VFAT# %02d"%vfat, fontsize=12)
         axs.set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
         fig.tight_layout()
