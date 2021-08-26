@@ -95,7 +95,7 @@ def fit_scurve(vfatList, scurve_result, oh, directoryName, verbose , channel_lis
         for channel in tqdm(range(128)):
             scurveData      = dictToArray(scurve_result, vfat, channel) # transfer data from dictionary to array
         
-            params, covMatrix = curve_fit(scurveFunc, scurveData[:,0], scurveData[:,1], p0=[1, 0, 10, 1], maxfev=100000) # fit data; returns optimized parameters and covariance matrix
+            params, covMatrix = curve_fit(scurveFunc, scurveData[:,0], scurveData[:,1], p0=[1, 0, 50, 0.4], maxfev=100000) # fit data; returns optimized parameters and covariance matrix
             
             file_out.write("%d    %.4f    %.4f \n" % (channel, params[2], params[3]))
             scurveParams[vfatCounter, channel, 0] = params[3] # store channel ENC
@@ -281,7 +281,7 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         vfatCnt0 += 1
         print(("\n2D histogram of scurves for VFAT%d " % vfat )+ ("saved at %s" % directoryName) + "/scurve2Dhist_"+oh+"_VFAT%d.pdf" % vfat)
 
-    plt.rcParams['font.size'] = '22'
+    plt.rcParams['font.size'] = '35'
     fig1.tight_layout()
     fig1.savefig((directoryName+"/scurve2Dhist_"+oh+".pdf"))
     plt.close(fig1)
