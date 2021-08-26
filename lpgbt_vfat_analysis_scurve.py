@@ -239,7 +239,7 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         cbar.set_label("Fired Events / Total Events")
         axs.set_title("VFAT# %02d"%vfat)
         axs.set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
-        fig.savefig((directoryName+"/scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat, dpi=1000)
+        fig.savefig((directoryName+"/scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat)
 
         if numVfats == 1:
             ax1.set_xlabel("Channel Number")
