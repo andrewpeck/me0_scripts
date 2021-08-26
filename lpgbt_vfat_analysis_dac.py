@@ -172,7 +172,7 @@ def main(inFile, calFile, directoryName, oh):
 
             file.write("%s;%i;%i\n" % (DAC_reg, vfat, nominal_ADC0))
         fig.suptitle(DAC_reg, fontsize=32) # place DAC name for main title
-        fig.subplots_adjust(top=0.88) # adjust main title so that it
+        fig.subplots_adjust(top=0.88) # adjust main title
         fig.tight_layout()
         plt.savefig(directoryName + "/DAC_summaryPlots_%s_%s.pdf"%(oh, DAC_reg))
         file.close()

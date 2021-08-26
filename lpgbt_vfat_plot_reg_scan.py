@@ -49,12 +49,34 @@ if __name__ == "__main__":
             dac_result[vfat][channel][reg] = float(fired)/float(events)
     file.close()
 
+    numVfats = len(scurve_result.keys())
+    if numVfats <= 3:
+        fig1, ax1 = plt.subplots(1, numVfats, figsize=(numVfats*10,10))
+        plot1 = 0
+        cbar1 = 0
+    elif numVfats <= 6:
+        fig1, ax1 = plt.subplots(2, 3, figsize=(30,20))
+        plot1 ={}
+        cbar1 ={}
+    elif numVfats <= 12:
+        fig1, ax1 = plt.subplots(2, 6, figsize=(60,20))
+        plot1 ={}
+        cbar1 ={}
+    elif numVfats <= 18:
+        fig1, ax1 = plt.subplots(3, 6, figsize=(60,30))
+        plot1 ={}
+        cbar1 ={}
+    elif numVfats <= 24:
+        fig1, ax1 = plt.subplots(4, 6, figsize=(60,40))
+        plot1 ={}
+        cbar1 ={}
+
     for vfat in dac_result:
         fig, axs = plt.subplots()
-        plt.xlabel("Channel Number")
-        plt.ylabel(dac + " (DAC)")
-        #plt.xlim(0,128)
-        #plt.ylim(0,256)
+        axs.set_xlabel("Channel Number")
+        axs.set_ylabel(dac + " (DAC)")
+        #axs.xlim(0,128)
+        #axs.ylim(0,256)
 
         plot_data = []
         for reg in range(0,256):
@@ -72,14 +94,67 @@ if __name__ == "__main__":
         plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(dacVals), max(dacVals)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
         cbar = fig.colorbar(plot, ax=axs, pad=0.01)
         cbar.set_label("Fired Events / Total Events")
-        plt.title("VFAT# %02d"%vfat)
-        plt.savefig((plot_filename_prefix+"_map_VFAT%02d.pdf")%vfat)
+        axs.set_title("VFAT# %02d"%vfat)
+        fig.savefig((plot_filename_prefix+"_map_VFAT%02d.pdf")%vfat)
+        plt.close(fig)
 
+        if numVfats == 1:
+            ax1.set_xlabel("Channel Number")
+            ax1.set_ylabel(dac + " (DAC)")
+            ax1.set_title("VFAT# %02d"%vfat)
+            plot1 = ax1.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(dacVals), max(dacVals)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
+            cbar1 = fig1.colorbar(plot1, ax=ax1, pad=0.01)
+            cbar1.set_label("Fired Events / Total Events")
+        elif numVfats <= 3:
+            ax1[vfatCnt0].set_xlabel("Channel Number")
+            ax1[vfatCnt0].set_ylabel(dac + " (DAC)")
+            ax1[vfatCnt0].set_title("VFAT# %02d"%vfat)
+            plot1[vfatCnt0] = ax1[vfatCnt0].imshow(plot_data, extent=[min(channelNum), max(channelNum), min(dacVals), max(dacVals)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
+            cbar1[vfatCnt0] = fig1, ax=ax1[vfatCnt0], pad=0.01)
+            cbar1[vfatCnt0].set_label("Fired Events / Total Events")
+        elif numVfats <= 6:
+            ax1[int(vfatCnt0/3), vfatCnt0%3].set_xlabel("Channel Number")
+            ax1[int(vfatCnt0/3), vfatCnt0%3].set_ylabel(dac + " (DAC)")
+            ax1[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT# %02d"%vfat)
+            plot1[int(vfatCnt0/3), vfatCnt0%3] = ax1[int(vfatCnt0/3), vfatCnt0%3].imshow(plot_data, extent=[min(channelNum), max(channelNum), min(dacVals), max(dacVals)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
+            cbar1[int(vfatCnt0/3), vfatCnt0%3] = fig1.colorbar(plot1[int(vfatCnt0/3), vfatCnt0%3], ax=ax1[int(vfatCnt0/3), vfatCnt0%3], pad=0.01)
+            cbar1[int(vfatCnt0/3), vfatCnt0%3].set_label("Fired Events / Total Events")
+        else:
+            ax1[int(vfatCnt0/6), vfatCnt0%6].set_xlabel("Channel Number")
+            ax1[int(vfatCnt0/6), vfatCnt0%6].set_ylabel(dac + " (DAC)")
+            ax1[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT# %02d"%vfat)
+            plot1[int(vfatCnt0/6), vfatCnt0%6] = ax1[int(vfatCnt0/6), vfatCnt0%6].imshow(plot_data, extent=[min(channelNum), max(channelNum), min(dacVals), max(dacVals)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
+            cbar1[int(vfatCnt0/6), vfatCnt0%6] = fig1.colorbar(plot1[int(vfatCnt0/6), vfatCnt0%6], ax=ax1[int(vfatCnt0/6), vfatCnt0%6], pad=0.01)
+            cbar1[int(vfatCnt0/6), vfatCnt0%6].set_label("Fired Events / Total Events")
+
+            vfatCnt0+=1
+
+    fig1.tight_layout()
+    fig1.savefig((plot_filename_prefix+"_map.pdf"))
+    plt.close(fig1)
+
+    if numVfats <= 3:
+        fig2, ax2 = plt.subplots(1, numVfats, figsize=(numVfats*10,10))
+        leg2 = 0
+    elif numVfats <= 6:
+        fig2, ax2 = plt.subplots(2, 3, figsize=(30,20))
+        leg2 ={}
+    elif numVfats <= 12:
+        fig2, ax2 = plt.subplots(2, 6, figsize=(60,20))
+        leg2 ={}
+    elif numVfats <= 18:
+        fig2, ax2 = plt.subplots(3, 6, figsize=(60,30))
+        leg2 ={}
+    elif numVfats <= 24:
+        fig2, ax2 = plt.subplots(4, 6, figsize=(60,40))
+        leg2 ={}
+
+    vfatCnt0 = 0
     for vfat in dac_result:
         fig, ax = plt.subplots()
-        plt.xlabel(dac)
-        plt.ylabel("# Fired Events / # Total Events")
-        plt.ylim(-0.1,1.1)
+        ax.set_xlabel(dac)
+        ax.set_ylabel("# Fired Events / # Total Events")
+        ax.ylim(-0.1,1.1)
         for channel in args.channels:
             channel = int(channel)
             if channel not in dac_result[vfat]:
@@ -93,11 +168,48 @@ if __name__ == "__main__":
                     reg_plot.append(r)
                     frac.append(dac_result[vfat][channel][r])
             ax.plot(reg_plot, frac, "o", label="Channel %d"%channel)
+            if numVfats == 1:
+                ax2.plot(reg_plot, frac, "o", label="Channel %d"%channel)
+            elif numVfats <= 3:
+                ax2[vfatCnt0].plot(reg_plot, frac, "o", label="Channel %d"%channel)
+            elif numVfats <= 6:
+                ax2[int(vfatCnt0/3), vfatCnt0%3].plot(reg_plot, frac, "o", label="Channel %d"%channel)
+            else:
+                ax2[int(vfatCnt0/6), vfatCnt0%6].plot(reg_plot, frac, "o", label="Channel %d"%channel)
         leg = ax.legend(loc="center right", ncol=2)
-        plt.title("VFAT# %02d"%vfat)
-        plt.savefig((directoryName+"/register_"+oh+"_VFAT%02d.pdf")%vfat)
+        ax.set_title("VFAT# %02d"%vfat)
+        fig.tight_layout()
+        fig.savefig((directoryName+"/register_"+oh+"_VFAT%02d.pdf")%vfat)
+        plt.close(fig)
 
+        if numVfats == 1:
+            ax2.set_xlabel("dac")
+            ax2.set_ylabel("Fired Events / Total Events")
+            ax2.set_title("VFAT# %02d"%vfat)
+            ax2.ylim(-0.1,1.1)
+            leg2 = ax2.legend(loc="center right", ncol=2)
+        elif numVfats <= 3:
+            ax2[vfatCnt0].set_xlabel("dac")
+            ax2[vfatCnt0].set_ylabel("Fired Events / Total Events")
+            ax2[vfatCnt0].set_title("VFAT# %02d"%vfat)
+            ax2[vfatCnt0].ylim(-0.1,1.1)
+            leg2[vfatCnt0] = ax2[vfatCnt0].legend(loc="center right", ncol=2)
+        elif numVfats <= 6:
+            ax2[int(vfatCnt0/3), vfatCnt0%3].set_xlabel("dac")
+            ax2[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("Fired Events / Total Events")
+            ax2[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT# %02d"%vfat)
+            ax2[int(vfatCnt0/3), vfatCnt0%3].ylim(-0.1,1.1)
+            leg2[int(vfatCnt0/3), vfatCnt0%3] = ax2[int(vfatCnt0/3), vfatCnt0%3].legend(loc="center right", ncol=2)
+        else:
+            ax2[int(vfatCnt0/6), vfatCnt0%6].set_xlabel("dac")
+            ax2[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("Fired Events / Total Events")
+            ax2[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT# %02d"%vfat)
+            ax2[int(vfatCnt0/6), vfatCnt0%6].ylim(-0.1,1.1)
+            leg2[int(vfatCnt0/6), vfatCnt0%6] = ax2[int(vfatCnt0/6), vfatCnt0%6].legend(loc="center right", ncol=2)
 
+        vfatCnt0+=1
 
-
+    fig2.tight_layout()
+    fig2.savefig((directoryName+"/register_"+oh+".pdf"))
+    plt.close(fig2)
 
