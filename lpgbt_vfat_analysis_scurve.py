@@ -180,7 +180,7 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
     """
     channelNum = np.arange(0, 128, 1)
     chargeVals = np.arange(0, 256, 1)
-    plt.rcParams['font.size'] = '12'
+    plt.rcParams['font.size'] = '22'
 
     numVfats = len(scurve_result.keys())
     if numVfats <= 3:
@@ -281,7 +281,6 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         vfatCnt0 += 1
         print(("\n2D histogram of scurves for VFAT%d " % vfat )+ ("saved at %s" % directoryName) + "/scurve2Dhist_"+oh+"_VFAT%d.pdf" % vfat)
 
-    plt.rcParams['font.size'] = '35'
     fig1.tight_layout()
     fig1.savefig((directoryName+"/scurve2Dhist_"+oh+".pdf"))
     plt.close(fig1)
