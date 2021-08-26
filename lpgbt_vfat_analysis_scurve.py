@@ -180,7 +180,6 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
     """
     channelNum = np.arange(0, 128, 1)
     chargeVals = np.arange(0, 256, 1)
-    plt.rcParams['font.size'] = '22'
 
     numVfats = len(scurve_result.keys())
     if numVfats <= 3:
@@ -207,8 +206,10 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
     vfatCnt0 = 0
     for vfat in scurve_result:
         fig, axs = plt.subplots()
-        axs.set_xlabel("Channel Number")
-        axs.set_ylabel("Injected Charge (fC)")
+        axs.set_xlabel("Channel Number", fontsize=12)
+        axs.set_ylabel("Injected Charge (fC)", fontsize=12)
+        for label in (axs.get_xticklabels() + axs.get_yticklabels()):
+            label.set_fontsize(12)
         #axs.xlim(0,128)
         #axs.ylim(0,256)
 
@@ -238,8 +239,8 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         #    chargeVals_mod[i] = DACToCharge(chargeVals_mod[i], slope_adc, intercept_adc, current_pulse_sf, vfat, mode)
         #plot = axs.imshow(plot_data, extent=[min(channelNum), max(channelNum), min(chargeVals_mod), max(chargeVals_mod)], origin="lower",  cmap=cm.ocean_r,interpolation="nearest", aspect="auto")
         cbar = fig.colorbar(cf, ax=axs, pad=0.01)
-        cbar.set_label("Fired Events / Total Events")
-        axs.set_title("VFAT# %02d"%vfat)
+        cbar.set_label("Fired Events / Total Events", fontsize=12)
+        axs.set_title("VFAT# %02d"%vfat, fontsize=12)
         axs.set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
         fig.tight_layout()
         fig.savefig((directoryName+"/scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat)
