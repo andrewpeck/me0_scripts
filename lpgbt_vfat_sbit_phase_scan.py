@@ -23,7 +23,7 @@ def getConfig (filename):
     return reg_map
 
 
-def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, bestphase_list):
+def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode, cal_dac, bestphase_list):
     print ("LPGBT VFAT S-Bit Phase Scan\n")
 
     if bestphase_list!={}:
@@ -75,16 +75,29 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, bestphase_lis
         # Configure the pulsing VFAT
         print("Configuring VFAT %02d" % (vfat))
         configureVfat(1, vfat, oh_select, 0)
+        if set_cal_mode == "voltage":
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)), 1)
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"% (oh_select, vfat)), 200)
+        elif set_cal_mode == "current":
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)), 2)
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"% (oh_select, vfat)), 0)
+        else:
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)), 0)
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"% (oh_select, vfat)), 0)
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DAC"% (oh_select, vfat)), cal_dac)
         for i in range(128):
             enableVfatchannel(vfat, oh_select, i, 1, 0) # mask all channels and disable calpulsing
         print ("")
 
-    # Reset TTC generator
+    # Configure TTC generator
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET"), 1)
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 1)
-    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 50)
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_GAP"), l1a_bxgap)
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_L1A_COUNT"), nl1a)
+    if l1a_bxgap >= 40:
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 25)
+    else:
+        write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_CALPULSE_TO_L1A_GAP"), 2)
 
     for phase in range(0, 16):
         print("Scanning phase %d" % phase)
@@ -364,8 +377,10 @@ if __name__ == "__main__":
             sys.exit()
         vfat_list.append(v_int)
 
-    nl1a = 100 # Nr. of L1As
-    l1a_bxgap = 500 # Gap between 2 L1As in nr. of BXs
+    nl1a = 1000 # Nr. of L1As
+    l1a_bxgap = 100 # Gap between 2 L1As in nr. of BXs
+    set_cal_mode = "current"
+    cal_dac = 150 # should be 50 for voltage pulse mode
 
     if args.bestphase is not None and args.bestphase_file is not None:
         print (Colors.YELLOW + "Provide either best phase (same for all VFATs) or text file of best phases for each VFAT" + Colors.ENDC)
@@ -417,7 +432,7 @@ if __name__ == "__main__":
 
     # Running Phase Scan
     try:
-        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, nl1a, l1a_bxgap, bestphase_list)
+        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, nl1a, l1a_bxgap, set_cal_mode, cal_dac, bestphase_list)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
