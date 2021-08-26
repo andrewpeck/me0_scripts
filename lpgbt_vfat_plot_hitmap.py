@@ -68,9 +68,9 @@ if __name__ == "__main__":
         ax.ylim(-0.1,1.1)
         channel_plot = range(0,128)
         if args.type == "hit":
-            ax.title("Channel Hit Map")
+            ax.set_title("Channel Hit Map")
         else:
-            ax.title("Channel Noise Map")
+            ax.set_title("Channel Noise Map")
 
         frac = []
         for channel in channel_plot:
@@ -84,9 +84,9 @@ if __name__ == "__main__":
             ax2.ylabel("Fired Events / Total Events")
             ax2.ylim(-0.1,1.1)
             if args.type == "hit":
-                ax2.title("Channel Hit Map")
+                ax2.set_title("Channel Hit Map")
             else:
-                ax2.title("Channel Noise Map")
+                ax2.set_title("Channel Noise Map")
             leg2 = ax2.legend(loc="center right", ncol=2)
             ax2.plot(channel_plot, frac, "o", label="VFAT %d"%vfat)
         elif numVfats <= 3:
@@ -94,9 +94,9 @@ if __name__ == "__main__":
             ax2[vfatCnt0].ylabel("Fired Events / Total Events")
             ax2[vfatCnt0].ylim(-0.1,1.1)
             if args.type == "hit":
-                ax2[vfatCnt0].title("Channel Hit Map")
+                ax2[vfatCnt0].set_title("Channel Hit Map")
             else:
-                ax2[vfatCnt0].title("Channel Noise Map")
+                ax2[vfatCnt0].set_title("Channel Noise Map")
             leg2[vfatCnt0] = ax2[vfatCnt0].legend(loc="center right", ncol=2)
             ax2[vfatCnt0].plot(channel_plot, frac, "o", label="VFAT %d"%vfat)
         elif numVfats <= 6:
@@ -104,9 +104,9 @@ if __name__ == "__main__":
             ax2[int(vfatCnt0/3), vfatCnt0%3].ylabel("Fired Events / Total Events")
             ax2[int(vfatCnt0/3), vfatCnt0%3].ylim(-0.1,1.1)
             if args.type == "hit":
-                ax2[int(vfatCnt0/3), vfatCnt0%3].title("Channel Hit Map")
+                ax2[int(vfatCnt0/3), vfatCnt0%3].set_title("Channel Hit Map")
             else:
-                ax2[int(vfatCnt0/3), vfatCnt0%3].title("Channel Noise Map")
+                ax2[int(vfatCnt0/3), vfatCnt0%3].set_title("Channel Noise Map")
             leg2[int(vfatCnt0/3), vfatCnt0%3] = ax2[int(vfatCnt0/3), vfatCnt0%3].legend(loc="center right", ncol=2)
             ax2[int(vfatCnt0/3), vfatCnt0%3].plot(channel_plot, frac, "o", label="VFAT %d"%vfat)
         else:
@@ -114,9 +114,9 @@ if __name__ == "__main__":
             ax2[int(vfatCnt0/6), vfatCnt0%6].ylabel("Fired Events / Total Events")
             ax2[int(vfatCnt0/6), vfatCnt0%6].ylim(-0.1,1.1)
             if args.type == "hit":
-                ax2[int(vfatCnt0/6), vfatCnt0%6].title("Channel Hit Map")
+                ax2[int(vfatCnt0/6), vfatCnt0%6].set_title("Channel Hit Map")
             else:
-                ax2[int(vfatCnt0/6), vfatCnt0%6].title("Channel Noise Map")
+                ax2[int(vfatCnt0/6), vfatCnt0%6].set_title("Channel Noise Map")
             leg2[int(vfatCnt0/6), vfatCnt0%6] = ax2[int(vfatCnt0/6), vfatCnt0%6].legend(loc="center right", ncol=2)
             ax2[int(vfatCnt0/6), vfatCnt0%6].plot(channel_plot, frac, "o", label="VFAT %d"%vfat)
 

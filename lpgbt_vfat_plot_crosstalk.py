@@ -75,13 +75,13 @@ if __name__ == "__main__":
         axs.ylim(0,128)
         plot = axs.imshow(plot_data, cmap="jet")
         fig.colorbar(plot, ax=axs)
-        axs.title("VFAT# %02d"%vfat)
+        axs.set_title("VFAT# %02d"%vfat)
         fig.savefig((directoryName+"/crosstalk_"+oh+"_VFAT%02d.pdf")%vfat)
 
         if numVfats == 1:
             ax1.xlabel("Channel Injected")
             ax1.ylabel("Channel Read")
-            ax1.title("VFAT# %02d"%vfat)
+            ax1.set_title("VFAT# %02d"%vfat)
             ax1.xlim(0,128)
             ax1.ylim(0,128)
             plot1 = ax1.imshow(plot_data, cmap="jet")
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         elif numVfats <= 3:
             ax1[vfatCnt0].xlabel("Channel Injected")
             ax1[vfatCnt0].ylabel("Channel Read")
-            ax1[vfatCnt0].title("VFAT# %02d"%vfat)
+            ax1[vfatCnt0].set_title("VFAT# %02d"%vfat)
             ax1[vfatCnt0].xlim(0,128)
             ax1[vfatCnt0].ylim(0,128)
             plot1[vfatCnt0] = ax1[vfatCnt0].imshow(plot_data, cmap="jet")
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         elif numVfats <= 6:
             ax1[int(vfatCnt0/3), vfatCnt0%3].xlabel("Channel Injected")
             ax1[int(vfatCnt0/3), vfatCnt0%3].ylabel("Channel Read")
-            ax1[int(vfatCnt0/3), vfatCnt0%3].title("VFAT# %02d"%vfat)
+            ax1[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT# %02d"%vfat)
             ax1[int(vfatCnt0/3), vfatCnt0%3].xlim(0,128)
             ax1[int(vfatCnt0/3), vfatCnt0%3].ylim(0,128)
             plot1[int(vfatCnt0/3), vfatCnt0%3] = ax1[int(vfatCnt0/3), vfatCnt0%3].imshow(plot_data, cmap="jet")
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         else:
             ax1[int(vfatCnt0/6), vfatCnt0%6].xlabel("Channel Injected")
             ax1[int(vfatCnt0/6), vfatCnt0%6].ylabel("Channel Read")
-            ax1[int(vfatCnt0/6), vfatCnt0%6].title("VFAT# %02d"%vfat)
+            ax1[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT# %02d"%vfat)
             ax1[int(vfatCnt0/6), vfatCnt0%6].xlim(0,128)
             ax1[int(vfatCnt0/6), vfatCnt0%6].ylim(0,128)
             plot1[int(vfatCnt0/6), vfatCnt0%6] = ax1[int(vfatCnt0/6), vfatCnt0%6].imshow(plot_data, cmap="jet")
