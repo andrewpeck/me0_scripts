@@ -171,8 +171,8 @@ if __name__ == "__main__":
     vfatCnt0 = 0
     for vfat in scurve_result:
         fig, axs = plt.subplots()
-        axs.xlabel("Channel Number")
-        axs.ylabel("Injected Charge (fC)")
+        axs.set_xlabel("Channel Number")
+        axs.set_ylabel("Injected Charge (fC)")
         #axs.xlim(0,128)
         #axs.ylim(0,256)
 
@@ -206,32 +206,32 @@ if __name__ == "__main__":
         fig.savefig((directoryName+"/scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat, dpi=1000)
 
         if numVfats == 1:
-            ax1.xlabel("Channel Number")
-            ax1.ylabel("Injected Charge (fC)")
+            ax1.set_xlabel("Channel Number")
+            ax1.set_ylabel("Injected Charge (fC)")
             ax1.set_title("VFAT# %02d"%vfat)
             cf1 = ax1.pcolormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
             cbar1 = fig1.colorbar(cf1, ax=ax1, pad=0.01)
             cbar1.set_label("Fired Events / Total Events")
             ax1.set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
         elif numVfats <= 3:
-            ax1[vfatCnt0].xlabel("Channel Number")
-            ax1[vfatCnt0].ylabel("Injected Charge (fC)")
+            ax1[vfatCnt0].set_xlabel("Channel Number")
+            ax1[vfatCnt0].set_ylabel("Injected Charge (fC)")
             ax1[vfatCnt0].set_title("VFAT# %02d"%vfat)
             cf1[vfatCnt0] = ax1[vfatCnt0].pcolormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
             cbar1[vfatCnt0] = fig1[vfatCnt0].colorbar(cf1[vfatCnt0], ax=ax1[vfatCnt0], pad=0.01)
             cbar1[vfatCnt0].set_label("Fired Events / Total Events")
             ax1[vfatCnt0].set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
         elif numVfats <= 6:
-            ax1[int(vfatCnt0/3), vfatCnt0%3].xlabel("Channel Number")
-            ax1[int(vfatCnt0/3), vfatCnt0%3].ylabel("Injected Charge (fC)")
+            ax1[int(vfatCnt0/3), vfatCnt0%3].set_xlabel("Channel Number")
+            ax1[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("Injected Charge (fC)")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT# %02d"%vfat)
             cf1[int(vfatCnt0/3), vfatCnt0%3] = ax1[int(vfatCnt0/3), vfatCnt0%3].pcolormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
             cbar1[int(vfatCnt0/3), vfatCnt0%3] = fig1[int(vfatCnt0/3), vfatCnt0%3].colorbar(cf1[int(vfatCnt0/3), vfatCnt0%3], ax=ax1[int(vfatCnt0/3), vfatCnt0%3], pad=0.01)
             cbar1[int(vfatCnt0/3), vfatCnt0%3].set_label("Fired Events / Total Events")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
         else:
-            ax1[int(vfatCnt0/6), vfatCnt0%6].xlabel("Channel Number")
-            ax1[int(vfatCnt0/6), vfatCnt0%6].ylabel("Injected Charge (fC)")
+            ax1[int(vfatCnt0/6), vfatCnt0%6].set_xlabel("Channel Number")
+            ax1[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("Injected Charge (fC)")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT# %02d"%vfat)
             cf1[int(vfatCnt0/6), vfatCnt0%6] = ax1[int(vfatCnt0/6), vfatCnt0%6].pcolormesh(plot_data_x, plot_data_y, plot_data, cmap=cm.ocean_r, shading="nearest")
             cbar1[int(vfatCnt0/6), vfatCnt0%6] = fig1[int(vfatCnt0/6), vfatCnt0%6].colorbar(cf1[int(vfatCnt0/6), vfatCnt0%6], ax=ax1[int(vfatCnt0/6), vfatCnt0%6], pad=0.01)
@@ -262,8 +262,8 @@ if __name__ == "__main__":
     vfatCnt0 = 0
     for vfat in scurve_result:
         fig, ax = plt.subplots()
-        ax.xlabel("Injected Charge (fC)")
-        ax.ylabel("Fired Events / Total Events")
+        ax.set_xlabel("Injected Charge (fC)")
+        ax.set_ylabel("Fired Events / Total Events")
         #if args.type == "daq":
         #    plt.ylim(-0.1,1.1)
         #else:
@@ -296,23 +296,23 @@ if __name__ == "__main__":
         fig.savefig((directoryName+"/scurve_"+oh+"_VFAT%02d.pdf")%vfat)
 
         if numVfats == 1:
-            ax2.xlabel("Injected Charge (fC)")
-            ax2.ylabel("Fired Events / Total Events")
+            ax2.set_xlabel("Injected Charge (fC)")
+            ax2.set_ylabel("Fired Events / Total Events")
             ax2.set_title("VFAT# %02d"%vfat)
             leg2 = ax2.legend(loc="center right", ncol=2)
         elif numVfats <= 3:
-            ax2[vfatCnt0].xlabel("Injected Charge (fC)")
-            ax2[vfatCnt0].ylabel("Fired Events / Total Events")
+            ax2[vfatCnt0].set_xlabel("Injected Charge (fC)")
+            ax2[vfatCnt0].set_ylabel("Fired Events / Total Events")
             ax2[vfatCnt0].set_title("VFAT# %02d"%vfat)
             leg2[vfatCnt0] = ax2[vfatCnt0].legend(loc="center right", ncol=2)
         elif numVfats <= 6:
-            ax2[int(vfatCnt0/3), vfatCnt0%3].xlabel("Injected Charge (fC)")
-            ax2[int(vfatCnt0/3), vfatCnt0%3].ylabel("Fired Events / Total Events")
+            ax2[int(vfatCnt0/3), vfatCnt0%3].set_xlabel("Injected Charge (fC)")
+            ax2[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("Fired Events / Total Events")
             ax2[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT# %02d"%vfat)
             leg2[int(vfatCnt0/3), vfatCnt0%3] = ax2[int(vfatCnt0/3), vfatCnt0%3].legend(loc="center right", ncol=2)
         else:
-            ax2[int(vfatCnt0/6), vfatCnt0%6].xlabel("Injected Charge (fC)")
-            ax2[int(vfatCnt0/6), vfatCnt0%6].ylabel("Fired Events / Total Events")
+            ax2[int(vfatCnt0/6), vfatCnt0%6].set_xlabel("Injected Charge (fC)")
+            ax2[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("Fired Events / Total Events")
             ax2[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT# %02d"%vfat)
             leg2[int(vfatCnt0/6), vfatCnt0%6] = ax2[int(vfatCnt0/6), vfatCnt0%6].legend(loc="center right", ncol=2)
 

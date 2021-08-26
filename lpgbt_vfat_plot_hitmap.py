@@ -63,8 +63,8 @@ if __name__ == "__main__":
     vfatCnt0 = 0
     for vfat in hitmap_result:
         fig, ax = plt.subplots()
-        ax.xlabel("Channel")
-        ax.ylabel("# Fired Events / # Total Events")
+        ax.set_xlabel("Channel")
+        ax.set_ylabel("# Fired Events / # Total Events")
         ax.ylim(-0.1,1.1)
         channel_plot = range(0,128)
         if args.type == "hit":
@@ -80,8 +80,8 @@ if __name__ == "__main__":
         fig.savefig((directoryName+"/hitmap_"+oh+"_VFAT%02d.pdf")%vfat)
 
         if numVfats == 1:
-            ax2.xlabel("Channel")
-            ax2.ylabel("Fired Events / Total Events")
+            ax2.set_xlabel("Channel")
+            ax2.set_ylabel("Fired Events / Total Events")
             ax2.ylim(-0.1,1.1)
             if args.type == "hit":
                 ax2.set_title("Channel Hit Map")
@@ -90,8 +90,8 @@ if __name__ == "__main__":
             leg2 = ax2.legend(loc="center right", ncol=2)
             ax2.plot(channel_plot, frac, "o", label="VFAT %d"%vfat)
         elif numVfats <= 3:
-            ax2[vfatCnt0].xlabel("Channel")
-            ax2[vfatCnt0].ylabel("Fired Events / Total Events")
+            ax2[vfatCnt0].set_xlabel("Channel")
+            ax2[vfatCnt0].set_ylabel("Fired Events / Total Events")
             ax2[vfatCnt0].ylim(-0.1,1.1)
             if args.type == "hit":
                 ax2[vfatCnt0].set_title("Channel Hit Map")
@@ -100,8 +100,8 @@ if __name__ == "__main__":
             leg2[vfatCnt0] = ax2[vfatCnt0].legend(loc="center right", ncol=2)
             ax2[vfatCnt0].plot(channel_plot, frac, "o", label="VFAT %d"%vfat)
         elif numVfats <= 6:
-            ax2[int(vfatCnt0/3), vfatCnt0%3].xlabel("Channel")
-            ax2[int(vfatCnt0/3), vfatCnt0%3].ylabel("Fired Events / Total Events")
+            ax2[int(vfatCnt0/3), vfatCnt0%3].set_xlabel("Channel")
+            ax2[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("Fired Events / Total Events")
             ax2[int(vfatCnt0/3), vfatCnt0%3].ylim(-0.1,1.1)
             if args.type == "hit":
                 ax2[int(vfatCnt0/3), vfatCnt0%3].set_title("Channel Hit Map")
@@ -110,8 +110,8 @@ if __name__ == "__main__":
             leg2[int(vfatCnt0/3), vfatCnt0%3] = ax2[int(vfatCnt0/3), vfatCnt0%3].legend(loc="center right", ncol=2)
             ax2[int(vfatCnt0/3), vfatCnt0%3].plot(channel_plot, frac, "o", label="VFAT %d"%vfat)
         else:
-            ax2[int(vfatCnt0/6), vfatCnt0%6].xlabel("Channel")
-            ax2[int(vfatCnt0/6), vfatCnt0%6].ylabel("Fired Events / Total Events")
+            ax2[int(vfatCnt0/6), vfatCnt0%6].set_xlabel("Channel")
+            ax2[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("Fired Events / Total Events")
             ax2[int(vfatCnt0/6), vfatCnt0%6].ylim(-0.1,1.1)
             if args.type == "hit":
                 ax2[int(vfatCnt0/6), vfatCnt0%6].set_title("Channel Hit Map")
