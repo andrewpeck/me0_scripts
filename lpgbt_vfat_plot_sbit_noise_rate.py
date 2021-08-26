@@ -79,6 +79,7 @@ if __name__ == "__main__":
         ax.set_title("VFAT# %02d"%vfat)
         fig.tight_layout()
         fig.savefig((directoryName+"/sbit_noise_rate_"+oh+"_VFAT%02d.pdf")%vfat)
+        plt.close(fig)
 
         if numVfats == 1:
             ax1.set_xlabel("Threshold (DAC)")
@@ -109,7 +110,7 @@ if __name__ == "__main__":
 
     fig1.tight_layout()
     fig1.savefig((directoryName+"/sbit_noise_rate_"+oh+".pdf"))
-
+    plt.close(fig1)
 
 
 

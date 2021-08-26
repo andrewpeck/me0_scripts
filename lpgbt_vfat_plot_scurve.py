@@ -205,6 +205,7 @@ if __name__ == "__main__":
         axs.set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
         fig.tight_layout()
         fig.savefig((directoryName+"/scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat)
+        plt.close(fig)
 
         if numVfats == 1:
             ax1.set_xlabel("Channel Number")
@@ -243,6 +244,8 @@ if __name__ == "__main__":
 
     fig1.tight_layout()
     fig1.savefig((directoryName+"/scurve2Dhist_"+oh+".pdf"))
+    plt.close(fig1)
+
 
     if numVfats <= 3:
         fig2, ax2 = plt.subplots(1, numVfats, figsize=(numVfats*10,10))
@@ -295,6 +298,7 @@ if __name__ == "__main__":
         leg = ax.legend(loc="center right", ncol=2)
         ax.set_title("VFAT# %02d"%vfat)
         fig.savefig((directoryName+"/scurve_"+oh+"_VFAT%02d.pdf")%vfat)
+        plt.close(fig)
 
         if numVfats == 1:
             ax2.set_xlabel("Injected Charge (fC)")
@@ -321,6 +325,7 @@ if __name__ == "__main__":
 
     fig2.tight_layout()
     fig2.savefig((directoryName+"/scurve_"+oh+".pdf"))
+    plt.close(fig2)
 
 
 

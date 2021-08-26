@@ -95,7 +95,7 @@ def fit_scurve(vfatList, scurve_result, oh, directoryName, verbose , channel_lis
         for channel in tqdm(range(128)):
             scurveData      = dictToArray(scurve_result, vfat, channel) # transfer data from dictionary to array
         
-            params, covMatrix = curve_fit(scurveFunc, scurveData[:,0], scurveData[:,1], p0=[1, 0, 20, 0.4], maxfev=100000) # fit data; returns optimized parameters and covariance matrix
+            params, covMatrix = curve_fit(scurveFunc, scurveData[:,0], scurveData[:,1], p0=[1, 0, 10, 0.4], maxfev=100000) # fit data; returns optimized parameters and covariance matrix
             
             file_out.write("%d    %.4f    %.4f \n" % (channel, params[2], params[3]))
             scurveParams[vfatCounter, channel, 0] = params[3] # store channel ENC
@@ -171,6 +171,7 @@ def plotENCdistributions(vfatList, scurveParams, oh, directoryName):
     fig.tight_layout()
     plt.savefig(directoryName + "/scurveENCdistribution_"+oh+".pdf")
     print("\nENC distribution plot saved at %s" % directoryName + "/scurveENCdistribution_"+oh+".pdf")
+    plt.close()
 
 def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_adc, current_pulse_sf, mode):
     """
@@ -241,6 +242,7 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
         axs.set_xticks(np.arange(min(channelNum), max(channelNum)+1, 20))
         fig.tight_layout()
         fig.savefig((directoryName+"/scurve2Dhist_"+oh+"_VFAT%02d.pdf")%vfat)
+        plt.close(fig)
 
         if numVfats == 1:
             ax1.set_xlabel("Channel Number")
@@ -280,6 +282,7 @@ def plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_
 
     fig1.tight_layout()
     fig1.savefig((directoryName+"/scurve2Dhist_"+oh+".pdf"))
+    plt.close(fig1)
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore") # temporarily disable warnings; infinite covariance matrix is returned when calling scipy.optimize.curve_fit(), but fit is fine

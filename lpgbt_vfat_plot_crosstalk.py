@@ -77,6 +77,7 @@ if __name__ == "__main__":
         fig.colorbar(plot, ax=axs)
         axs.set_title("VFAT# %02d"%vfat)
         fig.savefig((directoryName+"/crosstalk_"+oh+"_VFAT%02d.pdf")%vfat)
+        plt.close(fig)
 
         if numVfats == 1:
             ax1.set_xlabel("Channel Injected")
@@ -115,3 +116,4 @@ if __name__ == "__main__":
 
     fig1.tight_layout()
     fig1.savefig((directoryName+"/crosstalk_"+oh+".pdf"))
+    plt.close(fig1)

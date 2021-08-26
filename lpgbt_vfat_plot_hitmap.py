@@ -79,6 +79,7 @@ if __name__ == "__main__":
         leg = ax.legend(loc="center right", ncol=2)
         fig.tight_layout()
         fig.savefig((directoryName+"/hitmap_"+oh+"_VFAT%02d.pdf")%vfat)
+        plt.close(fig)
 
         if numVfats == 1:
             ax2.set_xlabel("Channel")
@@ -125,3 +126,4 @@ if __name__ == "__main__":
 
     fig2.tight_layout()
     fig2.savefig((directoryName+"/hitmap_"+oh+".pdf"))
+    plt.close(fig2)
