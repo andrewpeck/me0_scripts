@@ -377,7 +377,7 @@ if __name__ == "__main__":
             sys.exit()
         vfat_list.append(v_int)
 
-    nl1a = 1000 # Nr. of L1As
+    nl1a = 100 # Nr. of L1As
     l1a_bxgap = 100 # Gap between 2 L1As in nr. of BXs
     set_cal_mode = "current"
     cal_dac = 150 # should be 50 for voltage pulse mode
