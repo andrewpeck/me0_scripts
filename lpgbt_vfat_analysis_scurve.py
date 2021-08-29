@@ -94,14 +94,7 @@ def fit_scurve(vfatList, scurve_result, oh, directoryName, verbose , channel_lis
 
         for channel in tqdm(range(128)):
             scurveData      = dictToArray(scurve_result, vfat, channel) # transfer data from dictionary to array
-
-            threshold_initial_guess = 0
-            for charge in scurve_result[vfat][channel]:
-                effi = scurve_result[vfat][channel][charge]
-                if effi>=0.1:
-                    threshold_initial_guess = charge
-                    break
-
+            threshold_initial_guess = (scurveData[:,0][0] + scurveData[:,0][-1])/2.0
             params, covMatrix = curve_fit(scurveFunc, scurveData[:,0], scurveData[:,1], p0=[1, 0, threshold_initial_guess, 0.4], maxfev=100000) # fit data; returns optimized parameters and covariance matrix
             if verbose == True:
                 print ("Initial guess for threshold for fitting: %.4f (fC)"%vfat_threshold_initial_guess[vfat])
