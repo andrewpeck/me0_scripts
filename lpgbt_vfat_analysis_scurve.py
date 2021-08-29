@@ -91,12 +91,21 @@ def fit_scurve(vfatList, scurve_result, oh, directoryName, verbose , channel_lis
         file_out.write("========= Results for VFAT%2d =========\n" % vfat)
         print("========= Processing data for VFAT%2d =========\n" % vfat)
         file_out.write("Channel    Mean    ENC\n")
-            
+
         for channel in tqdm(range(128)):
             scurveData      = dictToArray(scurve_result, vfat, channel) # transfer data from dictionary to array
-        
-            params, covMatrix = curve_fit(scurveFunc, scurveData[:,0], scurveData[:,1], p0=[1, 0, 50, 0.4], maxfev=100000) # fit data; returns optimized parameters and covariance matrix
-            
+
+            threshold_initial_guess = 0
+            for charge in scurve_result[vfat][channel]:
+                effi = scurve_result[vfat][channel][charge]
+                if effi>=0.1:
+                    threshold_initial_guess = charge
+                    break
+
+            params, covMatrix = curve_fit(scurveFunc, scurveData[:,0], scurveData[:,1], p0=[1, 0, threshold_initial_guess, 0.4], maxfev=100000) # fit data; returns optimized parameters and covariance matrix
+            if verbose == True:
+                print ("Initial guess for threshold for fitting: %.4f (fC)"%vfat_threshold_initial_guess[vfat])
+
             file_out.write("%d    %.4f    %.4f \n" % (channel, params[2], params[3]))
             scurveParams[vfatCounter, channel, 0] = params[3] # store channel ENC
             scurveParams[vfatCounter, channel, 1] = params[2] # store channel mean
@@ -379,7 +388,6 @@ if __name__ == "__main__":
     
     vfatList     = list(scurve_result.keys())
     scurveParams = fit_scurve(vfatList, scurve_result, oh, directoryName, args.verbose, channel_list)
-
     plotENCdistributions(vfatList, scurveParams, oh, directoryName)
     plot2Dhist(vfatList, directoryName, oh, scurve_result, slope_adc, intercept_adc, current_pulse_sf, args.mode)
 
