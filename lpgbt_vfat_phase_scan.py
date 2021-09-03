@@ -160,7 +160,7 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_lis
 
     for vfat in vfat_list:
         for phase in range(0, 16):
-            errs[vfat][phase] = (not 1==link_good[vfat][phase]) + sync_err_cnt[vfat][phase] + cfg_run[vfat][phase] + daq_crc_error[vfat][phase]
+            errs[vfat][phase] = (not link_good[vfat][phase]==1) + (not sync_err_cnt[vfat][phase]==0) + (not cfg_run[vfat][phase]==0) + (not daq_crc_error[vfat][phase]==0)
         centers[vfat], widths[vfat] = find_phase_center(errs[vfat])
 
     print ("\nphase : 0123456789ABCDEF")
