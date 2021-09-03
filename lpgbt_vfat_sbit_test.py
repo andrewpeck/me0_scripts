@@ -127,10 +127,6 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
         calpulse_counter_list[elink]  = {}
 
         for channel, sbit_read in zip(channel_list[elink], sbit_list[elink]):
-            # Reset L1A, CalPulse and S-bit counters
-            global_reset()
-            write_backend_reg(reset_sbit_counter_node, 1)
-
             # Enabling the pulsing channel
             if parallel is None:
                 print("Enabling pulsing on channel %02d in ELINK# %02d:" % (channel, elink))
@@ -139,6 +135,10 @@ def lpgbt_vfat_sbit(system, oh_select, vfat, elink_list, channel_list, sbit_list
 
             write_backend_reg(elink_sbit_select_node, elink) # Select elink for S-bit counter
             write_backend_reg(channel_sbit_select_node, sbit_read) # Select S-bit for S-bit counter
+
+            # Reset L1A, CalPulse and S-bit counters
+            global_reset()
+            write_backend_reg(reset_sbit_counter_node, 1)
 
             # Start the cyclic generator
             print ("ELINK# %02d, Channel %02d: Start L1A and Calpulsing cycle"%(elink, channel))
