@@ -5,6 +5,7 @@ import sys
 import argparse
 import random
 import json
+import glob
 from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
 
 
