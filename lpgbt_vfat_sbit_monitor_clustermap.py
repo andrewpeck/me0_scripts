@@ -99,12 +99,15 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
             # Stop the cyclic generator
             write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET"), 1)
 
+            l1a_counter = read_backend_reg(l1a_node)
+            calpulse_counter = read_backend_reg(calpulse_node)
+
             if system!="dryrun" and l1a_counter != nl1a:
                 print (Colors.RED + "ERROR: Number of L1As incorrect" + Colors.ENDC)
                 rw_terminate()
 
             for i in range(0,8):
-                s_bit_cluster_mapping[vfat][channel]["cluster_count"].append(read_backend_reg(cluster_count_nodes[i])/nl1a)
+                s_bit_cluster_mapping[vfat][channel]["cluster_count"].append(read_backend_reg(cluster_count_nodes[i])/calpulse_counter)
                 sbit_monitor_value = read_backend_reg(sbit_monitor_nodes[i])
                 sbit_cluster_address = sbit_monitor_value & 0x7ff
                 sbit_cluster_size = ((sbit_monitor_value >> 11) & 0x7) + 1
