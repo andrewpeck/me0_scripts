@@ -132,6 +132,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
     filename = "vfat_data/vfat_sbit_monitor_cluster_mapping_results/ME0_OH%d_vfat_sbit_monitor_cluster_mapping_results_"%oh_select+now+".py"
     file_out = open(filename, "w")
     file_out.write("VFAT    Channel    Sbit    Cluster_Counts (1-7)    Clusters (Size, Address)\n\n")
+
     for vfat in s_bit_cluster_mapping:
         for channel in s_bit_cluster_mapping[vfat]:
             result_str = "%d  %d  %d  "%(vfat, channel, s_bit_cluster_mapping[vfat][channel]["sbit"])
@@ -142,8 +143,8 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
                 if (s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"][i]==0x7ff and s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"][i] == 0x7):
                     continue
                 result_str += "%d,%d  "%(s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"][i], s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"][i])
-        result_str += "\n"
-        file_out.write(result_str)
+            result_str += "\n"
+            file_out.write(result_str)
     file_out.close()
     print ("S-bit Monitor Cluster Mapping Results written in file: %s \n"%filename)
 
