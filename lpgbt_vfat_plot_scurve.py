@@ -147,10 +147,14 @@ if __name__ == "__main__":
     chargeVals = np.arange(0, 256, 1)
 
     numVfats = len(scurve_result.keys())
-    if numVfats <= 3:
+    if numVfats == 1:
         fig1, ax1 = plt.subplots(1, numVfats, figsize=(numVfats*10,10))
         cf1 = 0
         cbar1 = 0
+    elif numVfats <= 3:
+        fig1, ax1 = plt.subplots(1, numVfats, figsize=(numVfats*10,10))
+        cf1 ={}
+        cbar1 ={}
     elif numVfats <= 6:
         fig1, ax1 = plt.subplots(2, 3, figsize=(30,20))
         cf1 ={}
