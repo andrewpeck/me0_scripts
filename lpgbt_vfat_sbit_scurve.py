@@ -120,6 +120,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
     for channel in channel_list:
         print ("Channel: %d"%channel)
         elink = int(channel/16)
+        # Looping over VFATs
         for vfat in vfat_list:
             if parallel is None:
                 enableVfatchannel(vfat, oh_select, channel, 0, 1) # unmask channel and enable calpulsing

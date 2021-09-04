@@ -78,87 +78,40 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
             sbit = s_bit_channel_mapping[str(vfat)][str(elink)][str(channel)]
             s_bit_cluster_mapping[vfat][channel] = {}
             s_bit_cluster_mapping[vfat][channel][sbit] = sbit
+            s_bit_cluster_mapping[vfat][channel][cluster_count] = []
+            s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_size] = []
+            s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_address] = []
 
+            # Enabling the pulsing channel
+            enableVfatchannel(vfat, oh_select, channel, 0, 1) # unmask this channel and enable calpulsing
 
+            # Reset L1A, CalPulse and S-bit monitor
+            global_reset()
+            write_backend_reg(reset_sbit_monitor_node, 1)
 
+            # Start the cyclic generator
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_START"), 1)
+            cyclic_running = read_backend_reg(cyclic_running_node)
+            while cyclic_running:
+                cyclic_running = read_backend_reg(cyclic_running_node)
 
+            # Stop the cyclic generator
+            write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET"), 1)
 
-        # Looping over all 8 elinks
-        for elink in range(0,8):
-            print ("Phase scan for S-bits in ELINK# %02d" %(elink))
-            write_backend_reg(elink_sbit_select_node, elink) # Select elink for S-bit counter
+            if system!="dryrun" and l1a_counter != nl1a:
+                print (Colors.RED + "ERROR: Number of L1As incorrect" + Colors.ENDC)
+                rw_terminate()
 
-            s_bit_channel_mapping[vfat][elink] = {}
-            s_bit_matches = {}
-            # Looping over all channels in that elink
-            for channel in range(elink*16,elink*16+16):
-                # Enabling the pulsing channel
-                enableVfatchannel(vfat, oh_select, channel, 0, 1) # unmask this channel and enable calpulsing
+            for i in range(0,8):
+                s_bit_cluster_mapping[vfat][channel][cluster_count].append(read_backend_reg(cluster_count_nodes[i])/nl1a)
+                sbit_monitor_value = read_backend_reg(sbit_monitor_nodes[i])
+                sbit_cluster_address = sbit_monitor_value & 0x7ff
+                sbit_cluster_size = ((sbit_monitor_value >> 11) & 0x7) + 1
+                s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_size].append(sbit_cluster_size)
+                s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_address].append(sbit_cluster_address)
 
-                channel_sbit_counter_final = {}
-                sbit_channel_match = 0
-                s_bit_channel_mapping[vfat][elink][channel] = -9999
-
-                # Looping over all s-bits in that elink
-                for sbit in range(elink*8,elink*8+8):
-                    # Reset L1A, CalPulse and S-bit counters
-                    global_reset()
-                    write_backend_reg(reset_sbit_counter_node, 1)
-
-                    write_backend_reg(channel_sbit_select_node, sbit) # Select S-bit for S-bit counter
-                    s_bit_matches[sbit] = 0
-
-                    # Start the cyclic generator
-                    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.CYCLIC_START"), 1)
-                    cyclic_running = read_backend_reg(cyclic_running_node)
-                    while cyclic_running:
-                        cyclic_running = read_backend_reg(cyclic_running_node)
-
-                    # Stop the cyclic generator
-                    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.RESET"), 1)
-
-                    elink_sbit_counter_final = read_backend_reg(elink_sbit_counter_node)
-                    l1a_counter = read_backend_reg(l1a_node)
-                    calpulse_counter = read_backend_reg(calpulse_node)
-
-                    if system!="dryrun" and l1a_counter != nl1a:
-                        print (Colors.RED + "ERROR: Number of L1As incorrect" + Colors.ENDC)
-                        rw_terminate()
-                    if system!="dryrun" and elink_sbit_counter_final == 0:
-                        print (Colors.YELLOW + "WARNING: Elink %02d did not register any S-bit for calpulse on channel %02d"%(elink, channel) + Colors.ENDC)
-                        s_bit_channel_mapping[vfat][elink][channel] = -9999
-                        break
-                    channel_sbit_counter_final[sbit] = read_backend_reg(channel_sbit_counter_node)
-
-                    if channel_sbit_counter_final[sbit] > 0:
-                        if sbit_channel_match == 1:
-                            print (Colors.YELLOW + "WARNING: Multiple S-bits registered hits for calpulse on channel %02d"%(channel) + Colors.ENDC)
-                            s_bit_channel_mapping[vfat][elink][channel] = -9999
-                            break
-                        if s_bit_matches[sbit] >= 2:
-                            print (Colors.YELLOW + "WARNING: S-bit %02d already matched to 2 channels"%(sbit) + Colors.ENDC)
-                            s_bit_channel_mapping[vfat][elink][channel] = -9999
-                            break
-                        if s_bit_matches[sbit] == 1:
-                            if s_bit_channel_mapping[vfat][elink][channel-1] != sbit:
-                                print (Colors.YELLOW + "WARNING: S-bit %02d matched to a different channel than the previous one"%(sbit) + Colors.ENDC)
-                                s_bit_channel_mapping[vfat][elink][channel] = -9999
-                                break
-                            if channel%2==0:
-                                print (Colors.YELLOW + "WARNING: S-bit %02d already matched to an earlier odd numbered channel"%(sbit) + Colors.ENDC)
-                                s_bit_channel_mapping[vfat][elink][channel] = -9999
-                                break
-                        s_bit_channel_mapping[vfat][elink][channel] = sbit
-                        sbit_channel_match = 1
-                        s_bit_matches[sbit] += 1
-                # End of S-bit loop for this channel
-
-                # Disabling the pulsing channels
-                enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask this channel and disable calpulsing
-            # End of Channel loop
-
-            print ("")
-        # End of Elink loop
+            # Disabling the pulsing channels
+            enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask this channel and disable calpulsing
 
         # Unconfigure the pulsing VFAT
         print("Unconfiguring VFAT %02d" % (vfat))
@@ -167,29 +120,31 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
         # End of VFAT loop
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 0)
 
-    if not os.path.isdir("vfat_data/vfat_sbit_mapping_results"):
-        os.mkdir("vfat_data/vfat_sbit_mapping_results")
+    if not os.path.isdir("vfat_data/vfat_sbit_monitor_cluster_mapping_results"):
+        os.mkdir("vfat_data/vfat_sbit_monitor_cluster_mapping_results")
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    filename = "vfat_data/vfat_sbit_mapping_results/ME0_OH%d_vfat_sbit_mapping_results_"%oh_select+now+".py"
-    with open(filename, "w") as file:
-        file.write(json.dumps(s_bit_channel_mapping))
-
-    print ("S-bit Mapping Results: \n")
-    for vfat in s_bit_channel_mapping:
-        print ("VFAT %02d: "%(vfat))
-        for elink in s_bit_channel_mapping[vfat]:
-            print ("  ELINK %02d: "%(elink))
-            for channel in s_bit_channel_mapping[vfat][elink]:
-                if s_bit_channel_mapping[vfat][elink][channel] == -9999:
-                    print (Colors.RED + "    Channel %02d:  S-bit %02d"%(channel, s_bit_channel_mapping[vfat][elink][channel]) + Colors.ENDC)
-                else:
-                    print (Colors.GREEN + "    Channel %02d:  S-bit %02d"%(channel, s_bit_channel_mapping[vfat][elink][channel]) + Colors.ENDC)
-        print ("")
+    filename = "vfat_data/vfat_sbit_monitor_cluster_mapping_results/ME0_OH%d_vfat_sbit_monitor_cluster_mapping_results_"%oh_select+now+".py"
+    file_out = open(filename, "w")
+    file_out.write("VFAT    Channel    Sbit    Cluster_Counts (1-7)    Clusters (Size, Address)")
+    for vfat in s_bit_cluster_mapping:
+        for channel in s_bit_cluster_mapping[vfat]:
+            result_str = "%d  %d  %d  "%(vfat, channel, sbit)
+            for i in range(1,8):
+                result_str += "%d,"%s_bit_cluster_mapping[vfat][channel][cluster_count][i]
+            result_str += "  "
+            for i in range(0,8):
+                if (s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_address]==0x7ff and s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_size] == 0x7):
+                    continue
+                result_str += "%d,%d  "%(s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_size], s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_address])
+        result_str += "\n"
+        file_out.write(result_str)
+    file_out.close()
+    print ("S-bit Monitor Cluster Mapping Results written in file: %s \n"%filename)
 
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 0)
-    print ("\nS-bit mapping done\n")
+    print ("\nS-bit cluster mapping done\n")
 
 if __name__ == "__main__":
 
