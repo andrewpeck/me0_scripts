@@ -78,10 +78,10 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
             elink = int(channel/16)
             sbit = s_bit_channel_mapping[str(vfat)][str(elink)][str(channel)]
             s_bit_cluster_mapping[vfat][channel] = {}
-            s_bit_cluster_mapping[vfat][channel][sbit] = sbit
-            s_bit_cluster_mapping[vfat][channel][cluster_count] = []
-            s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_size] = []
-            s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_address] = []
+            s_bit_cluster_mapping[vfat][channel]["sbit"] = sbit
+            s_bit_cluster_mapping[vfat][channel]["cluster_count"] = []
+            s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"] = []
+            s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"] = []
 
             # Enabling the pulsing channel
             enableVfatchannel(vfat, oh_select, channel, 0, 1) # unmask this channel and enable calpulsing
@@ -104,12 +104,12 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
                 rw_terminate()
 
             for i in range(0,8):
-                s_bit_cluster_mapping[vfat][channel][cluster_count].append(read_backend_reg(cluster_count_nodes[i])/nl1a)
+                s_bit_cluster_mapping[vfat][channel]["cluster_count"].append(read_backend_reg(cluster_count_nodes[i])/nl1a)
                 sbit_monitor_value = read_backend_reg(sbit_monitor_nodes[i])
                 sbit_cluster_address = sbit_monitor_value & 0x7ff
                 sbit_cluster_size = ((sbit_monitor_value >> 11) & 0x7) + 1
-                s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_size].append(sbit_cluster_size)
-                s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_address].append(sbit_cluster_address)
+                s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"].append(sbit_cluster_size)
+                s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"].append(sbit_cluster_address)
 
             # Disabling the pulsing channels
             enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask this channel and disable calpulsing
@@ -131,14 +131,14 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
     file_out.write("VFAT    Channel    Sbit    Cluster_Counts (1-7)    Clusters (Size, Address)")
     for vfat in s_bit_cluster_mapping:
         for channel in s_bit_cluster_mapping[vfat]:
-            result_str = "%d  %d  %d  "%(vfat, channel, sbit)
+            result_str = "%d  %d  %d  "%(vfat, channel, s_bit_cluster_mapping[vfat][channel]["sbit"])
             for i in range(1,8):
-                result_str += "%d,"%s_bit_cluster_mapping[vfat][channel][cluster_count][i]
+                result_str += "%d,"%s_bit_cluster_mapping[vfat][channel]["cluster_count"][i]
             result_str += "  "
             for i in range(0,8):
-                if (s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_address]==0x7ff and s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_size] == 0x7):
+                if (s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"]==0x7ff and s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"] == 0x7):
                     continue
-                result_str += "%d,%d  "%(s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_size], s_bit_cluster_mapping[vfat][channel][sbit_monitor_cluster_address])
+                result_str += "%d,%d  "%(s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"], s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"])
         result_str += "\n"
         file_out.write(result_str)
     file_out.close()
