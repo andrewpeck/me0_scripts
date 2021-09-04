@@ -56,6 +56,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
 
         # Configure the pulsing VFAT
         print("Configuring VFAT %02d" % (vfat))
+        configureVfat(1, vfat, oh_select, 0)
         if set_cal_mode == "voltage":
             write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)), 1)
             write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"% (oh_select, vfat)), 200)
@@ -66,7 +67,6 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
             write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)), 0)
             write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DUR"% (oh_select, vfat)), 0)
         write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_DAC"% (oh_select, vfat)), cal_dac)
-        configureVfat(1, vfat, oh_select, 0)
         for i in range(128):
             enableVfatchannel(vfat, oh_select, i, 1, 0) # mask all channels and disable calpulsing
         print ("")
@@ -140,7 +140,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
                 result_str += "%d,"%s_bit_cluster_mapping[vfat][channel]["cluster_count"][i]
             result_str += "  "
             for i in range(0,8):
-                if (s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"][i]==0x7ff and s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"][i] == 0x7):
+                if (s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"][i] == 0x7ff and s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"][i] == 0x7):
                     continue
                 result_str += "%d,%d  "%(s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"][i], s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"][i])
             result_str += "\n"
