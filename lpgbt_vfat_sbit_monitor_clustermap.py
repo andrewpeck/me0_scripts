@@ -139,9 +139,9 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
                 result_str += "%d,"%s_bit_cluster_mapping[vfat][channel]["cluster_count"][i]
             result_str += "  "
             for i in range(0,8):
-                if (s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"]==0x7ff and s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"] == 0x7):
+                if (s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"][i]==0x7ff and s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"][i] == 0x7):
                     continue
-                result_str += "%d,%d  "%(s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"], s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"])
+                result_str += "%d,%d  "%(s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_size"][i], s_bit_cluster_mapping[vfat][channel]["sbit_monitor_cluster_address"][i])
         result_str += "\n"
         file_out.write(result_str)
     file_out.close()
