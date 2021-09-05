@@ -116,12 +116,14 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
     else:
         print ("Injecting charge in channels one at a time\n")
 
-    # Looping over channels
-    for channel in channel_list:
-        print ("Channel: %d"%channel)
-        elink = int(channel/16)
-        # Looping over VFATs
-        for vfat in vfat_list:
+    # Looping over VFATs
+    for vfat in vfat_list:
+        print ("VFAT: %02d"%vfat)
+        # Looping over channels
+        for channel in channel_list:
+            print ("  Channel: %d"%channel)
+            elink = int(channel/16)
+
             if parallel is None:
                 enableVfatchannel(vfat, oh_select, channel, 0, 1) # unmask channel and enable calpulsing
             write_backend_reg(vfat_sbit_select_node, vfat)
@@ -155,8 +157,8 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
             # End of charge loop
             if parallel is None:
                 enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channel and disable calpulsing
-        # End of VFAT loop
-    # End of channel loop
+        # End of channel loop
+    # End of VFAT loop
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 0)
     print ("")
 
