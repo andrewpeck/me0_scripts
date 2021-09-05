@@ -58,6 +58,9 @@ def lpgbt_vfat_scurve(system, oh_select, vfat_list, channel_list, set_cal_mode, 
             print ("Trim settings set to low for all channels")
             for channel in channel_list:
                 setVfatchannelTrim(vfat, oh_select, channel, 1, 31)
+        else:
+            for channel in channel_list:
+                setVfatchannelTrim(vfat, oh_select, channel, 0, 0)
 
         link_good_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
         sync_error_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
@@ -174,6 +177,7 @@ def lpgbt_vfat_scurve(system, oh_select, vfat_list, channel_list, set_cal_mode, 
         print("Unconfiguring VFAT %d" % (vfat))
         for channel in range(0,128):
             enableVfatchannel(vfat, oh_select, channel, 0, 0) # disable calpulsing on all channels for this VFAT
+            setVfatchannelTrim(vfat, oh_select, channel, 0, 0) # set trim to 0
         configureVfat(0, vfat, oh_select, 0)
 
     # Writing Results
