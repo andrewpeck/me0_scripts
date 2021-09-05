@@ -71,15 +71,29 @@ def initialize_vfat_config(oh_select, use_dac_scan_results):
                         vfat_register_dac_scan[reg][vfat] = dac
                     file_in.close()
 
+def setVfatchannelTrim(vfatN, ohN, channel, trim_polarity, trim_amp):
+    channel_trim_polarity_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.VFAT_CHANNELS.CHANNEL%i.ARM_TRIM_POLARITY"%(ohN, vfatN, channel))
+    channel_trim_amp_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.VFAT_CHANNELS.CHANNEL%i.ARM_TRIM_AMPLITUDE"%(ohN, vfatN, channel))
+    write_backend_reg(channel_trim_polarity_node, trim_polarity)
+    write_backend_reg(channel_trim_amp_node, trim_amp)
+
 def enableVfatchannel(vfatN, ohN, channel, mask, enable_cal):
-    channel_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.VFAT_CHANNELS.CHANNEL%i"%(ohN, vfatN, channel))
-    if mask:
-        write_backend_reg(channel_node, 0x4000) # mask and disable calpulsing
+    #channel_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.VFAT_CHANNELS.CHANNEL%i"%(ohN, vfatN, channel))
+    channel_enable_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.VFAT_CHANNELS.CHANNEL%i.CALPULSE_ENABLE"%(ohN, vfatN, channel))
+    channel_mask_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.VFAT_CHANNELS.CHANNEL%i.MASK"%(ohN, vfatN, channel))
+    if mask: # mask and disable calpulsing
+        #write_backend_reg(channel_node, 0x4000)
+        write_backend_reg(channel_enable_node, 0)
+        write_backend_reg(channel_mask_node, 1)
     else:
-        if enable_cal:
-            write_backend_reg(channel_node, 0x8000) # unmask and enable calpulsing
-        else:
-            write_backend_reg(channel_node, 0x0000) # unmask but disable calpulsing
+        if enable_cal: # unmask and enable calpulsing
+            #write_backend_reg(channel_node, 0x8000)
+            write_backend_reg(channel_enable_node, 1)
+            write_backend_reg(channel_mask_node, 0)
+        else: # unmask but disable calpulsing
+            #write_backend_reg(channel_node, 0x0000)
+            write_backend_reg(channel_enable_node, 0)
+            write_backend_reg(channel_mask_node, 0)
 
 def configureVfat(configure, vfatN, ohN, low_thresh):
 

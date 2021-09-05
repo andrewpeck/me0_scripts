@@ -6,9 +6,9 @@ import argparse
 import random
 import glob
 import json
-from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
+from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel, setVfatchannelTrim
 
-def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, parallel, threshold, step, nl1a, l1a_bxgap, s_bit_channel_mapping):
+def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, parallel, threshold, step, nl1a, l1a_bxgap, trim, s_bit_channel_mapping):
     if not os.path.exists("vfat_data/vfat_sbit_scurve_results"):
         os.makedirs("vfat_data/vfat_sbit_scurve_results")
     now = str(datetime.datetime.now())[:16]
@@ -49,6 +49,13 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
         for channel in channel_list:
             enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask all channels and disable calpulsing
         cal_mode[vfat] = read_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)))
+
+        if trim == "up":
+            print ("Trim settings set to high for all channels for all VFATs")
+            setVfatchannelTrim(vfat, oh_select, channel, 0, 63)
+        elif trim == "down":
+            print ("Trim settings set to low for all channels for all VFATs")
+            setVfatchannelTrim(vfat, oh_select, channel, 1, 63)
 
         link_good_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
         sync_error_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
@@ -199,6 +206,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for SCurve scan (default=1)")
     parser.add_argument("-n", "--nl1a", action="store", dest="nl1a", help="nl1a = fixed number of L1A cycles")
     parser.add_argument("-b", "--bxgap", action="store", dest="bxgap", default="500", help="bxgap = Nr. of BX between two L1As (default = 500 i.e. 12.5 us)")
+    parser.add_argument("-z", "--trim", action="store", dest="trim", default="nominal", help="trim = nominal, up, down")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -303,6 +311,10 @@ if __name__ == "__main__":
     with open(latest_file) as input_file:
         s_bit_channel_mapping = json.load(input_file)   
 
+    if args.trim not in ["nominal", "up", "down"]:
+        print (Colors.YELLOW + "Trim option can only be: nominal, up, down" + Colors.ENDC)
+        sys.exit()
+
     # Parsing Registers XML File
     print("Parsing xml file...")
     parseXML()
@@ -315,7 +327,7 @@ if __name__ == "__main__":
 
     # Running Sbit SCurve
     try:
-        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, channel_list, cal_mode, args.parallel, threshold, step, nl1a, l1a_bxgap, s_bit_channel_mapping)
+        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, channel_list, cal_mode, args.parallel, threshold, step, nl1a, l1a_bxgap, args.trim, s_bit_channel_mapping)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
