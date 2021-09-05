@@ -51,11 +51,13 @@ def lpgbt_vfat_scurve(system, oh_select, vfat_list, channel_list, set_cal_mode, 
         cal_mode[vfat] = read_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_CAL_MODE"% (oh_select, vfat)))
 
         if trim == "up":
-            print ("Trim settings set high for all channels for all VFATs")
-            setVfatchannelTrim(vfat, oh_select, channel, 0, 31)
+            print ("Trim settings set to high for all channels")
+            for channel in channel_list:
+                setVfatchannelTrim(vfat, oh_select, channel, 0, 31)
         elif trim == "down":
-            print ("Trim settings set low for all channels for all VFATs")
-            setVfatchannelTrim(vfat, oh_select, channel, 1, 31)
+            print ("Trim settings set to low for all channels")
+            for channel in channel_list:
+                setVfatchannelTrim(vfat, oh_select, channel, 1, 31)
 
         link_good_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
         sync_error_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
