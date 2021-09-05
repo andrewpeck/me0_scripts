@@ -118,10 +118,9 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
 
     # Looping over VFATs
     for vfat in vfat_list:
-        print ("VFAT: %02d"%vfat)
         # Looping over channels
         for channel in channel_list:
-            print ("  Channel: %d"%channel)
+            print ("VFAT: %02d  Channel: %d"%(vfat, channel))
             elink = int(channel/16)
 
             if parallel is None:
@@ -158,6 +157,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
             if parallel is None:
                 enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channel and disable calpulsing
         # End of channel loop
+        print ("")
     # End of VFAT loop
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 0)
     print ("")
