@@ -52,10 +52,10 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
 
         if trim == "up":
             print ("Trim settings set to high for all channels for all VFATs")
-            setVfatchannelTrim(vfat, oh_select, channel, 0, 63)
+            setVfatchannelTrim(vfat, oh_select, channel, 0, 31)
         elif trim == "down":
             print ("Trim settings set to low for all channels for all VFATs")
-            setVfatchannelTrim(vfat, oh_select, channel, 1, 63)
+            setVfatchannelTrim(vfat, oh_select, channel, 1, 31)
 
         link_good_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
         sync_error_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
