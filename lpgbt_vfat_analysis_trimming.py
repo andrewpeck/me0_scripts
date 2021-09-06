@@ -118,7 +118,8 @@ if __name__ == "__main__":
 
     threshold_df["target"] = threshold_df.groupby("vfatN").transform(lambda x: x.median())["threshold"]
     threshold_df["vfat_addr"] = threshold_df.vfatCH + 128*threshold_df.vfatN
-    threshold_df.set_index("vfat_addr", inplace=True)
+    threshold_df["index"] = threshold_df.vfatCH + 128*threshold_df.vfatN
+    threshold_df.set_index("index", inplace=True)
 
     sel = threshold_df.threshold == 0
     threshold_df1 = threshold_df[sel].copy()
@@ -128,7 +129,7 @@ if __name__ == "__main__":
 
     sel = threshold_df.threshold > 0
     threshold_df2 = threshold_df[sel].copy()
-    threshold_df2["val"] = threshold_df2.groupby(threshold_df2.index)[["threshold","target","trim_pol","trim_amp"]].apply(lambda x: return_values(x))
+    threshold_df2["val"] = threshold_df2.groupby("vfat_addr")[["threshold","target","trim_pol","trim_amp"]].apply(lambda x: return_values(x))
     threshold_df2["trim_pol_set"] = ((1-np.sign(threshold_df2["val"]))/2).astype(int)
     threshold_df2["trim_amp_set"] = np.clip(abs(threshold_df2["val"]), a_max=63, a_min=None)
 
