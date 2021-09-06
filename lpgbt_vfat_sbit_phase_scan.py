@@ -337,6 +337,7 @@ if __name__ == "__main__":
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
     parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use previous DAC scan results for configuration")
+    parser.add_argument("-u", "--use_channel_trimming", action="store", dest="use_channel_trimming", help="use_channel_trimming = to use latest trimming results for either options - daq or sbit")
     parser.add_argument("-b", "--bestphase", action="store", dest="bestphase", help="bestphase = Best value of the elinkRX phase (in hex), calculated from phase scan by default")
     parser.add_argument("-f", "--bestphase_file", action="store", dest="bestphase_file", help="bestphase_file = Text file with best value of the elinkRX phase for each VFAT and ELINK (in hex), calculated from phase scan by default")
     args = parser.parse_args()
@@ -377,11 +378,6 @@ if __name__ == "__main__":
             sys.exit()
         vfat_list.append(v_int)
 
-    nl1a = 100 # Nr. of L1As
-    l1a_bxgap = 100 # Gap between 2 L1As in nr. of BXs
-    set_cal_mode = "current"
-    cal_dac = 150 # should be 50 for voltage pulse mode
-
     if args.bestphase is not None and args.bestphase_file is not None:
         print (Colors.YELLOW + "Provide either best phase (same for all VFATs) or text file of best phases for each VFAT" + Colors.ENDC)
         sys.exit()
@@ -408,7 +404,17 @@ if __name__ == "__main__":
                 bestphase_list[vfat] = {}
             bestphase_list[vfat][elink] = phase
         file_in.close()
-        
+
+    if args.use_channel_trimming is not None:
+        if args.use_channel_trimming not in ["daq", "sbit"]:
+            print (Colors.YELLOW + "Only allowed options for use_channel_trimming: daq or sbit" + Colors.ENDC)
+            sys.exit()
+
+    nl1a = 100 # Nr. of L1As
+    l1a_bxgap = 100 # Gap between 2 L1As in nr. of BXs
+    set_cal_mode = "current"
+    cal_dac = 150 # should be 50 for voltage pulse mode
+
     # Parsing Registers XML File
     print("Parsing xml file...")
     parseXML()
@@ -416,7 +422,7 @@ if __name__ == "__main__":
 
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
-    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results)
+    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results, args.use_channel_trimming)
     print("Initialization Done\n")
 
     if not os.path.isfile(config_boss_filename):

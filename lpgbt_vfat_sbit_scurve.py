@@ -58,9 +58,6 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
             print ("Trim settings set to low for all channels")
             for channel in channel_list:
                 setVfatchannelTrim(vfat, oh_select, channel, 1, 31)
-        else:
-            for channel in channel_list:
-                setVfatchannelTrim(vfat, oh_select, channel, 0, 0)
 
         link_good_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.LINK_GOOD" % (oh_select, vfat))
         sync_error_node = get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%d.VFAT%d.SYNC_ERR_CNT" % (oh_select, vfat))
@@ -179,7 +176,6 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
         print("Unconfiguring VFAT %d" % (vfat))
         for channel in range(0,128):
             enableVfatchannel(vfat, oh_select, channel, 0, 0) # disable calpulsing on all channels for this VFAT
-            setVfatchannelTrim(vfat, oh_select, channel, 0, 0) # set trim to 0
         configureVfat(0, vfat, oh_select, 0)
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 0)
 
@@ -209,6 +205,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--parallel", action="store", dest="parallel", help="parallel = all (inject calpulse in all channels) or select (inject calpulse in selected channels) simultaneously (only possible in voltage mode, not a preferred option)")
     parser.add_argument("-x", "--threshold", action="store", dest="threshold", help="threshold = the CFG_THR_ARM_DAC value (default=configured value of VFAT)")
     parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use previous DAC scan results for configuration")
+    parser.add_argument("-u", "--use_channel_trimming", action="store", dest="use_channel_trimming", help="use_channel_trimming = to use latest trimming results for either options - daq or sbit")
     parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for SCurve scan (default=1)")
     parser.add_argument("-n", "--nl1a", action="store", dest="nl1a", help="nl1a = fixed number of L1A cycles")
     parser.add_argument("-b", "--bxgap", action="store", dest="bxgap", default="500", help="bxgap = Nr. of BX between two L1As (default = 500 i.e. 12.5 us)")
@@ -321,6 +318,11 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Trim option can only be: nominal, up, down" + Colors.ENDC)
         sys.exit()
 
+    if args.use_channel_trimming is not None:
+        if args.use_channel_trimming not in ["daq", "sbit"]:
+            print (Colors.YELLOW + "Only allowed options for use_channel_trimming: daq or sbit" + Colors.ENDC)
+            sys.exit()
+
     # Parsing Registers XML File
     print("Parsing xml file...")
     parseXML()
@@ -328,7 +330,7 @@ if __name__ == "__main__":
 
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
-    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results)
+    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results, args.use_channel_trimming)
     print("Initialization Done\n")
 
     # Running Sbit SCurve

@@ -138,6 +138,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--vfats", action="store", dest="vfats", nargs="+", help="vfats = VFAT number (0-23)")
     parser.add_argument("-e", "--elinks", action="store", nargs="+", dest="elinks", help="elinks = list of elinks (default: 0-7)")
     parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use previous DAC scan results for configuration")
+    parser.add_argument("-u", "--use_channel_trimming", action="store", dest="use_channel_trimming", help="use_channel_trimming = to use latest trimming results for either options - daq or sbit")
     parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for threshold scan (default=1)")
     parser.add_argument("-m", "--time", action="store", dest="time", default="0.001", help="time = time for each elink (default= 1 ms)")
     args = parser.parse_args()
@@ -194,6 +195,11 @@ if __name__ == "__main__":
                 sys.exit()
             elink_list.append(e_int)
 
+    if args.use_channel_trimming is not None:
+        if args.use_channel_trimming not in ["daq", "sbit"]:
+            print (Colors.YELLOW + "Only allowed options for use_channel_trimming: daq or sbit" + Colors.ENDC)
+            sys.exit()
+
     # Parsing Registers XML File
     print("Parsing xml file...")
     parseXML()
@@ -201,7 +207,7 @@ if __name__ == "__main__":
 
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
-    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results)
+    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results, args.use_channel_trimming)
     print("Initialization Done\n")
 
     # Running Sbit SCurve

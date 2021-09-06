@@ -9,12 +9,14 @@ vfat_register_config = {}
 vfat_calib_iref = {}
 vfat_calib_vref = {}
 vfat_register_dac_scan = {}
+vfat_channel_trimming = {}
 
-def initialize_vfat_config(oh_select, use_dac_scan_results):
+def initialize_vfat_config(oh_select, use_dac_scan_results, use_channel_trimming):
     global vfat_register_config
     global vfat_calib_iref
     global vfat_calib_vref
     global vfat_register_dac_scan
+    global vfat_channel_trimming
 
     # Generic register list
     vfat_register_config_file_path = "vfat_data/ME0_OH%d_vfatConfig.txt"%oh_select
@@ -70,6 +72,42 @@ def initialize_vfat_config(oh_select, use_dac_scan_results):
                         dac = int(line.split(";")[2])
                         vfat_register_dac_scan[reg][vfat] = dac
                     file_in.close()
+            else:
+                print (Colors.YELLOW + "DAC scan results not present, using default regsiter values" + Colors.ENDC)
+        else:
+            print (Colors.YELLOW + "DAC scan results not present, using default regsiter values" + Colors.ENDC)
+
+    # Channel Trimming Results
+    if use_channel_trimming is not None:
+        trim_results_base_path = ""
+        if use_channel_trimming == "daq":
+            trim_results_path = "vfat_data/vfat_daq_trimming_results"
+        elif use_channel_trimming == "sbit":
+            trim_results_path = "vfat_data/vfat_sbit_trimming_results"
+        if os.path.isdir(trim_results_path):
+            trim_file_list = glob.glob(trim_results_path+"/*.txt")
+            if len(trim_file_list)>0:
+                trim_file_latest = max(trim_file_list, key=os.path.getctime)
+                trim_file_in = open(trim_file_latest)
+                for line in trim_file_in.readlines():
+                    if "VFAT" in line:
+                        continue
+                    if len(line.split())==0:
+                        continue
+                    vfat = int(line.split()[0])
+                    channel = int(line.split()[1])
+                    trim_amp = float(line.split()[2])
+                    trim_polarity = int(line.split()[3])
+                    if vfat not in vfat_channel_trimming:
+                        vfat_channel_trimming[vfat] = {}
+                    vfat_channel_trimming[vfat][channel] = {}
+                    vfat_channel_trimming[vfat][channel]["trim_amp"] = trim_amp
+                    vfat_channel_trimming[vfat][channel]["trim_polarity"] = trim_polarity
+                trim_file_in.close()
+            else:
+                print (Colors.YELLOW + "Trimming results not present, not using trimming" + Colors.ENDC)
+        else:
+            print (Colors.YELLOW + "Trimming results not present, not using trimming" + Colors.ENDC)
 
 def setVfatchannelTrim(vfatN, ohN, channel, trim_polarity, trim_amp):
     channel_trim_polarity_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.VFAT_CHANNELS.CHANNEL%i.ARM_TRIM_POLARITY"%(ohN, vfatN, channel))
@@ -125,10 +163,21 @@ def configureVfat(configure, vfatN, ohN, low_thresh):
             #write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%i.CFG_THR_ZCC_DAC"     % (ohN, vfatN)) , 0)
             write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_THR_ARM_DAC"     % (ohN, vfatN)) , 0)
 
+        for i in range(128):
+            trim_polarity = 0
+            trim_amp = 0
+            if vfatN in vfat_channel_trimming:
+                if i in vfat_channel_trimming[vfatN]:
+                    trim_polarity = vfat_channel_trimming[vfatN][i]["trim_polarity"]
+                    trim_amp = vfat_channel_trimming[vfatN][i]["trim_amp"]
+            setVfatchannelTrim(vfatN, ohN, i, trim_polarity, trim_amp):
+
         write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN"%(ohN, vfatN)), 1)
 
     else:
         #print ("Unconfiguring VFAT")
+        for i in range(128):
+            setVfatchannelTrim(vfatN, ohN, i, 0, 0):
         write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN"%(ohN, vfatN)), 0)
 
 
@@ -161,6 +210,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
     parser.add_argument("-c", "--config", action="store", dest="config", help="config = 1 for configure, 0 for unconfigure")
     parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use previous DAC scan results for configuration")
+    parser.add_argument("-u", "--use_channel_trimming", action="store", dest="use_channel_trimming", help="use_channel_trimming = to use latest trimming results for either options - daq or sbit")
     parser.add_argument("-lt", "--low_thresh", action="store_true", dest="low_thresh", help="low_thresh = to set low threshold for channels")
     args = parser.parse_args()
 
@@ -205,6 +255,11 @@ if __name__ == "__main__":
         sys.exit()
     configure = int(args.config)
 
+    if args.use_channel_trimming is not None:
+        if args.use_channel_trimming not in ["daq", "sbit"]:
+            print (Colors.YELLOW + "Only allowed options for use_channel_trimming: daq or sbit" + Colors.ENDC)
+            sys.exit()
+
     # Parsing Registers XML File
     print("Parsing xml file...")
     parseXML()
@@ -212,7 +267,7 @@ if __name__ == "__main__":
 
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
-    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results)
+    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results, args.use_channel_trimming)
     print("Initialization Done\n")
     
     # Running Phase Scan
