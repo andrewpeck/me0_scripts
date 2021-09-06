@@ -96,7 +96,7 @@ def initialize_vfat_config(oh_select, use_dac_scan_results, use_channel_trimming
                         continue
                     vfat = int(line.split()[0])
                     channel = int(line.split()[1])
-                    trim_amp = float(line.split()[2])
+                    trim_amp = int(line.split()[2])
                     trim_polarity = int(line.split()[3])
                     if vfat not in vfat_channel_trimming:
                         vfat_channel_trimming[vfat] = {}
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--vfats", action="store", nargs="+", dest="vfats", help="vfats = list of VFAT numbers (0-23)")
     parser.add_argument("-c", "--config", action="store", dest="config", help="config = 1 for configure, 0 for unconfigure")
     parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use previous DAC scan results for configuration")
-    parser.add_argument("-u", "--use_channel_trimming", action="store", dest="use_channel_trimming", help="use_channel_trimming = to use latest trimming results for either options - daq or sbit")
+    parser.add_argument("-u", "--use_channel_trimming", action="store", dest="use_channel_trimming", help="use_channel_trimming = to use latest trimming results for either options - daq or sbit (default = None)")
     parser.add_argument("-lt", "--low_thresh", action="store_true", dest="low_thresh", help="low_thresh = to set low threshold for channels")
     args = parser.parse_args()
 
