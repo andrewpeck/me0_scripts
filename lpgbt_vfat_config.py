@@ -170,8 +170,7 @@ def configureVfat(configure, vfatN, ohN, low_thresh):
                 if i in vfat_channel_trimming[vfatN]:
                     trim_polarity = vfat_channel_trimming[vfatN][i]["trim_polarity"]
                     trim_amp = vfat_channel_trimming[vfatN][i]["trim_amp"]
-            setVfatchannelTrim(vfatN, ohN, i, trim_polarity, trim_amp):
-
+            setVfatchannelTrim(vfatN, ohN, i, trim_polarity, trim_amp)
         write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN"%(ohN, vfatN)), 1)
 
     else:
