@@ -226,7 +226,7 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Only Backend or dryrun supported" + Colors.ENDC)
         sys.exit()
     elif args.system == "dryrun":
-        print ("Dry Run - not actually running vfat bert")
+        print ("Dry Run - not actually running vfat configuration")
     else:
         print (Colors.YELLOW + "Only valid options: backend, dryrun" + Colors.ENDC)
         sys.exit()
