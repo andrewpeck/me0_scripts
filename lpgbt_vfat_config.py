@@ -176,7 +176,7 @@ def configureVfat(configure, vfatN, ohN, low_thresh):
     else:
         #print ("Unconfiguring VFAT")
         for i in range(128):
-            setVfatchannelTrim(vfatN, ohN, i, 0, 0):
+            setVfatchannelTrim(vfatN, ohN, i, 0, 0)
         write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN"%(ohN, vfatN)), 0)
 
 
