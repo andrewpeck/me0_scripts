@@ -113,10 +113,11 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, set_cal_mode, cal_dac, nl1a, l
     print (vfat_list)
     print ("")
 
-    # Looping over channels to be injected
-    for channel_inj in channel_list:
-        print ("Channel Injected: %d"%channel_inj)
-        for vfat in vfat_list:
+    # Looping over VFATs
+    for vfat in vfat_list:
+        # Looping over channels to be injected
+        for channel_inj in channel_list:
+            print ("VFAT: %02d, Channel Injected: %d"%(vfat, channel_inj))
             enableVfatchannel(vfat, oh_select, channel_inj, 0, 1) # enable calpulsing
             write_backend_reg(vfat_sbit_select_node, vfat)
 
@@ -143,8 +144,8 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, set_cal_mode, cal_dac, nl1a, l
                 sbit_data[vfat][channel_inj][channel_read]["fired"] = read_backend_reg(channel_sbit_counter_node)
             # End of charge loop
             enableVfatchannel(vfat, oh_select, channel_inj, 0, 0) # disable calpulsing
-        # End of VFAT loop
-    # End of channel loop
+        # End of channel loop
+    # End of VFAT loop
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TTC.GENERATOR.ENABLE"), 0)
     print ("")
 
@@ -189,6 +190,7 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--cal_mode", action="store", dest="cal_mode", default = "current", help="cal_mode = voltage or current (default = current)")
     parser.add_argument("-d", "--cal_dac", action="store", dest="cal_dac", help="cal_dac = Value of CAL_DAC register (default = 50 for voltage pulse mode and 150 for current pulse mode)")
     parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use previous DAC scan results for configuration")
+    parser.add_argument("-u", "--use_channel_trimming", action="store", dest="use_channel_trimming", help="use_channel_trimming = to use latest trimming results for either options - daq or sbit (default = None)")
     parser.add_argument("-n", "--nl1a", action="store", dest="nl1a", help="nl1a = fixed number of L1A cycles")
     parser.add_argument("-b", "--bxgap", action="store", dest="bxgap", default="500", help="bxgap = Nr. of BX between two L1As (default = 500 i.e. 12.5 us)")
     args = parser.parse_args()
@@ -260,6 +262,11 @@ if __name__ == "__main__":
     l1a_timegap = l1a_bxgap * 25 * 0.001 # in microseconds
     print ("Gap between consecutive L1A or CalPulses = %d BX = %.2f us" %(l1a_bxgap, l1a_timegap))
 
+    if args.use_channel_trimming is not None:
+        if args.use_channel_trimming not in ["daq", "sbit"]:
+            print (Colors.YELLOW + "Only allowed options for use_channel_trimming: daq or sbit" + Colors.ENDC)
+            sys.exit()
+
     # Parsing Registers XML File
     print("Parsing xml file...")
     parseXML()
@@ -267,7 +274,7 @@ if __name__ == "__main__":
 
     # Initialization (for CHeeseCake: reset and config_select)
     rw_initialize(args.system)
-    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results)
+    initialize_vfat_config(int(args.ohid), args.use_dac_scan_results, args.use_channel_trimming)
     print("Initialization Done\n")
 
     # Running Sbit SCurve

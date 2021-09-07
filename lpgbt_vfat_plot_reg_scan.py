@@ -50,10 +50,14 @@ if __name__ == "__main__":
     file.close()
 
     numVfats = len(scurve_result.keys())
-    if numVfats <= 3:
+    if numVfats == 1:
         fig1, ax1 = plt.subplots(1, numVfats, figsize=(numVfats*10,10))
         plot1 = 0
         cbar1 = 0
+    elif numVfats <= 3:
+        fig1, ax1 = plt.subplots(1, numVfats, figsize=(numVfats*10,10))
+        plot1 ={}
+        cbar1 ={}
     elif numVfats <= 6:
         fig1, ax1 = plt.subplots(2, 3, figsize=(30,20))
         plot1 ={}

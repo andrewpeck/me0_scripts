@@ -16,6 +16,8 @@ cd me0_scripts
 git checkout cheesecake_integration
 ```
 
+Install python3
+
 ## Powering On
 
 After every power on, lpGBTs on ASIAGO need to be configured.
@@ -43,21 +45,21 @@ export BOARD_IDX="0"
 Configure the master/boss lpgbt:
 
 ```
-python lpgbt_config.py -s dryrun -l boss
-python lpgbt_config.py -s backend -l boss -o <OH_LINK_NR> -g <GBT_LINK_NR> -i config_boss.txt
+python3 lpgbt_config.py -s dryrun -l boss
+python3 lpgbt_config.py -s backend -l boss -o <OH_LINK_NR> -g <GBT_LINK_NR> -i config_boss.txt
 ```
 
 Configure the slave/sub lpgbt:
 
 ```
-python lpgbt_config.py -s dryrun -l sub
-python lpgbt_config.py -s backend -l sub -o <OH_LINK_NR> -g <GBT_LINK_NR> -i config_sub.txt
+python3 lpgbt_config.py -s dryrun -l sub
+python3 lpgbt_config.py -s backend -l sub -o <OH_LINK_NR> -g <GBT_LINK_NR> -i config_sub.txt
 ```
 
 Enable TX2 for VTRX+ if required:
 
 ```
-python lpgbt_vtrx.py -s backend -l boss -o <OH_LINK_NR> -g <GBT_LINK_NR> -t name -c TX1 TX2 -e 1
+python3 lpgbt_vtrx.py -s backend -l boss -o <OH_LINK_NR> -g <GBT_LINK_NR> -t name -c TX1 TX2 -e 1
 ```
 
 ## Using CHeeseCake
@@ -67,19 +69,19 @@ python lpgbt_vtrx.py -s backend -l boss -o <OH_LINK_NR> -g <GBT_LINK_NR> -t name
 Configure the master/boss lpgbt:
 
 ```
-python lpgbt_config.py -s chc -l boss
+python3 lpgbt_config.py -s chc -l boss
 ```
 
 Configure the slave/sub lpgbt:
 
 ```
-python lpgbt_config.py -s chc -l sub
+python3 lpgbt_config.py -s chc -l sub
 ```
 
 Enable TX2 for VTRX+ if required (usually VTRX+ enabled during configuration):
 
 ```
-python lpgbt_vtrx.py -s chc -l boss -t name -c TX2 -e 1
+python3 lpgbt_vtrx.py -s chc -l boss -t name -c TX2 -e 1
 ```
 
 ### Checking lpGBT Status
@@ -87,13 +89,13 @@ python lpgbt_vtrx.py -s chc -l boss -t name -c TX2 -e 1
 Check the status of the master/boss lpgbt:
 
 ```
-python lpgbt_status.py -s chc -l boss
+python3 lpgbt_status.py -s chc -l boss
 ```
 
 Check the status of the slave/sub lpgbt:
 
 ```
-python lpgbt_status.py -s chc -l sub
+python3 lpgbt_status.py -s chc -l sub
 ```
 
 ### Fusing
@@ -101,27 +103,27 @@ python lpgbt_status.py -s chc -l sub
 Obtain the config .txt files first with a dryrun:
 
 ```
-python lpgbt_config.py -s dryrun -l boss
-python lpgbt_config.py -s dryrun -l sub
+python3 lpgbt_config.py -s dryrun -l boss
+python3 lpgbt_config.py -s dryrun -l sub
 
 ```
 
 Fuse the USER IDs with Cheesecake:
 ```
-python lpgbt_efuse.py -s chc -l boss -f user_id -u USER_ID_BOSS
-python lpgbt_efuse.py -s chc -l sub -f user_id -u USER_ID_SUB
+python3 lpgbt_efuse.py -s chc -l boss -f user_id -u USER_ID_BOSS
+python3 lpgbt_efuse.py -s chc -l sub -f user_id -u USER_ID_SUB
 ```
 
 Fuse the master/boss lpgbt with Cheesecake from text file produced by lpgbt_config.py:
 
 ```
-python lpgbt_efuse.py -s chc -l boss -f input_file -i config_boss.txt -v 1 -c 1
+python3 lpgbt_efuse.py -s chc -l boss -f input_file -i config_boss.txt -v 1 -c 1
 ```
 
 Fuse the slave/sub lpgbt with Cheesecake from text file produced by lpgbt_config.py:
 
 ```
-python lpgbt_efuse.py -s chc -l sub -f input_file -i config_sub.txt -c 1
+python3 lpgbt_efuse.py -s chc -l sub -f input_file -i config_sub.txt -c 1
 ```
 
 ## Details of all scripts:
@@ -162,6 +164,8 @@ Use -h option for any script to check usage
 
 ```lpgbt_vfat_analysis_scurve.py```: SCurve Analysis (fitting) using DAQ data for VFATs
 
+```lpgbt_vfat_analysis_trimming.py```: Analysis for channel trimming for VFATs
+
 ```lpgbt_vfat_config.py```: configure VFAT
 
 ```lpgbt_vfat_dac_scan.py```: VFAT DAC Scan
@@ -195,6 +199,8 @@ Use -h option for any script to check usage
 ```lpgbt_vfat_sbit_crosstalk.py```: Scan for checking cross talk using S-bits for VFATs (only works with test firmware)
 
 ```lpgbt_vfat_sbit_mapping.py```: S-bit mapping for VFATs (only works with test firmware)
+
+```lpgbt_vfat_sbit_monitor_clustermap.py```: Cluster mapping of channel using S-bit monitor (only works with test firmware)
 
 ```lpgbt_vfat_sbit_noise_rate.py```: S-bit Noise rates for VFATs (only works with test firmware)
 
@@ -241,6 +247,21 @@ and login using your CERN credentials. (To execute from any directory, place `DB
  
 7. Execute the script:
 ```
-# python3 get_cal_info_vfat.py -s backend -o <oh_id> -t <input_type> -w
+python3 get_cal_info_vfat.py -s backend -o <oh_id> -t <input_type> -w
 ```
 For more information on usage, run `# python3 get_cal_info_vfat.py -h`.
+
+## Procedure for Channel Trimming
+
+1. Run the SCurve script (DAQ or Sbit) wirth 3 different options for "-z": nominal, up, down to take SCurves at 3 different trim values
+
+2. Run the SCurve analysis script to calculate the threshold for each channel for each VFAT
+
+3. Run the trimming analysis script
+```
+python3 lpgbt_vfat_analysis_trimming.py -nd <nominal SCurve result directory> -ud <Trim up SCurve result directory> -dd <Trim down SCurve result directory>
+```
+
+This will generate text files in either directories - `vfat_data/vfat_daq_trimming_results` or `vfat_data/vfat_sbit_trimming_results` depending upon whether DAQ or Sbit SCurves were used
+
+4. The trimming results can be used during VFAT configuration while using any of the scripts by using the additional option `-u daq` or `-u sbit` while running them, with daq or sbit indiciating whether you want to use the trimming results from the DAQ or SBit SCurves
