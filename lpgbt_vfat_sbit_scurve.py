@@ -132,12 +132,12 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
             print ("VFAT: %02d  Channel: %d"%(vfat, channel))
             elink = int(channel/16)
 
-            if parallel is None:
-                enableVfatchannel(vfat, oh_select, channel, 0, 1) # unmask channel and enable calpulsing
-            write_backend_reg(vfat_sbit_select_node, vfat)
             if s_bit_channel_mapping[str(vfat)][str(elink)][str(channel)] == -9999:
                 print (Colors.YELLOW + "    Bad channel (from S-bit mapping) %02d on VFAT %02d"%(channel,vfat) + Colors.ENDC)
                 continue
+            if parallel is None:
+                enableVfatchannel(vfat, oh_select, channel, 0, 1) # unmask channel and enable calpulsing
+            write_backend_reg(vfat_sbit_select_node, vfat)
             write_backend_reg(channel_sbit_select_node, s_bit_channel_mapping[str(vfat)][str(elink)][str(channel)])
 
             # Looping over charge

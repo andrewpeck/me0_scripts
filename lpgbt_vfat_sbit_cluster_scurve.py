@@ -132,11 +132,11 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
         for channel in channel_list:
             print ("VFAT: %02d  Channel: %d"%(vfat, channel))
 
-            if parallel is None:
-                enableVfatchannel(vfat, oh_select, channel, 0, 1) # unmask channel and enable calpulsing
             if s_bit_cluster_mapping[vfat][channel] == -9999:
                 print (Colors.YELLOW + "    Bad channel (from S-bit cluster mapping) %02d on VFAT %02d"%(channel,vfat) + Colors.ENDC)
                 continue
+            if parallel is None:
+                enableVfatchannel(vfat, oh_select, channel, 0, 1) # unmask channel and enable calpulsing
 
             # Looping over charge
             for c in range(0,256,step):
@@ -185,13 +185,13 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
                             incorrect_cluster = 1
                             break
                 if multiple_cluster:
-                    print (Colors.YELLOW + "  Multiple clusters detected" + Colors.ENDC)
+                    print (Colors.YELLOW + "  Multiple clusters detected for CAL_DAC = %d"%c + Colors.ENDC)
                     continue
                 if large_cluster:
-                    print (Colors.YELLOW + "  Cluster size larger than 1" + Colors.ENDC)
+                    print (Colors.YELLOW + "  Cluster size larger than 1 for CAL_DAC = %d"%c + Colors.ENDC)
                     continue
                 if incorrect_cluster:
-                    print (Colors.YELLOW + "  Incorrect cluster detected" + Colors.ENDC)
+                    print (Colors.YELLOW + "  Incorrect cluster detected for CAL_DAC = %d"%c + Colors.ENDC)
                     continue
 
                 sbit_data[vfat][channel][charge]["events"] = calpulse_counter
