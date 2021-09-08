@@ -157,7 +157,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
                     cyclic_running = read_backend_reg(cyclic_running_node)
                 # Stop the cyclic generator
                 write_backend_reg(ttc_reset_node, 1)
-                print ("  Time taken for L1A loop with %d L1As and %d BX gap = %.4f us"%(nl1a, l1a_bxgap, (time()-t0)*1e6))
+                #print ("  Time taken for L1A loop with %d L1As and %d BX gap = %.4f us"%(nl1a, l1a_bxgap, (time()-t0)*1e6))
                 calpulse_counter = read_backend_reg(calpulse_node)
 
                 cluster_count = 0
@@ -169,7 +169,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
                     if i not in [0,1] and cluster_count_i != 0:
                         multiple_cluster = 1
                         break
-                    if i==0:
+                    if i==1:
                         cluster_count = cluster_count_i
                     sbit_monitor_value = read_backend_reg(sbit_monitor_nodes[i])
                     sbit_cluster_address = sbit_monitor_value & 0x7ff
@@ -178,10 +178,10 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
                         multiple_cluster = 1
                         break
                     if i==0:
-                        if sbit_cluster_size!=1:
+                        if sbit_cluster_size>1:
                             large_cluster = 1
                             break
-                        if sbit_cluster_address!= s_bit_cluster_mapping[vfat][channel]:
+                        if sbit_cluster_address!=0x7ff and sbit_cluster_address!= s_bit_cluster_mapping[vfat][channel]:
                             incorrect_cluster = 1
                             break
                 if multiple_cluster:
