@@ -157,7 +157,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
                     cyclic_running = read_backend_reg(cyclic_running_node)
                 # Stop the cyclic generator
                 write_backend_reg(ttc_reset_node, 1)
-                print ("  Time taken for L1A loop with %d L1As and %d BX gap = %.4f us"%(nl1a, l1a_bxgap, (time-t0)*1e6))
+                print ("  Time taken for L1A loop with %d L1As and %d BX gap = %.4f us"%(nl1a, l1a_bxgap, (time()-t0)*1e6))
                 calpulse_counter = read_backend_reg(calpulse_node)
 
                 cluster_count = 0
