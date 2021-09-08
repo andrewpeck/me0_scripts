@@ -349,7 +349,7 @@ if __name__ == "__main__":
     for line in file_in.readlines():
         if "VFAT" in line:
             continue
-        if len(line.split()==0):
+        if len(line.split())==0:
             continue
         vfat = int(line.split()[0])
         channel = int(line.split()[1])
