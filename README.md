@@ -190,6 +190,8 @@ Use -h option for any script to check usage
 
 ```lpgbt_vfat_plot_reg_scan.py```: Register Scan Plotting using DAQ data for VFATs
 
+```lpgbt_vfat_plot_sbit_cluster_noise_rate.py```: Noise Rate Plotting using SBit Clusters for VFATs
+
 ```lpgbt_vfat_plot_sbit_noise_rate.py```: Noise Rate Plotting using SBits for VFATs
 
 ```lpgbt_vfat_plot_scurve.py```: SCurve quick Plotting using DAQ data for VFATs
@@ -202,9 +204,13 @@ Use -h option for any script to check usage
 
 ```lpgbt_vfat_sbit_monitor_clustermap.py```: Cluster mapping of channel using S-bit monitor (only works with test firmware)
 
+```lpgbt_vfat_sbit_cluster_noise_rate.py```: S-bit Cluster Noise rates for VFATs (only works with test firmware)
+
 ```lpgbt_vfat_sbit_noise_rate.py```: S-bit Noise rates for VFATs (only works with test firmware)
 
 ```lpgbt_vfat_sbit_phase_scan.py```: S-bit phase scan for VFATs (only works with test firmware)
+
+```lpgbt_vfat_sbit_cluster_scurve.py```: S-bit Cluster SCurve for VFATs (only works with test firmware)
 
 ```lpgbt_vfat_sbit_scurve.py```: S-bit SCurve for VFATs (only works with test firmware)
 

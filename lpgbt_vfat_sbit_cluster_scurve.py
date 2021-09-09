@@ -181,7 +181,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
                         if sbit_cluster_size>1:
                             large_cluster = 1
                             break
-                        if sbit_cluster_address!=0x7ff and sbit_cluster_address!= s_bit_cluster_mapping[vfat][channel]:
+                        if sbit_cluster_address!=0x7ff and sbit_cluster_address != s_bit_cluster_mapping[vfat][channel]:
                             incorrect_cluster = 1
                             break
                 if multiple_cluster:

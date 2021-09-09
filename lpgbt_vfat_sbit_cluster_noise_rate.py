@@ -8,33 +8,17 @@ import glob
 import json
 from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
 
-s_bit_channel_mapping = {}
-print ("")
-if not os.path.isdir("vfat_data/vfat_sbit_mapping_results"):
-    print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
-    sys.exit()
-list_of_files = glob.glob("vfat_data/vfat_sbit_mapping_results/*.py")
-if len(list_of_files)==0:
-    print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
-    sys.exit()
-elif len(list_of_files)>1:
-    print ("Mutliple S-bit mapping results found, using latest file")
-latest_file = max(list_of_files, key=os.path.getctime)
-print ("Using S-bit mapping file: %s\n"%(latest_file.split("vfat_data/vfat_sbit_mapping_results/")[1]))
-with open(latest_file) as input_file:
-    s_bit_channel_mapping = json.load(input_file)
 
-
-def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
-    if not os.path.exists("vfat_data/vfat_sbit_noise_results"):
-        os.makedirs("vfat_data/vfat_sbit_noise_results")
+def lpgbt_vfat_sbit(system, oh_select, vfat_list, step, runtime, s_bit_cluster_mapping):
+    if not os.path.exists("vfat_data/vfat_sbit_cluster_noise_results"):
+        os.makedirs("vfat_data/vfat_sbit_cluster_noise_results")
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    foldername = "vfat_data/vfat_sbit_noise_results/"
-    filename = foldername + "ME0_OH%d_vfat_sbit_noise_"%oh_select + now + ".txt"
+    foldername = "vfat_data/vfat_sbit_cluster_noise_results/"
+    filename = foldername + "ME0_OH%d_vfat_sbit_cluster_noise_"%oh_select + now + ".txt"
     file_out = open(filename,"w+")
-    file_out.write("vfat    elink    threshold    fired    time\n")
+    file_out.write("vfat    threshold    fired    time\n")
 
     vfat_oh_link_reset()
     global_reset()
@@ -61,20 +45,19 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
             rw_terminate()
 
         sbit_data[vfat] = {}
-        for elink in elink_list:
-            sbit_data[vfat][elink] = {}
-            for thr in range(0,256,step):
-                sbit_data[vfat][elink][thr] = {}
-                sbit_data[vfat][elink][thr]["time"] = -9999
-                sbit_data[vfat][elink][thr]["fired"] = -9999
+        for thr in range(0,256,step):
+            sbit_data[vfat][thr] = {}
+            sbit_data[vfat][thr]["time"] = -9999
+            sbit_data[vfat][thr]["fired"] = -9999
 
     # Nodes for Sbit counters
-    vfat_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_VFAT_SBIT_ME0") # VFAT for reading S-bits
-    elink_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_ELINK_SBIT_ME0") # Node for selecting Elink to count
-    channel_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_SBIT_ME0") # Node for selecting S-bit to count
-    elink_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SBIT0XE_COUNT_ME0") # S-bit counter for elink
-    channel_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SBIT0XS_COUNT_ME0") # S-bit counter for specific channel
-    reset_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.CTRL.SBIT_TEST_RESET")  # To reset all S-bit counters
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TRIGGER.SBIT_MONITOR.OH_SELECT"), oh_select)
+    reset_sbit_monitor_node = get_rwreg_node("BEFE.GEM_AMC.TRIGGER.SBIT_MONITOR.RESET")  # To reset S-bit Monitor
+    sbit_monitor_nodes = []
+    cluster_count_nodes = []
+    for i in range(0,8):
+        sbit_monitor_nodes.append(get_rwreg_node("BEFE.GEM_AMC.TRIGGER.SBIT_MONITOR.CLUSTER%d"%i))
+        cluster_count_nodes.append(get_rwreg_node("BEFE.GEM_AMC.TRIGGER.OH0.CLUSTER_COUNT_%d_CNT"%i))
 
     dac_node = {}
     dac = "CFG_THR_ARM_DAC"
@@ -85,41 +68,61 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
     print (vfat_list)
     print ("")
 
+    # Enable channels in 1 VFAT at a time and read out number of clusters for that VFAT, check address match for VFAT from mapping
+
     # Looping over VFATs
     for vfat in vfat_list:
+        print ("VFAT %02d"%(vfat))
         initial_thr = read_backend_reg(dac_node[vfat])
-        # Looping over elinks
-        for elink in elink_list:
-            print ("VFAT %02d, Elink: %d"%(vfat, elink))
-            write_backend_reg(vfat_sbit_select_node, vfat)
-            write_backend_reg(elink_sbit_select_node, elink)
 
-            # Unmask channels for this elink
-            channel_start = elink*16
-            channel_end = channel_start + 15
-            for channel in range(channel_start, channel_end+1):
-                enableVfatchannel(vfat, oh_select, channel, 0, 0) # unmask channels
+        # Unmask channels for this vfat
+        for channel in range(0,128):
+            enableVfatchannel(vfat, oh_select, channel, 0, 0) # unmask channels
 
-            # Looping over threshold
-            for thr in range(0,256,step):
-                #print ("    Threshold: %d"%thr)
-                write_backend_reg(dac_node[vfat], thr)
-                sleep(1e-3)
+        # Looping over threshold
+        for thr in range(0,256,step):
+            #print ("    Threshold: %d"%thr)
+            write_backend_reg(dac_node[vfat], thr)
+            sleep(1e-3)
 
-                # Count hits in elink in given time
-                write_backend_reg(reset_sbit_counter_node, 1)
-                sleep(runtime)
-                sbit_data[vfat][elink][thr]["fired"] = read_backend_reg(elink_sbit_counter_node)
-                sbit_data[vfat][elink][thr]["time"] = runtime 
+            # Count number of clusters for VFATs in given time
+            write_backend_reg(reset_sbit_monitor_node, 1)
+            global_reset()
+            sleep(runtime)
+
+            cluster_counts = []
+            for i in range(0,8):
+                cluster_counts.append(read_backend_reg(cluster_count_nodes[i]))
+            cluster_addr_mismatch = 0
+            for i in range(0,8):
+                sbit_monitor_value = read_backend_reg(sbit_monitor_nodes[i])
+                sbit_cluster_address = sbit_monitor_value & 0x7ff
+                sbit_cluster_size = ((sbit_monitor_value >> 11) & 0x7) + 1
+                if sbit_cluster_address!=0x7ff:
+                    cluster_addr_match = 0
+                    for channel in s_bit_cluster_mapping[vfat]:
+                        if sbit_cluster_address == s_bit_cluster_mapping[vfat][channel]:
+                            cluster_addr_match = 1
+                            break
+                if cluster_addr_match == 0:
+                    cluster_addr_mismatch = 1
+                    break
+            if cluster_addr_mismatch == 1:
+                print (Colors.YELLOW + "Cluster detected not belonging to this VFAT" + Colors.ENDC)
+                continue
+
+            n_total_clusters = 0
+            for i in range (1,8):
+                n_total_clusters += i*cluster_counts[i]
+
+            sbit_data[vfat][thr]["fired"] = n_total_clusters
+            sbit_data[vfat][thr]["time"] = runtime
             # End of charge loop
 
-            # Mask again the channels for this elink
-            for channel in range(channel_start, channel_end+1):
-                enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channels
-
-        # End of elink loop
+        # Mask channels again for this vfat
+        for channel in range(0,128):
+            enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channels
         write_backend_reg(dac_node[vfat], initial_thr)
-        sleep(1e-3)
     # End of VFAT loop
     print ("")
 
@@ -133,11 +136,10 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
 
     # Writing Results
     for vfat in vfat_list:
-        for elink in elink_list:
-            for thr in range(0,256,1):
-                if thr not in sbit_data[vfat][elink]:
-                    continue
-                file_out.write("%d    %d    %d    %d    %f\n"%(vfat, elink, thr, sbit_data[vfat][elink][thr]["fired"], sbit_data[vfat][elink][thr]["time"]))
+        for thr in range(0,256,1):
+            if thr not in sbit_data[vfat]:
+                continue
+            file_out.write("%d    %d    %d    %f\n"%(vfat, thr, sbit_data[vfat][thr]["fired"], sbit_data[vfat][thr]["time"]))
 
     print ("")
     file_out.close()
@@ -146,17 +148,16 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
 if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description="LpGBT VFAT S-Bit Noise Rate")
+    parser = argparse.ArgumentParser(description="LpGBT VFAT S-Bit Cluster Noise Rate")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--vfats", action="store", dest="vfats", nargs="+", help="vfats = VFAT number (0-23)")
-    parser.add_argument("-e", "--elinks", action="store", nargs="+", dest="elinks", help="elinks = list of elinks (default: 0-7)")
     parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use previous DAC scan results for configuration")
     parser.add_argument("-u", "--use_channel_trimming", action="store", dest="use_channel_trimming", help="use_channel_trimming = to use latest trimming results for either options - daq or sbit (default = None)")
-    parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for threshold scan (default = 1)")
-    parser.add_argument("-m", "--time", action="store", dest="time", default="0.001", help="time = time for each elink (default = 1 ms)")
+    parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for threshold scan (default=1)")
+    parser.add_argument("-m", "--time", action="store", dest="time", default="0.001", help="time = time for each VFAT (default= 1 ms)")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -200,21 +201,42 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Step size can only be between 1 and 256" + Colors.ENDC)
         sys.exit()
 
-    elink_list = []
-    if args.elinks is None:
-        elink_list = range(0,8)
-    else:
-        for e in args.elinks:
-            e_int = int(e)
-            if e_int not in range(0,8):
-                print (Colors.YELLOW + "Invalid elink, only allowed 0-7" + Colors.ENDC)
-                sys.exit()
-            elink_list.append(e_int)
-
     if args.use_channel_trimming is not None:
         if args.use_channel_trimming not in ["daq", "sbit"]:
             print (Colors.YELLOW + "Only allowed options for use_channel_trimming: daq or sbit" + Colors.ENDC)
             sys.exit()
+
+    s_bit_cluster_mapping = {}
+    print ("")
+    if not os.path.isdir("vfat_data/vfat_sbit_monitor_cluster_mapping_results"):
+        print (Colors.YELLOW + "Run the S-bit cluster mapping first" + Colors.ENDC)
+        sys.exit()
+    list_of_files = glob.glob("vfat_data/vfat_sbit_monitor_cluster_mapping_results/*.txt")
+    if len(list_of_files)==0:
+        print (Colors.YELLOW + "Run the S-bit cluster mapping first" + Colors.ENDC)
+        sys.exit()
+    elif len(list_of_files)>1:
+        print ("Mutliple S-bit cluster mapping results found, using latest file")
+    latest_file = max(list_of_files, key=os.path.getctime)
+    print ("Using S-bit cluster mapping file: %s\n"%(latest_file.split("vfat_data/vfat_sbit_monitor_cluster_mapping_results/")[1]))
+    file_in = open(latest_file)
+    for line in file_in.readlines():
+        if "VFAT" in line:
+            continue
+        if len(line.split())==0:
+            continue
+        vfat = int(line.split()[0])
+        channel = int(line.split()[1])
+        sbit = int(line.split()[2])
+        cluster_count = line.split()[3]
+        cluster_size = int(line.split()[4].split(",")[0])
+        cluster_address = int(line.split()[4].split(",")[1])
+        if cluster_address == 2047:
+            cluster_address = -9999
+        if vfat not in s_bit_cluster_mapping:
+            s_bit_cluster_mapping[vfat] = {}
+        s_bit_cluster_mapping[vfat][channel] = cluster_address
+    file_in.close()
 
     # Parsing Registers XML File
     print("Parsing xml file...")
@@ -228,7 +250,7 @@ if __name__ == "__main__":
 
     # Running Sbit Noise Rate
     try:
-        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, elink_list, step, float(args.time))
+        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, step, float(args.time), s_bit_cluster_mapping)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

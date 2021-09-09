@@ -9,7 +9,7 @@ import argparse
 if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description="Plotting VFAT Sbit Noise Rate")
+    parser = argparse.ArgumentParser(description="Plotting VFAT Sbit Cluster Noise Rate")
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="Noise rate result filename")
     args = parser.parse_args()
 
@@ -29,18 +29,15 @@ if __name__ == "__main__":
         if "vfat" in line:
             continue
         vfat = int(line.split()[0])
-        elink = int(line.split()[1])
-        thr = int(line.split()[2])
-        fired = int(line.split()[3])
-        time = float(line.split()[4])
+        thr = int(line.split()[1])
+        fired = int(line.split()[2])
+        time = float(line.split()[3])
         if vfat not in noise_result:
             noise_result[vfat] = {}
-        if elink not in noise_result[vfat]:
-            noise_result[vfat][elink] = {}
         if fired == -9999:
-            noise_result[vfat][elink][thr] = 0
+            noise_result[vfat][thr] = 0
         else:
-            noise_result[vfat][elink][thr] = fired
+            noise_result[vfat][thr] = fired
     file.close()
 
     numVfats = len(noise_result.keys())
@@ -60,15 +57,9 @@ if __name__ == "__main__":
         threshold = []
         noise_rate = []
 
-        for elink in noise_result[vfat]:
-            for thr in noise_result[vfat][elink]:
-                threshold.append(thr)
-                noise_rate.append(0)
-            break
-        for elink in noise_result[vfat]:
-            for i in range(0,len(threshold)):
-                thr = threshold[i]
-                noise_rate[i] += noise_result[vfat][elink][thr]/time
+        for thr in noise_result[vfat]:
+            threshold.append(thr)
+            noise_rate.append(noise_result[vfat][thr]/time)
 
         fig, ax = plt.subplots()
         ax.set_xlabel("Threshold (DAC)")
@@ -78,7 +69,7 @@ if __name__ == "__main__":
         #leg = ax.legend(loc="center right", ncol=2)
         ax.set_title("VFAT# %02d"%vfat)
         fig.tight_layout()
-        fig.savefig((directoryName+"/sbit_noise_rate_"+oh+"_VFAT%02d.pdf")%vfat)
+        fig.savefig((directoryName+"/sbit_cluster_noise_rate_"+oh+"_VFAT%02d.pdf")%vfat)
         plt.close(fig)
 
         if numVfats == 1:
@@ -109,7 +100,7 @@ if __name__ == "__main__":
         vfatCnt0+=1
 
     fig1.tight_layout()
-    fig1.savefig((directoryName+"/sbit_noise_rate_"+oh+".pdf"))
+    fig1.savefig((directoryName+"/sbit_cluster_noise_rate_"+oh+".pdf"))
     plt.close(fig1)
 
 
