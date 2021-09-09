@@ -152,7 +152,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--vfats", action="store", dest="vfats", nargs="+", help="vfats = VFAT number (0-23)")
-    parser.add_argument("-e", "--elinks", action="store", nargs="+", dest="elinks", help="elinks = list of elinks (default: 0-7)")
+    #parser.add_argument("-e", "--elinks", action="store", nargs="+", dest="elinks", help="elinks = list of elinks (default: 0-7)")
     parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use previous DAC scan results for configuration")
     parser.add_argument("-u", "--use_channel_trimming", action="store", dest="use_channel_trimming", help="use_channel_trimming = to use latest trimming results for either options - daq or sbit (default = None)")
     parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for threshold scan (default = 1)")
@@ -200,16 +200,7 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Step size can only be between 1 and 256" + Colors.ENDC)
         sys.exit()
 
-    elink_list = []
-    if args.elinks is None:
-        elink_list = range(0,8)
-    else:
-        for e in args.elinks:
-            e_int = int(e)
-            if e_int not in range(0,8):
-                print (Colors.YELLOW + "Invalid elink, only allowed 0-7" + Colors.ENDC)
-                sys.exit()
-            elink_list.append(e_int)
+    elink_list = range(0,8)
 
     if args.use_channel_trimming is not None:
         if args.use_channel_trimming not in ["daq", "sbit"]:
