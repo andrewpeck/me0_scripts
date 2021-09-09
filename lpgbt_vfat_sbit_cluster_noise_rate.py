@@ -94,6 +94,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, step, runtime, s_bit_cluster_m
             for i in range(0,8):
                 cluster_counts.append(read_backend_reg(cluster_count_nodes[i]))
             cluster_addr_mismatch = 0
+            sbit_cluster_address_mismatch = -9999
             for i in range(0,8):
                 sbit_monitor_value = read_backend_reg(sbit_monitor_nodes[i])
                 sbit_cluster_address = sbit_monitor_value & 0x7ff
@@ -103,12 +104,13 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, step, runtime, s_bit_cluster_m
                     for channel in s_bit_cluster_mapping[vfat]:
                         if sbit_cluster_address == s_bit_cluster_mapping[vfat][channel]:
                             cluster_addr_match = 1
+                            sbit_cluster_address_mismatch = sbit_cluster_address
                             break
                     if cluster_addr_match == 0:
                         cluster_addr_mismatch = 1
                         break
             if cluster_addr_mismatch == 1:
-                print (Colors.YELLOW + "Cluster detected not belonging to this VFAT for CFG_THR_ARM_DAC = %d"%thr + Colors.ENDC)
+                print (Colors.YELLOW + "Cluster (address = %d) detected not belonging to this VFAT for CFG_THR_ARM_DAC = %d"%(sbit_cluster_address_mismatch, thr) + Colors.ENDC)
                 continue
 
             n_total_clusters = 0
