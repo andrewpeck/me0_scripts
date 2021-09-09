@@ -104,9 +104,9 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, step, runtime, s_bit_cluster_m
                     for channel in s_bit_cluster_mapping[vfat]:
                         if sbit_cluster_address == s_bit_cluster_mapping[vfat][channel]:
                             cluster_addr_match = 1
-                            sbit_cluster_address_mismatch = sbit_cluster_address
                             break
                     if cluster_addr_match == 0:
+                        sbit_cluster_address_mismatch = sbit_cluster_address
                         cluster_addr_mismatch = 1
                         break
             if cluster_addr_mismatch == 1:
