@@ -89,7 +89,7 @@ def main(inFile, calFile, directoryName, oh):
         elif numVfats <= 24:
             fig, ax = plt.subplots(4, 6, figsize=(60,40))
 
-        if DAC_reg == "CFG_ARM_THR":
+        if DAC_reg == "CFG_THR_ARM_DAC":
             thr_filename_out = directoryName + "/converted_values" + oh + "_" + DAC_reg + ".txt"
             thr_pd = pd.DataFrame()
 
@@ -112,7 +112,7 @@ def main(inFile, calFile, directoryName, oh):
             datavfat["value"] /= nominalDacScalingFactors[DAC_reg] # use scale factor
             datavfat["error"] /= nominalDacScalingFactors[DAC_reg]
             print("vfat data after transformation: {}".format(datavfat["value"]))
-            if DAC_reg == "CFG_ARM_THR":
+            if DAC_reg == "CFG_THR_ARM_DAC":
                 thr_pd.append(datavfat)
             datavfat2 = datavfat
 
@@ -178,7 +178,7 @@ def main(inFile, calFile, directoryName, oh):
 
             file.write("%s;%i;%i\n" % (DAC_reg, vfat, nominal_ADC0))
 
-        if DAC_reg == "CFG_ARM_THR":
+        if DAC_reg == "CFG_THR_ARM_DAC":
             thr_pd.to_csv(thr_filename_out)
 
         fig.suptitle(DAC_reg, fontsize=32) # place DAC name for main title
