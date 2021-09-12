@@ -113,7 +113,7 @@ def main(inFile, calFile, directoryName, oh):
             datavfat["error"] /= nominalDacScalingFactors[DAC_reg]
             print("vfat data after transformation: {}".format(datavfat["value"]))
             if DAC_reg == "CFG_THR_ARM_DAC":
-                thr_pd.append(datavfat)
+                thr_pd = thr_pd.append(datavfat)
             datavfat2 = datavfat
 
             # convert data to np arrays for plotting
