@@ -70,7 +70,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, sbit_list, step, runtime, s_bi
 
     # Looping over VFATs
     for vfat in vfat_list:
-        print ("VFAT: %02d"vfat)
+        print ("VFAT: %02d"%vfat)
         initial_thr = read_backend_reg(dac_node[vfat])
         # Looping over sbits
         for sbit in sbit_list:
