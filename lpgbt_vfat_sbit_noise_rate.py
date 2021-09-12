@@ -8,24 +8,7 @@ import glob
 import json
 from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
 
-s_bit_channel_mapping = {}
-print ("")
-if not os.path.isdir("vfat_data/vfat_sbit_mapping_results"):
-    print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
-    sys.exit()
-list_of_files = glob.glob("vfat_data/vfat_sbit_mapping_results/*.py")
-if len(list_of_files)==0:
-    print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
-    sys.exit()
-elif len(list_of_files)>1:
-    print ("Mutliple S-bit mapping results found, using latest file")
-latest_file = max(list_of_files, key=os.path.getctime)
-print ("Using S-bit mapping file: %s\n"%(latest_file.split("vfat_data/vfat_sbit_mapping_results/")[1]))
-with open(latest_file) as input_file:
-    s_bit_channel_mapping = json.load(input_file)
-
-
-def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
+def lpgbt_vfat_sbit(system, oh_select, vfat_list, sbit_list, step, runtime, s_bit_channel_mapping):
     if not os.path.exists("vfat_data/vfat_sbit_noise_results"):
         os.makedirs("vfat_data/vfat_sbit_noise_results")
     now = str(datetime.datetime.now())[:16]
@@ -34,7 +17,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
     foldername = "vfat_data/vfat_sbit_noise_results/"
     filename = foldername + "ME0_OH%d_vfat_sbit_noise_"%oh_select + now + ".txt"
     file_out = open(filename,"w+")
-    file_out.write("vfat    elink    threshold    fired    time\n")
+    file_out.write("vfat    sbit    threshold    fired    time\n")
 
     vfat_oh_link_reset()
     global_reset()
@@ -61,12 +44,12 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
             rw_terminate()
 
         sbit_data[vfat] = {}
-        for elink in elink_list:
-            sbit_data[vfat][elink] = {}
+        for sbit in sbit_list:
+            sbit_data[vfat][sbit] = {}
             for thr in range(0,256,step):
-                sbit_data[vfat][elink][thr] = {}
-                sbit_data[vfat][elink][thr]["time"] = -9999
-                sbit_data[vfat][elink][thr]["fired"] = -9999
+                sbit_data[vfat][sbit][thr] = {}
+                sbit_data[vfat][sbit][thr]["time"] = -9999
+                sbit_data[vfat][sbit][thr]["fired"] = -9999
 
     # Nodes for Sbit counters
     vfat_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_VFAT_SBIT_ME0") # VFAT for reading S-bits
@@ -86,18 +69,30 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
     print ("")
 
     # Looping over VFATs
-    for vfat in vfat_list:
+    for vfat in vfat_list%:
+        print ("VFAT: %02d"vfat)
         initial_thr = read_backend_reg(dac_node[vfat])
-        # Looping over elinks
-        for elink in elink_list:
-            print ("VFAT %02d, Elink: %d"%(vfat, elink))
+        # Looping over sbits
+        for sbit in sbit_list:
+            print ("  VFAT: %02d, Sbit: %d"%(vfat, sbit))
+            elink = int(sbit/8)
+            channel_list = []
+            for c in s_bit_channel_mapping[str(vfat)][str(elink)]:
+                if sbit == s_bit_channel_mapping[str(vfat)][str(elink)][c]:
+                    channel_list.append(int(c))
+            if len(channel_list)>2:
+                print (Colors.YELLOW + "Skipping S-bit %02d, more than 2 channels"%sbit + Colors.ENDC)
+                continue
+            elif len(channel_list)==1:
+                print (Colors.YELLOW + "S-bit %02d has 1 non-working channel"%sbit + Colors.ENDC)
+            elif len(channel_list)==0:
+                print (Colors.YELLOW + "Skipping S-bit %02d, missing both channels"%sbit + Colors.ENDC)
+                continue
             write_backend_reg(vfat_sbit_select_node, vfat)
-            write_backend_reg(elink_sbit_select_node, elink)
+            write_backend_reg(channel_sbit_select_node, sbit)
 
-            # Unmask channels for this elink
-            channel_start = elink*16
-            channel_end = channel_start + 15
-            for channel in range(channel_start, channel_end+1):
+            # Unmask channels for this sbit
+            for channel in channel_list:
                 enableVfatchannel(vfat, oh_select, channel, 0, 0) # unmask channels
 
             # Looping over threshold
@@ -109,17 +104,18 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
                 # Count hits in elink in given time
                 write_backend_reg(reset_sbit_counter_node, 1)
                 sleep(runtime)
-                sbit_data[vfat][elink][thr]["fired"] = read_backend_reg(elink_sbit_counter_node)
-                sbit_data[vfat][elink][thr]["time"] = runtime 
+                sbit_data[vfat][sbit][thr]["fired"] = read_backend_reg(channel_sbit_counter_node)
+                sbit_data[vfat][sbit][thr]["time"] = runtime
             # End of charge loop
 
             # Mask again the channels for this elink
-            for channel in range(channel_start, channel_end+1):
+            for channel in channel_list:
                 enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channels
 
-        # End of elink loop
+        # End of sbits loop
         write_backend_reg(dac_node[vfat], initial_thr)
         sleep(1e-3)
+        print ("")
     # End of VFAT loop
     print ("")
 
@@ -133,11 +129,11 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, elink_list, step, runtime):
 
     # Writing Results
     for vfat in vfat_list:
-        for elink in elink_list:
+        for sbit in sbit_list:
             for thr in range(0,256,1):
-                if thr not in sbit_data[vfat][elink]:
+                if thr not in sbit_data[vfat][sbit]:
                     continue
-                file_out.write("%d    %d    %d    %d    %f\n"%(vfat, elink, thr, sbit_data[vfat][elink][thr]["fired"], sbit_data[vfat][elink][thr]["time"]))
+                file_out.write("%d    %d    %d    %d    %f\n"%(vfat, sbit, thr, sbit_data[vfat][sbit][thr]["fired"], sbit_data[vfat][sbit][thr]["time"]))
 
     print ("")
     file_out.close()
@@ -152,7 +148,6 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--vfats", action="store", dest="vfats", nargs="+", help="vfats = VFAT number (0-23)")
-    #parser.add_argument("-e", "--elinks", action="store", nargs="+", dest="elinks", help="elinks = list of elinks (default: 0-7)")
     parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use previous DAC scan results for configuration")
     parser.add_argument("-u", "--use_channel_trimming", action="store", dest="use_channel_trimming", help="use_channel_trimming = to use latest trimming results for either options - daq or sbit (default = None)")
     parser.add_argument("-t", "--step", action="store", dest="step", default="1", help="step = Step size for threshold scan (default = 1)")
@@ -200,7 +195,22 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Step size can only be between 1 and 256" + Colors.ENDC)
         sys.exit()
 
-    elink_list = range(0,8)
+    sbit_list = range(0,64)
+    s_bit_channel_mapping = {}
+    print ("")
+    if not os.path.isdir("vfat_data/vfat_sbit_mapping_results"):
+        print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
+        sys.exit()
+    list_of_files = glob.glob("vfat_data/vfat_sbit_mapping_results/*.py")
+    if len(list_of_files)==0:
+        print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
+        sys.exit()
+    elif len(list_of_files)>1:
+        print ("Mutliple S-bit mapping results found, using latest file")
+    latest_file = max(list_of_files, key=os.path.getctime)
+    print ("Using S-bit mapping file: %s\n"%(latest_file.split("vfat_data/vfat_sbit_mapping_results/")[1]))
+    with open(latest_file) as input_file:
+        s_bit_channel_mapping = json.load(input_file)
 
     if args.use_channel_trimming is not None:
         if args.use_channel_trimming not in ["daq", "sbit"]:
@@ -219,7 +229,7 @@ if __name__ == "__main__":
 
     # Running Sbit Noise Rate
     try:
-        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, elink_list, step, float(args.time))
+        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, sbit_list, step, float(args.time), s_bit_channel_mapping)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

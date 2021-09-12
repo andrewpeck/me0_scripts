@@ -29,18 +29,18 @@ if __name__ == "__main__":
         if "vfat" in line:
             continue
         vfat = int(line.split()[0])
-        elink = int(line.split()[1])
+        sbit = int(line.split()[1])
         thr = int(line.split()[2])
         fired = int(line.split()[3])
         time = float(line.split()[4])
         if vfat not in noise_result:
             noise_result[vfat] = {}
-        if elink not in noise_result[vfat]:
-            noise_result[vfat][elink] = {}
+        if sbit not in noise_result[vfat]:
+            noise_result[vfat][sbit] = {}
         if fired == -9999:
-            noise_result[vfat][elink][thr] = 0
+            noise_result[vfat][sbit][thr] = 0
         else:
-            noise_result[vfat][elink][thr] = fired
+            noise_result[vfat][sbit][thr] = fired
     file.close()
 
     numVfats = len(noise_result.keys())
@@ -60,15 +60,15 @@ if __name__ == "__main__":
         threshold = []
         noise_rate = []
 
-        for elink in noise_result[vfat]:
-            for thr in noise_result[vfat][elink]:
+        for sbit in noise_result[vfat]:
+            for thr in noise_result[vfat][sbit]:
                 threshold.append(thr)
                 noise_rate.append(0)
             break
-        for elink in noise_result[vfat]:
+        for sbit in noise_result[vfat]:
             for i in range(0,len(threshold)):
                 thr = threshold[i]
-                noise_rate[i] += noise_result[vfat][elink][thr]/time
+                noise_rate[i] += noise_result[vfat][sbit][thr]/time
 
         fig, ax = plt.subplots()
         ax.set_xlabel("Threshold (DAC)")
@@ -105,6 +105,21 @@ if __name__ == "__main__":
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_yscale("log")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT# %02d"%vfat)
             ax1[int(vfatCnt0/6), vfatCnt0%6].plot(threshold, noise_rate, "o")
+
+        fig2, ax2 = plt.subplots(8, 8, figsize=(80,80))
+        for sbit in noise_result[vfat]:
+            noise_rate_sbit = []
+            for thr in range(0,len(threshold)):
+                noise_rate_sbit.append(noise_result[vfat][sbit][thr]/time)
+            ax2[int(sbit/8), sbit%8].set_xlabel("Threshold (DAC)")
+            ax2[int(sbit/8), sbit%8].set_ylabel("SBit Rate (Hz)")
+            ax2[int(sbit/8), sbit%8].set_yscale("log")
+            ax2[int(sbit/8), sbit%8].plot(threshold, noise_rate_sbit, "o")
+            #leg = ax.legend(loc="center right", ncol=2)
+            ax2[int(sbit/8), sbit%8].set_title("VFAT# %02d, S-Bit# %02d"%(vfat, sbit))
+        fig2.tight_layout()
+        fig2.savefig((directoryName+"/sbit_noise_rate_channels_"+oh+"_VFAT%02d.pdf")%vfat)
+        plt.close(fig2)
 
         vfatCnt0+=1
 
