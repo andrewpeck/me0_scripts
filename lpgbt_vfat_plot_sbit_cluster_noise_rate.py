@@ -31,7 +31,7 @@ if __name__ == "__main__":
         if "vfat" in line:
             continue
         vfat = int(line.split()[0])
-        sbit = line.split()[1])
+        sbit = line.split()[1]
         if sbit != "all":
             sbit = int(sbit)
         thr = int(line.split()[2])
