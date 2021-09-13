@@ -61,6 +61,7 @@ if __name__ == "__main__":
 
     vfatCnt0 = 0
     for vfat in noise_result:
+        print ("Creating plots for VFAT %02d"%vfat)
         threshold = []
         noise_rate = []
 
