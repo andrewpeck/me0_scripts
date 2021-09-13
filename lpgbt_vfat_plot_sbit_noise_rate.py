@@ -20,34 +20,6 @@ if __name__ == "__main__":
     oh = plot_filename_prefix.split("_vfat")[0]
     file = open(args.filename)
 
-    thr_dac_value = {}
-    if args.use_dac_scan_results:
-        dac_scan_results_base_path = "vfat_data/vfat_dac_scan_results"
-        if os.path.isdir(dac_scan_results_base_path):
-            list_of_files = glob.glob(dac_scan_results_base_path+"/*.txt")
-            if len(list_of_files)>0:
-                latest_file = max(list_of_files, key=os.path.getctime)
-    if os.path.isfile(latest_file):
-        calFile = calFile = "vfat_data/vfat_calib_data/"+oh+"_vfat_calib_info_adc0.txt"
-        dacData = pd.read_csv(latest_file, names=["OH", "DAC_reg", "vfat", "DAC_point","value","error"], sep=";", skiprows=[0])
-        calData = pd.read_csv(calFile ,names=["vfat", "vfat_serial_num", "slope", "intercept"], sep=";", skiprows=[0])
-
-        dacData_thr = dacData[dacData["DAC_reg"] == "CFG_ARM_THR"]
-        for vfat in dacData_thr.vfat.unique:
-            thr_dac_value[vfat] = {}
-            
-
-
-
-
-
-
-
-
-
-
-
-
     plt.rcParams.update({'font.size': 22})
 
     try:

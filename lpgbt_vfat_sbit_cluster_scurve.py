@@ -132,7 +132,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
         for channel in channel_list:
             print ("VFAT: %02d  Channel: %d"%(vfat, channel))
 
-            if s_bit_cluster_mapping[vfat][channel] == -9999:
+            if s_bit_cluster_mapping[vfat][channel]["cluster_address"] == -9999:
                 print (Colors.YELLOW + "    Bad channel (from S-bit cluster mapping) %02d on VFAT %02d"%(channel,vfat) + Colors.ENDC)
                 continue
             if parallel is None:
@@ -181,7 +181,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
                         if sbit_cluster_size>1:
                             large_cluster = 1
                             break
-                        if sbit_cluster_address!=0x7ff and sbit_cluster_address != s_bit_cluster_mapping[vfat][channel]:
+                        if sbit_cluster_address!=0x7ff and sbit_cluster_address != s_bit_cluster_mapping[vfat][channel]["cluster_address"]:
                             incorrect_cluster = 1
                             break
                 if multiple_cluster:
@@ -361,7 +361,9 @@ if __name__ == "__main__":
             cluster_address = -9999
         if vfat not in s_bit_cluster_mapping:
             s_bit_cluster_mapping[vfat] = {}
-        s_bit_cluster_mapping[vfat][channel] = cluster_address
+        s_bit_cluster_mapping[vfat][channel] = {}
+        s_bit_cluster_mapping[vfat][channel]["sbit"] = sbit
+        s_bit_cluster_mapping[vfat][channel]["cluster_address"] = cluster_address
     file_in.close()
 
     if args.trim not in ["nominal", "up", "down"]:

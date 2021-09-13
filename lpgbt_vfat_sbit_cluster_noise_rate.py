@@ -9,7 +9,7 @@ import json
 from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
 
 
-def lpgbt_vfat_sbit(system, oh_select, vfat_list, step, runtime, s_bit_cluster_mapping):
+def lpgbt_vfat_sbit(system, oh_select, vfat_list, sbit_list, step, runtime, s_bit_cluster_mapping):
     if not os.path.exists("vfat_data/vfat_sbit_cluster_noise_results"):
         os.makedirs("vfat_data/vfat_sbit_cluster_noise_results")
     now = str(datetime.datetime.now())[:16]
@@ -18,7 +18,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, step, runtime, s_bit_cluster_m
     foldername = "vfat_data/vfat_sbit_cluster_noise_results/"
     filename = foldername + "ME0_OH%d_vfat_sbit_cluster_noise_"%oh_select + now + ".txt"
     file_out = open(filename,"w+")
-    file_out.write("vfat    threshold    fired    time\n")
+    file_out.write("vfat    sbit    threshold    fired    time\n")
 
     vfat_oh_link_reset()
     global_reset()
@@ -45,10 +45,12 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, step, runtime, s_bit_cluster_m
             rw_terminate()
 
         sbit_data[vfat] = {}
-        for thr in range(0,256,step):
-            sbit_data[vfat][thr] = {}
-            sbit_data[vfat][thr]["time"] = -9999
-            sbit_data[vfat][thr]["fired"] = -9999
+        for sbit in sbit_list:
+            sbit_data[vfat][sbit] = {}
+            for thr in range(0,256,step):
+                sbit_data[vfat][sbit][thr] = {}
+                sbit_data[vfat][sbit][thr]["time"] = -9999
+                sbit_data[vfat][sbit][thr]["fired"] = -9999
 
     # Nodes for Sbit counters
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TRIGGER.SBIT_MONITOR.OH_SELECT"), oh_select)
@@ -68,63 +70,88 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, step, runtime, s_bit_cluster_m
     print (vfat_list)
     print ("")
 
-    # Enable channels in 1 VFAT at a time and read out number of clusters for that VFAT, check address match for VFAT from mapping
-
     # Looping over VFATs
     for vfat in vfat_list:
         print ("VFAT %02d"%(vfat))
         initial_thr = read_backend_reg(dac_node[vfat])
 
-        # Unmask channels for this vfat
-        for channel in range(0,128):
-            enableVfatchannel(vfat, oh_select, channel, 0, 0) # unmask channels
+        # Looping over sbits
+        for sbit in sbit_list:
+            print ("  VFAT: %02d, Sbit: %d"%(vfat, sbit))
 
-        # Looping over threshold
-        for thr in range(0,256,step):
-            #print ("    Threshold: %d"%thr)
-            write_backend_reg(dac_node[vfat], thr)
-            sleep(1e-3)
+            channel_list = []
+            if sbit == "all":
+                channel_list = range(0,128)
+            else:
+                for c in s_bit_cluster_mapping[vfat]:
+                    if sbit == s_bit_cluster_mapping[vfat][c]["sbit"]:
+                        channel_list.append(int(c))
+                if len(channel_list)>2:
+                    print (Colors.YELLOW + "Skipping S-bit %02d, more than 2 channels"%sbit + Colors.ENDC)
+                    continue
+                elif len(channel_list)==1:
+                    print (Colors.YELLOW + "S-bit %02d has 1 non-working channel"%sbit + Colors.ENDC)
+                elif len(channel_list)==0:
+                    print (Colors.YELLOW + "Skipping S-bit %02d, missing both channels"%sbit + Colors.ENDC)
+                    continue
 
-            # Count number of clusters for VFATs in given time
-            write_backend_reg(reset_sbit_monitor_node, 1)
-            global_reset()
-            sleep(runtime)
+            # Unmask channels for this vfat
+            for channel in channel_list:
+                enableVfatchannel(vfat, oh_select, channel, 0, 0) # unmask channels
 
-            cluster_counts = []
-            for i in range(0,8):
-                cluster_counts.append(read_backend_reg(cluster_count_nodes[i]))
-            cluster_addr_mismatch = 0
-            sbit_cluster_address_mismatch = -9999
-            for i in range(0,8):
-                sbit_monitor_value = read_backend_reg(sbit_monitor_nodes[i])
-                sbit_cluster_address = sbit_monitor_value & 0x7ff
-                sbit_cluster_size = ((sbit_monitor_value >> 11) & 0x7) + 1
-                if sbit_cluster_address!=0x7ff:
-                    cluster_addr_match = 0
-                    for channel in s_bit_cluster_mapping[vfat]:
-                        if sbit_cluster_address == s_bit_cluster_mapping[vfat][channel]:
-                            cluster_addr_match = 1
+            # Looping over threshold
+            for thr in range(0,256,step):
+                #print ("    Threshold: %d"%thr)
+                write_backend_reg(dac_node[vfat], thr)
+                sleep(1e-3)
+
+                # Count number of clusters for VFATs in given time
+                write_backend_reg(reset_sbit_monitor_node, 1)
+                global_reset()
+                sleep(runtime)
+
+                cluster_counts = []
+                for i in range(0,8):
+                    cluster_counts.append(read_backend_reg(cluster_count_nodes[i]))
+                cluster_addr_mismatch = 0
+                sbit_cluster_address_mismatch = -9999
+                for i in range(0,8):
+                    sbit_monitor_value = read_backend_reg(sbit_monitor_nodes[i])
+                    sbit_cluster_address = sbit_monitor_value & 0x7ff
+                    sbit_cluster_size = ((sbit_monitor_value >> 11) & 0x7) + 1
+                    if sbit_cluster_address!=0x7ff:
+                        cluster_addr_match = 0
+                        for channel in channel_list:
+                            if sbit_cluster_address == s_bit_cluster_mapping[vfat][channel]["cluster_address"]:
+                                cluster_addr_match = 1
+                                break
+                        if cluster_addr_match == 0:
+                            sbit_cluster_address_mismatch = sbit_cluster_address
+                            cluster_addr_mismatch = 1
                             break
-                    if cluster_addr_match == 0:
-                        sbit_cluster_address_mismatch = sbit_cluster_address
-                        cluster_addr_mismatch = 1
-                        break
-            if cluster_addr_mismatch == 1:
-                print (Colors.YELLOW + "Cluster (address = %d) detected not belonging to this VFAT for CFG_THR_ARM_DAC = %d"%(sbit_cluster_address_mismatch, thr) + Colors.ENDC)
-                continue
+                if cluster_addr_mismatch == 1:
+                    if sbit=="all":
+                        print (Colors.YELLOW + "Cluster (address = %d) detected not belonging to VFAT %02d for CFG_THR_ARM_DAC = %d"%(sbit_cluster_address_mismatch, vfat, thr) + Colors.ENDC)
+                    else:
+                        print (Colors.YELLOW + "Cluster (address = %d) detected not belonging to VFAT %02d Sbit %02d for CFG_THR_ARM_DAC = %d"%(sbit_cluster_address_mismatch, vfat, sbit, thr) + Colors.ENDC)
+                    continue
 
-            n_total_clusters = 0
-            for i in range (1,8):
-                n_total_clusters += i*cluster_counts[i]
+                n_total_clusters = 0
+                for i in range (1,8):
+                    n_total_clusters += i*cluster_counts[i]
 
-            sbit_data[vfat][thr]["fired"] = n_total_clusters
-            sbit_data[vfat][thr]["time"] = runtime
-            # End of charge loop
+                sbit_data[vfat][sbit][thr]["fired"] = n_total_clusters
+                sbit_data[vfat][sbit][thr]["time"] = runtime
+                # End of charge loop
 
-        # Mask channels again for this vfat
-        for channel in range(0,128):
-            enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channels
+            # Mask channels again for this vfat
+            for channel in channel_list:
+                enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channels
+
+        # End of sbits loop
         write_backend_reg(dac_node[vfat], initial_thr)
+        sleep(1e-3)
+        print ("")
     # End of VFAT loop
     print ("")
 
@@ -138,10 +165,11 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, step, runtime, s_bit_cluster_m
 
     # Writing Results
     for vfat in vfat_list:
-        for thr in range(0,256,1):
-            if thr not in sbit_data[vfat]:
-                continue
-            file_out.write("%d    %d    %d    %f\n"%(vfat, thr, sbit_data[vfat][thr]["fired"], sbit_data[vfat][thr]["time"]))
+        for sbit in sbit_list:
+            for thr in range(0,256,1):
+                if thr not in sbit_data[vfat][sbit]:
+                    continue
+                file_out.write("%d    %d    %d    %d    %f\n"%(vfat, sbit, thr, sbit_data[vfat][sbit][thr]["fired"], sbit_data[vfat][sbit][thr]["time"]))
 
     print ("")
     file_out.close()
@@ -208,6 +236,7 @@ if __name__ == "__main__":
             print (Colors.YELLOW + "Only allowed options for use_channel_trimming: daq or sbit" + Colors.ENDC)
             sys.exit()
 
+    sbit_list = ["all"] + range(0,64)
     s_bit_cluster_mapping = {}
     print ("")
     if not os.path.isdir("vfat_data/vfat_sbit_monitor_cluster_mapping_results"):
@@ -237,7 +266,9 @@ if __name__ == "__main__":
             cluster_address = -9999
         if vfat not in s_bit_cluster_mapping:
             s_bit_cluster_mapping[vfat] = {}
-        s_bit_cluster_mapping[vfat][channel] = cluster_address
+        s_bit_cluster_mapping[vfat][channel] = {}
+        s_bit_cluster_mapping[vfat][channel]["sbit"] = sbit
+        s_bit_cluster_mapping[vfat][channel]["cluster_address"] = cluster_address
     file_in.close()
 
     # Parsing Registers XML File
@@ -252,7 +283,7 @@ if __name__ == "__main__":
 
     # Running Sbit Noise Rate
     try:
-        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, step, float(args.time), s_bit_cluster_mapping)
+        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, sbit_list, step, float(args.time), s_bit_cluster_mapping)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
