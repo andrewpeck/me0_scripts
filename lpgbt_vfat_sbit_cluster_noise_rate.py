@@ -77,7 +77,10 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, sbit_list, step, runtime, s_bi
 
         # Looping over sbits
         for sbit in sbit_list:
-            print ("  VFAT: %02d, Sbit: %d"%(vfat, sbit))
+            if sbit=="all":
+                print ("  VFAT: %02d, Sbit: all"%(vfat))
+            else:
+                print ("  VFAT: %02d, Sbit: %d"%(vfat, sbit))
 
             channel_list = []
             if sbit == "all":
