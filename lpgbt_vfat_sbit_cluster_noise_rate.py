@@ -236,7 +236,8 @@ if __name__ == "__main__":
             print (Colors.YELLOW + "Only allowed options for use_channel_trimming: daq or sbit" + Colors.ENDC)
             sys.exit()
 
-    sbit_list = ["all"] + range(0,64)
+    sbit_list = range(0,64)
+    sbit_list = ["all"] + sbit_list
     s_bit_cluster_mapping = {}
     print ("")
     if not os.path.isdir("vfat_data/vfat_sbit_monitor_cluster_mapping_results"):
