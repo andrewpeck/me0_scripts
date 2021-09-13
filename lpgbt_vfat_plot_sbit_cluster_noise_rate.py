@@ -39,7 +39,8 @@ if __name__ == "__main__":
         time = float(line.split()[4])
         if vfat not in noise_result:
             noise_result[vfat] = {}
-        noise_result[vfat][sbit] = {}
+        if sbit not in noise_result[vfat]:
+            noise_result[vfat][sbit] = {}
         if fired == -9999:
             noise_result[vfat][sbit][thr] = 0
         else:
