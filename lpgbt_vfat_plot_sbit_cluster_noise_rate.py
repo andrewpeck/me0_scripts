@@ -18,6 +18,8 @@ if __name__ == "__main__":
     oh = plot_filename_prefix.split("_vfat")[0]
     file = open(args.filename)
 
+    plt.rcParams.update({'font.size': 22})
+
     try:
         os.makedirs(directoryName) # create directory for scurve noise rate results
     except FileExistsError: # skip if directory already exists
@@ -29,15 +31,19 @@ if __name__ == "__main__":
         if "vfat" in line:
             continue
         vfat = int(line.split()[0])
-        thr = int(line.split()[1])
-        fired = int(line.split()[2])
-        time = float(line.split()[3])
+        sbit = line.split()[1])
+        if sbit != "all":
+            sbit = int(sbit)
+        thr = int(line.split()[2])
+        fired = int(line.split()[3])
+        time = float(line.split()[4])
         if vfat not in noise_result:
             noise_result[vfat] = {}
+        noise_result[vfat][sbit] = {}
         if fired == -9999:
-            noise_result[vfat][thr] = 0
+            noise_result[vfat][sbit][thr] = 0
         else:
-            noise_result[vfat][thr] = fired
+            noise_result[vfat][sbit][thr] = fired
     file.close()
 
     numVfats = len(noise_result.keys())
