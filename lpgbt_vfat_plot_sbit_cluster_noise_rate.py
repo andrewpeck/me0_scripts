@@ -114,7 +114,14 @@ if __name__ == "__main__":
                 noise_rate_sbit.append(noise_result[vfat][sbit][thr]/time)
             ax2[int(sbit/8), sbit%8].set_xlabel("Threshold (DAC)")
             ax2[int(sbit/8), sbit%8].set_ylabel("SBit Rate (Hz)")
-            ax2[int(sbit/8), sbit%8].set_yscale("log")
+
+            y_all_zero = 0
+            for y in noise_rate_sbit:
+                if y!=0:
+                    y_all_zero = 1
+                    break
+            if not y_all_zero:
+                ax2[int(sbit/8), sbit%8].set_yscale("log")
             ax2[int(sbit/8), sbit%8].plot(threshold, noise_rate_sbit, "o", markersize=15)
             #leg = ax.legend(loc="center right", ncol=2)
             ax2[int(sbit/8), sbit%8].set_title("VFAT# %02d, S-Bit# %02d"%(vfat, sbit))
