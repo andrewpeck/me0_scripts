@@ -5,14 +5,12 @@ from matplotlib import cm
 import numpy as np
 import os, sys, glob
 import argparse
-import pandas as pd
 
 if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description="Plotting VFAT Sbit Noise Rate")
+    parser = argparse.ArgumentParser(description="Plotting VFAT Sbit Cluster Noise Rate")
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="Noise rate result filename")
-    parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use latest DAC scan results for converting threshold to fC")
     args = parser.parse_args()
 
     directoryName        = args.filename.split(".txt")[0]
@@ -33,7 +31,9 @@ if __name__ == "__main__":
         if "vfat" in line:
             continue
         vfat = int(line.split()[0])
-        sbit = int(line.split()[1])
+        sbit = line.split()[1]
+        if sbit != "all":
+            sbit = int(sbit)
         thr = int(line.split()[2])
         fired = int(line.split()[3])
         time = float(line.split()[4])
@@ -62,19 +62,12 @@ if __name__ == "__main__":
     vfatCnt0 = 0
     for vfat in noise_result:
         print ("Creating plots for VFAT %02d"%vfat)
-
         threshold = []
         noise_rate = []
 
-        for sbit in noise_result[vfat]:
-            for thr in noise_result[vfat][sbit]:
-                threshold.append(thr)
-                noise_rate.append(0)
-            break
-        for sbit in noise_result[vfat]:
-            for i in range(0,len(threshold)):
-                thr = threshold[i]
-                noise_rate[i] += noise_result[vfat][sbit][thr]/time
+        for thr in noise_result[vfat]["all"]:
+            threshold.append(thr)
+            noise_rate.append(noise_result[vfat]["all"][thr]/time)
 
         fig, ax = plt.subplots()
         ax.set_xlabel("Threshold (DAC)")
@@ -84,7 +77,7 @@ if __name__ == "__main__":
         #leg = ax.legend(loc="center right", ncol=2)
         ax.set_title("VFAT# %02d"%vfat)
         fig.tight_layout()
-        fig.savefig((directoryName+"/sbit_noise_rate_"+oh+"_VFAT%02d.pdf")%vfat)
+        fig.savefig((directoryName+"/sbit_cluster_noise_rate_"+oh+"_VFAT%02d.pdf")%vfat)
         plt.close(fig)
 
         if numVfats == 1:
@@ -114,12 +107,21 @@ if __name__ == "__main__":
 
         fig2, ax2 = plt.subplots(8, 8, figsize=(80,80))
         for sbit in noise_result[vfat]:
+            if sbit == "all":
+                continue
             noise_rate_sbit = []
             for thr in range(0,len(threshold)):
                 noise_rate_sbit.append(noise_result[vfat][sbit][thr]/time)
             ax2[int(sbit/8), sbit%8].set_xlabel("Threshold (DAC)")
             ax2[int(sbit/8), sbit%8].set_ylabel("SBit Rate (Hz)")
-            ax2[int(sbit/8), sbit%8].set_yscale("log")
+
+            y_not_all_zero = 0
+            for y in noise_rate_sbit:
+                if y!=0:
+                    y_not_all_zero = 1
+                    break
+            if y_not_all_zero:
+                ax2[int(sbit/8), sbit%8].set_yscale("log")
             ax2[int(sbit/8), sbit%8].plot(threshold, noise_rate_sbit, "o", markersize=15)
             #leg = ax.legend(loc="center right", ncol=2)
             ax2[int(sbit/8), sbit%8].set_title("VFAT# %02d, S-Bit# %02d"%(vfat, sbit))
@@ -130,7 +132,7 @@ if __name__ == "__main__":
         vfatCnt0+=1
 
     fig1.tight_layout()
-    fig1.savefig((directoryName+"/sbit_noise_rate_"+oh+".pdf"))
+    fig1.savefig((directoryName+"/sbit_cluster_noise_rate_"+oh+".pdf"))
     plt.close(fig1)
 
 

@@ -206,6 +206,7 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper_lis
 
         #write_backend_reg(vfat_hyst_en_node[vfat], 1)
 
+    print ("")
     for vfat in vfat_list:
         print("Unconfiguring VFAT %d" % (vfat))
         configureVfat(0, vfat, oh_select, 0)

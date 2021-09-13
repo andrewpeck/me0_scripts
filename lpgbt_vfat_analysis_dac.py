@@ -89,6 +89,10 @@ def main(inFile, calFile, directoryName, oh):
         elif numVfats <= 24:
             fig, ax = plt.subplots(4, 6, figsize=(60,40))
 
+        if DAC_reg == "CFG_THR_ARM_DAC":
+            thr_filename_out = directoryName + "/converted_values" + oh + "_" + DAC_reg + ".txt"
+            thr_pd = pd.DataFrame()
+
         for vfat in datareg.vfat.unique(): # loop over vfats
             print(Colors.GREEN + "\nWorking on VFAT: %s\n" % vfat+ Colors.ENDC)
             sel2 = datareg.vfat == vfat # select rows for the current vfat
@@ -108,6 +112,8 @@ def main(inFile, calFile, directoryName, oh):
             datavfat["value"] /= nominalDacScalingFactors[DAC_reg] # use scale factor
             datavfat["error"] /= nominalDacScalingFactors[DAC_reg]
             print("vfat data after transformation: {}".format(datavfat["value"]))
+            if DAC_reg == "CFG_THR_ARM_DAC":
+                thr_pd = thr_pd.append(datavfat)
             datavfat2 = datavfat
 
             # convert data to np arrays for plotting
@@ -171,6 +177,10 @@ def main(inFile, calFile, directoryName, oh):
             vfatCnt0 += 1
 
             file.write("%s;%i;%i\n" % (DAC_reg, vfat, nominal_ADC0))
+
+        if DAC_reg == "CFG_THR_ARM_DAC":
+            thr_pd.to_csv(thr_filename_out)
+
         fig.suptitle(DAC_reg, fontsize=32) # place DAC name for main title
         fig.subplots_adjust(top=0.88) # adjust main title
         fig.tight_layout()

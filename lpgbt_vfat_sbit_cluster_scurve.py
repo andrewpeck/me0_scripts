@@ -8,14 +8,14 @@ import glob
 import json
 from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel, setVfatchannelTrim
 
-def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, parallel, threshold, step, nl1a, l1a_bxgap, trim, s_bit_channel_mapping):
-    if not os.path.exists("vfat_data/vfat_sbit_scurve_results"):
-        os.makedirs("vfat_data/vfat_sbit_scurve_results")
+def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, parallel, threshold, step, nl1a, l1a_bxgap, trim, s_bit_cluster_mapping):
+    if not os.path.exists("vfat_data/vfat_sbit_cluster_scurve_results"):
+        os.makedirs("vfat_data/vfat_sbit_cluster_scurve_results")
     now = str(datetime.datetime.now())[:16]
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
-    foldername = "vfat_data/vfat_sbit_scurve_results/"
-    filename = foldername + "ME0_OH%d_vfat_sbit_scurve_"%(oh_select) + now + ".txt"
+    foldername = "vfat_data/vfat_sbit_cluster_scurve_results/"
+    filename = foldername + "ME0_OH%d_vfat_sbit_cluster_scurve_"%(oh_select) + now + ".txt"
     file_out = open(filename,"w+")
     file_out.write("vfat    channel    charge    fired    events\n")
 
@@ -96,12 +96,13 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
     calpulse_node = get_rwreg_node("BEFE.GEM_AMC.TTC.CMD_COUNTERS.CALPULSE")
     
     # Nodes for Sbit counters
-    vfat_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_VFAT_SBIT_ME0") # VFAT for reading S-bits
-    elink_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_ELINK_SBIT_ME0") # Node for selecting Elink to count
-    channel_sbit_select_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SEL_SBIT_ME0") # Node for selecting S-bit to count
-    elink_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SBIT0XE_COUNT_ME0") # S-bit counter for elink
-    channel_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.TEST_SBIT0XS_COUNT_ME0") # S-bit counter for specific channel
-    reset_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.CTRL.SBIT_TEST_RESET")  # To reset all S-bit counters
+    write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.TRIGGER.SBIT_MONITOR.OH_SELECT"), oh_select)
+    reset_sbit_monitor_node = get_rwreg_node("BEFE.GEM_AMC.TRIGGER.SBIT_MONITOR.RESET")  # To reset S-bit Monitor
+    sbit_monitor_nodes = []
+    cluster_count_nodes = []
+    for i in range(0,8):
+        sbit_monitor_nodes.append(get_rwreg_node("BEFE.GEM_AMC.TRIGGER.SBIT_MONITOR.CLUSTER%d"%i))
+        cluster_count_nodes.append(get_rwreg_node("BEFE.GEM_AMC.TRIGGER.OH0.CLUSTER_COUNT_%d_CNT"%i))
 
     dac_node = {}
     dac = "CFG_CAL_DAC"
@@ -130,15 +131,12 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
         # Looping over channels
         for channel in channel_list:
             print ("VFAT: %02d  Channel: %d"%(vfat, channel))
-            elink = int(channel/16)
 
-            if s_bit_channel_mapping[str(vfat)][str(elink)][str(channel)] == -9999:
-                print (Colors.YELLOW + "    Bad channel (from S-bit mapping) %02d on VFAT %02d"%(channel,vfat) + Colors.ENDC)
+            if s_bit_cluster_mapping[vfat][channel]["cluster_address"] == -9999:
+                print (Colors.YELLOW + "    Bad channel (from S-bit cluster mapping) %02d on VFAT %02d"%(channel,vfat) + Colors.ENDC)
                 continue
             if parallel is None:
                 enableVfatchannel(vfat, oh_select, channel, 0, 1) # unmask channel and enable calpulsing
-            write_backend_reg(vfat_sbit_select_node, vfat)
-            write_backend_reg(channel_sbit_select_node, s_bit_channel_mapping[str(vfat)][str(elink)][str(channel)])
 
             # Looping over charge
             for c in range(0,256,step):
@@ -151,17 +149,53 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
 
                 # Start the cyclic generator
                 global_reset()
-                write_backend_reg(reset_sbit_counter_node, 1)
+                write_backend_reg(reset_sbit_monitor_node, 1)
                 write_backend_reg(ttc_cyclic_start_node, 1)
                 cyclic_running = 1
+                t0 = time()
                 while (cyclic_running):
                     cyclic_running = read_backend_reg(cyclic_running_node)
                 # Stop the cyclic generator
                 write_backend_reg(ttc_reset_node, 1)
+                #print ("  Time taken for L1A loop with %d L1As and %d BX gap = %.4f us"%(nl1a, l1a_bxgap, (time()-t0)*1e6))
                 calpulse_counter = read_backend_reg(calpulse_node)
 
+                cluster_count = 0
+                multiple_cluster = 0
+                incorrect_cluster = 0
+                large_cluster = 0
+                for i in range(0,8):
+                    cluster_count_i = read_backend_reg(cluster_count_nodes[i])
+                    if i not in [0,1] and cluster_count_i != 0:
+                        multiple_cluster = 1
+                        break
+                    if i==1:
+                        cluster_count = cluster_count_i
+                    sbit_monitor_value = read_backend_reg(sbit_monitor_nodes[i])
+                    sbit_cluster_address = sbit_monitor_value & 0x7ff
+                    sbit_cluster_size = ((sbit_monitor_value >> 11) & 0x7) + 1
+                    if i!=0 and sbit_cluster_address!=0x7ff:
+                        multiple_cluster = 1
+                        break
+                    if i==0:
+                        if sbit_cluster_size>1:
+                            large_cluster = 1
+                            break
+                        if sbit_cluster_address!=0x7ff and sbit_cluster_address != s_bit_cluster_mapping[vfat][channel]["cluster_address"]:
+                            incorrect_cluster = 1
+                            break
+                if multiple_cluster:
+                    print (Colors.YELLOW + "  Multiple clusters detected for CAL_DAC = %d"%c + Colors.ENDC)
+                    continue
+                if large_cluster:
+                    print (Colors.YELLOW + "  Cluster size larger than 1 for CAL_DAC = %d"%c + Colors.ENDC)
+                    continue
+                if incorrect_cluster:
+                    print (Colors.YELLOW + "  Incorrect cluster detected for CAL_DAC = %d"%c + Colors.ENDC)
+                    continue
+
                 sbit_data[vfat][channel][charge]["events"] = calpulse_counter
-                sbit_data[vfat][channel][charge]["fired"] = read_backend_reg(channel_sbit_counter_node)
+                sbit_data[vfat][channel][charge]["fired"] = cluster_count
             # End of charge loop
             if parallel is None:
                 enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channel and disable calpulsing
@@ -194,7 +228,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, channel_list, set_cal_mode, pa
 if __name__ == "__main__":
 
     # Parsing arguments
-    parser = argparse.ArgumentParser(description="LpGBT VFAT S-Bit SCurve")
+    parser = argparse.ArgumentParser(description="LpGBT VFAT S-Bit SCurve using Clusters")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
@@ -225,7 +259,7 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Only Backend or dryrun supported" + Colors.ENDC)
         sys.exit()
     elif args.system == "dryrun":
-        print ("Dry Run - not actually running vfat bert")
+        print ("Dry Run - not actually running vfat scurve")
     else:
         print (Colors.YELLOW + "Only valid options: backend, dryrun" + Colors.ENDC)
         sys.exit()
@@ -298,21 +332,39 @@ if __name__ == "__main__":
     l1a_timegap = l1a_bxgap * 25 * 0.001 # in microseconds
     print ("Gap between consecutive L1A or CalPulses = %d BX = %.2f us" %(l1a_bxgap, l1a_timegap))
 
-    s_bit_channel_mapping = {}
+    s_bit_cluster_mapping = {}
     print ("")
-    if not os.path.isdir("vfat_data/vfat_sbit_mapping_results"):
-        print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
+    if not os.path.isdir("vfat_data/vfat_sbit_monitor_cluster_mapping_results"):
+        print (Colors.YELLOW + "Run the S-bit cluster mapping first" + Colors.ENDC)
         sys.exit()
-    list_of_files = glob.glob("vfat_data/vfat_sbit_mapping_results/*.py")
+    list_of_files = glob.glob("vfat_data/vfat_sbit_monitor_cluster_mapping_results/*.txt")
     if len(list_of_files)==0:
-        print (Colors.YELLOW + "Run the S-bit mapping first" + Colors.ENDC)
+        print (Colors.YELLOW + "Run the S-bit cluster mapping first" + Colors.ENDC)
         sys.exit()
     elif len(list_of_files)>1:
-        print ("Mutliple S-bit mapping results found, using latest file")
+        print ("Mutliple S-bit cluster mapping results found, using latest file")
     latest_file = max(list_of_files, key=os.path.getctime)
-    print ("Using S-bit mapping file: %s\n"%(latest_file.split("vfat_data/vfat_sbit_mapping_results/")[1]))
-    with open(latest_file) as input_file:
-        s_bit_channel_mapping = json.load(input_file)   
+    print ("Using S-bit cluster mapping file: %s\n"%(latest_file.split("vfat_data/vfat_sbit_monitor_cluster_mapping_results/")[1]))
+    file_in = open(latest_file)
+    for line in file_in.readlines():
+        if "VFAT" in line:
+            continue
+        if len(line.split())==0:
+            continue
+        vfat = int(line.split()[0])
+        channel = int(line.split()[1])
+        sbit = int(line.split()[2])
+        cluster_count = line.split()[3]
+        cluster_size = int(line.split()[4].split(",")[0])
+        cluster_address = int(line.split()[4].split(",")[1])
+        if cluster_address == 2047:
+            cluster_address = -9999
+        if vfat not in s_bit_cluster_mapping:
+            s_bit_cluster_mapping[vfat] = {}
+        s_bit_cluster_mapping[vfat][channel] = {}
+        s_bit_cluster_mapping[vfat][channel]["sbit"] = sbit
+        s_bit_cluster_mapping[vfat][channel]["cluster_address"] = cluster_address
+    file_in.close()
 
     if args.trim not in ["nominal", "up", "down"]:
         print (Colors.YELLOW + "Trim option can only be: nominal, up, down" + Colors.ENDC)
@@ -335,7 +387,7 @@ if __name__ == "__main__":
 
     # Running Sbit SCurve
     try:
-        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, channel_list, cal_mode, args.parallel, threshold, step, nl1a, l1a_bxgap, args.trim, s_bit_channel_mapping)
+        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, channel_list, cal_mode, args.parallel, threshold, step, nl1a, l1a_bxgap, args.trim, s_bit_cluster_mapping)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
