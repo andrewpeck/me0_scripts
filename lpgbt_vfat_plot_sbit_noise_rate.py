@@ -21,6 +21,7 @@ if __name__ == "__main__":
     file = open(args.filename)
 
     plt.rcParams.update({'font.size': 22})
+    plt.grid()
 
     try:
         os.makedirs(directoryName) # create directory for scurve noise rate results
@@ -76,41 +77,30 @@ if __name__ == "__main__":
                 thr = threshold[i]
                 noise_rate[i] += noise_result[vfat][sbit][thr]/time
 
-        fig, ax = plt.subplots()
-        ax.set_xlabel("Threshold (DAC)")
-        ax.set_ylabel("SBit Rate (Hz)")
-        ax.set_yscale("log")
-        ax.plot(threshold, noise_rate, "o", markersize=15)
-        #leg = ax.legend(loc="center right", ncol=2)
-        ax.set_title("VFAT# %02d"%vfat)
-        fig.tight_layout()
-        fig.savefig((directoryName+"/sbit_noise_rate_"+oh+"_VFAT%02d.pdf")%vfat)
-        plt.close(fig)
-
         if numVfats == 1:
             ax1.set_xlabel("Threshold (DAC)")
             ax1.set_ylabel("SBit Rate (Hz)")
             ax1.set_yscale("log")
             ax1.set_title("VFAT# %02d"%vfat)
-            ax1.plot(threshold, noise_rate, "o", markersize=15)
+            ax1.plot(threshold, noise_rate, "o", markersize=12)
         elif numVfats <= 3:
             ax1[vfatCnt0].set_xlabel("Threshold (DAC)")
             ax1[vfatCnt0].set_ylabel("SBit Rate (Hz)")
             ax1[vfatCnt0].set_yscale("log")
             ax1[vfatCnt0].set_title("VFAT# %02d"%vfat)
-            ax1[vfatCnt0].plot(threshold, noise_rate, "o", markersize=15)
+            ax1[vfatCnt0].plot(threshold, noise_rate, "o", markersize=12)
         elif numVfats <= 6:
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_xlabel("Threshold (DAC)")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("SBit Rate (Hz)")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_yscale("log")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT# %02d"%vfat)
-            ax1[int(vfatCnt0/3), vfatCnt0%3].plot(threshold, noise_rate, "o", markersize=15)
+            ax1[int(vfatCnt0/3), vfatCnt0%3].plot(threshold, noise_rate, "o", markersize=12)
         else:
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_xlabel("Threshold (DAC)")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("SBit Rate (Hz)")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_yscale("log")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT# %02d"%vfat)
-            ax1[int(vfatCnt0/6), vfatCnt0%6].plot(threshold, noise_rate, "o", markersize=15)
+            ax1[int(vfatCnt0/6), vfatCnt0%6].plot(threshold, noise_rate, "o", markersize=12)
 
         fig2, ax2 = plt.subplots(8, 8, figsize=(80,80))
         for sbit in noise_result[vfat]:
@@ -120,7 +110,7 @@ if __name__ == "__main__":
             ax2[int(sbit/8), sbit%8].set_xlabel("Threshold (DAC)")
             ax2[int(sbit/8), sbit%8].set_ylabel("SBit Rate (Hz)")
             ax2[int(sbit/8), sbit%8].set_yscale("log")
-            ax2[int(sbit/8), sbit%8].plot(threshold, noise_rate_sbit, "o", markersize=15)
+            ax2[int(sbit/8), sbit%8].plot(threshold, noise_rate_sbit, "o", markersize=12)
             #leg = ax.legend(loc="center right", ncol=2)
             ax2[int(sbit/8), sbit%8].set_title("VFAT# %02d, S-Bit# %02d"%(vfat, sbit))
         fig2.tight_layout()
