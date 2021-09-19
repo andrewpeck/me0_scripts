@@ -19,7 +19,6 @@ if __name__ == "__main__":
     file = open(args.filename)
 
     plt.rcParams.update({'font.size': 22})
-    plt.grid()
 
     try:
         os.makedirs(directoryName) # create directory for scurve noise rate results
@@ -75,24 +74,28 @@ if __name__ == "__main__":
             ax1.set_ylabel("SBit Rate (Hz)")
             ax1.set_yscale("log")
             ax1.set_title("VFAT# %02d"%vfat)
+            ax1.grid()
             ax1.plot(threshold, noise_rate, "o", markersize=12)
         elif numVfats <= 3:
             ax1[vfatCnt0].set_xlabel("Threshold (DAC)")
             ax1[vfatCnt0].set_ylabel("SBit Rate (Hz)")
             ax1[vfatCnt0].set_yscale("log")
             ax1[vfatCnt0].set_title("VFAT# %02d"%vfat)
+            ax1[vfatCnt0].grid()
             ax1[vfatCnt0].plot(threshold, noise_rate, "o", markersize=12)
         elif numVfats <= 6:
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_xlabel("Threshold (DAC)")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("SBit Rate (Hz)")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_yscale("log")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT# %02d"%vfat)
+            ax1[int(vfatCnt0/3), vfatCnt0%3].grid()
             ax1[int(vfatCnt0/3), vfatCnt0%3].plot(threshold, noise_rate, "o", markersize=12)
         else:
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_xlabel("Threshold (DAC)")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("SBit Rate (Hz)")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_yscale("log")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT# %02d"%vfat)
+            ax1[int(vfatCnt0/6), vfatCnt0%6].grid()
             ax1[int(vfatCnt0/6), vfatCnt0%6].plot(threshold, noise_rate, "o", markersize=12)
 
         fig2, ax2 = plt.subplots(8, 8, figsize=(80,80))
@@ -104,6 +107,7 @@ if __name__ == "__main__":
                 noise_rate_sbit.append(noise_result[vfat][sbit][thr]/time)
             ax2[int(sbit/8), sbit%8].set_xlabel("Threshold (DAC)")
             ax2[int(sbit/8), sbit%8].set_ylabel("SBit Rate (Hz)")
+            ax2[int(sbit/8), sbit%8].grid()
 
             y_not_all_zero = 0
             for y in noise_rate_sbit:
