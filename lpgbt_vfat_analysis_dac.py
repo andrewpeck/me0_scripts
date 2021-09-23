@@ -11,6 +11,9 @@ plt.rcParams.update({"font.size": 22}) # Increase font size
 def poly5(x, a, b, c, d, e, f):
     return (a * np.power(x,5)) + (b * np.power(x,4)) + (c * np.power(x,3)) + (d * np.power(x,2)) + (e * x) + f
 
+def linear(x, m, b):
+    return x*m + b
+
 def determine_nom(data, nominal_ADC0):
     val1=abs(data["value"]-nominal_ADC0).idxmin()
     return (data.iloc[val1].DAC_point)
@@ -30,7 +33,8 @@ nominalDacValues = {
         "CFG_HYST":(100.0/1000.0,"uA"), # changed to uA from nA
         "CFG_THR_ARM_DAC":(64,"mV"),
         "CFG_THR_ZCC_DAC":(5.5,"mV"),
-        "CFG_CAL_DAC_V":(0,"mV"), # there is no nominal value
+        "CFG_CAL_DAC_V_HIGH":(0,"mV"), # there is no nominal value
+        "CFG_CAL_DAC_V_LOW":(0,"mV"), # there is no nominal value
         "CFG_BIAS_PRE_VREF":(430,"mV"),
         "CFG_VREF_ADC":(1.0,"V")
 }
@@ -51,7 +55,8 @@ nominalDacScalingFactors = {
         "CFG_HYST":5,
         "CFG_THR_ARM_DAC":1,
         "CFG_THR_ZCC_DAC":4,
-        "CFG_CAL_DAC_V":1, #if voltageStep this is 1
+        "CFG_CAL_DAC_V_HIGH":1, #if voltageStep this is 1
+        "CFG_CAL_DAC_V_LOW":1, #if voltageStep this is 1
         "CFG_BIAS_PRE_VREF":1,
         "CFG_ADC_VREF": 1,
 }
@@ -68,6 +73,33 @@ def main(inFile, calFile, directoryName, oh):
     dacData.drop(indices, inplace=True)
 
     nominal_iref = 10*0.5 #the nominal reference current is 10 uA and it has a scaling factor of 0.5
+
+    cal_dac_derive = 0
+    vfat_list = datareg.vfat.unique()
+    vfat_cal_dac = {}
+    if "CFG_CAL_DAC_V_HIGH" in dacData.DAC_reg.unique() and "CFG_CAL_DAC_V_LOW" in dacData.DAC_reg.unique():
+        print ("Deriving slope and intercept for CAL DAC")
+        cal_dac_derive = 1
+        caldacFileName = directoryName + "/" + oh + "_vfat_calib_info_calDac.txt"
+        caldacfile = open(caldacFileName, "w")
+        caldacfile.write("vfat;vfat3_ser_num;cal_dacm;cal_dacb\n")
+        vfatid_filename = "vfat_data/"+oh+"_vfatID.txt"
+        vfat_id_list = {}
+        if os.path.isfile(vfatid_filename):
+            vfatid_file = open(vfatid_filename)
+            for line in vfatid_file.readlines():
+                vfat_id_list[int(line.split()[0])] = int(line.split()[1])
+            vfatid_file.close()
+        for vfat in vfat_list:
+            vfat_cal_dac[vfat] = {}
+            if vfat in vfat_id_list:
+                vfat_cal_dac[vfat]["vfat_serial_num"] = vfat_id_list[vfat]
+            else:
+                vfat_cal_dac[vfat]["vfat_serial_num"] = 0
+            vfat_cal_dac[vfat]["slope_high"] = 0
+            vfat_cal_dac[vfat]["slope_low"] = 0
+            vfat_cal_dac[vfat]["intercept_high"] = 0
+            vfat_cal_dac[vfat]["intercept_low"] = 0
 
     for DAC_reg in dacData.DAC_reg.unique(): # loop over dacs
         startTime = time()
@@ -146,6 +178,18 @@ def main(inFile, calFile, directoryName, oh):
             if nominal_ADC0 > max(datavfat.DAC_point):
                 nominal_ADC0 = max(datavfat.DAC_point)
 
+            # Only for CAL_DAC
+            if cal_dac_derive and (DAC_reg=="CFG_CAL_DAC_V_HIGH" or DAC_reg=="CFG_CAL_DAC_V_LOW"):
+                cal_dac_data_x = ydata
+                cal_dac_data_y = xdata
+                fitData_cal_dac = np.polyfit(cal_dac_data_x, cal_dac_data_y, 1)
+                if DAC_reg=="CFG_CAL_DAC_V_HIGH":
+                    vfat_cal_dac[vfat]["slope_high"] = fitData_cal_dac[0]
+                    vfat_cal_dac[vfat]["intercept_high"] = fitData_cal_dac[1]
+                elif DAC_reg=="CFG_CAL_DAC_V_LOW":
+                    vfat_cal_dac[vfat]["slope_low"] = fitData_cal_dac[0]
+                    vfat_cal_dac[vfat]["intercept_low"] = fitData_cal_dac[1]
+
             xlabel_plot = ""
             if nominalDacValues[DAC_reg][1] == "uA":
                 xlabel_plot = "ADC0 ($\mu$A)"
@@ -180,6 +224,13 @@ def main(inFile, calFile, directoryName, oh):
 
         if DAC_reg == "CFG_THR_ARM_DAC":
             thr_pd.to_csv(thr_filename_out)
+
+        if cal_dac_derive:
+            for vfat in vfat_list:
+                slope = vfat_cal_dac[vfat]["slope_high"]
+                intercept = vfat_cal_dac[vfat]["intercept_high"] - vfat_cal_dac[vfat]["intercept_low"]
+                caldacfile.write("%d;%d;%.4f;%.4f\n"%(vfat, vfat_cal_dac[vfat]["vfat_serial_num"], slope, intercept))
+            caldacfile.close()
 
         fig.suptitle(DAC_reg, fontsize=32) # place DAC name for main title
         fig.subplots_adjust(top=0.88) # adjust main title

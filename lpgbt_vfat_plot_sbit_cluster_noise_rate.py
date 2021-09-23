@@ -50,53 +50,93 @@ if __name__ == "__main__":
     numVfats = len(noise_result.keys())
     if numVfats <= 3:
         fig1, ax1 = plt.subplots(1, numVfats, figsize=(numVfats*10,10))
+        fig3, ax3 = plt.subplots(1, numVfats, figsize=(numVfats*10,10))
     elif numVfats <= 6:
         fig1, ax1 = plt.subplots(2, 3, figsize=(30,20))
+        fig3, ax3 = plt.subplots(2, 3, figsize=(30,20))
     elif numVfats <= 12:
         fig1, ax1 = plt.subplots(2, 6, figsize=(60,20))
+        fig3, ax3 = plt.subplots(2, 6, figsize=(60,20))
     elif numVfats <= 18:
         fig1, ax1 = plt.subplots(3, 6, figsize=(60,30))
+        fig3, ax3 = plt.subplots(3, 6, figsize=(60,30))
     elif numVfats <= 24:
         fig1, ax1 = plt.subplots(4, 6, figsize=(60,40))
+        fig3, ax3 = plt.subplots(4, 6, figsize=(60,40))
 
     vfatCnt0 = 0
     for vfat in noise_result:
         print ("Creating plots for VFAT %02d"%vfat)
         threshold = []
         noise_rate = []
+        noise_rate_avg = []
+        n_sbits = 0
 
         for thr in noise_result[vfat]["all"]:
             threshold.append(thr)
             noise_rate.append(noise_result[vfat]["all"][thr]/time)
+            noise_rate_avg.append(0)
+        for sbit in noise_result[vfat]:
+            if sbit == "all":
+                continue
+            nsbits += 1
+            for i in range(0,len(threshold)):
+                thr = threshold[i]
+                noise_rate_avg[i] += noise_result[vfat][sbit][thr]/time
+        noise_rate_avg = [noise/nsbits for noise in noise_rate_avg]
 
         if numVfats == 1:
             ax1.set_xlabel("Threshold (DAC)")
             ax1.set_ylabel("SBit Rate (Hz)")
             ax1.set_yscale("log")
-            ax1.set_title("VFAT# %02d"%vfat)
+            ax1.set_title("Total S-Bit Rate for VFAT# %02d"%vfat)
             ax1.grid()
             ax1.plot(threshold, noise_rate, "o", markersize=12)
+            ax3.set_xlabel("Threshold (DAC)")
+            ax3.set_ylabel("SBit Rate (Hz)")
+            ax3.set_yscale("log")
+            ax3.set_title("Average S-Bit Rate for VFAT# %02d"%vfat)
+            ax3.grid()
+            ax3.plot(threshold, noise_rate_avg, "o", markersize=12)
         elif numVfats <= 3:
             ax1[vfatCnt0].set_xlabel("Threshold (DAC)")
             ax1[vfatCnt0].set_ylabel("SBit Rate (Hz)")
             ax1[vfatCnt0].set_yscale("log")
-            ax1[vfatCnt0].set_title("VFAT# %02d"%vfat)
+            ax1[vfatCnt0].set_title("Total S-Bit Rate for VFAT# %02d"%vfat)
             ax1[vfatCnt0].grid()
             ax1[vfatCnt0].plot(threshold, noise_rate, "o", markersize=12)
+            ax3[vfatCnt0].set_xlabel("Threshold (DAC)")
+            ax3[vfatCnt0].set_ylabel("SBit Rate (Hz)")
+            ax3[vfatCnt0].set_yscale("log")
+            ax3[vfatCnt0].set_title("Average S-Bit Rate for VFAT# %02d"%vfat)
+            ax3[vfatCnt0].grid()
+            ax3[vfatCnt0].plot(threshold, noise_rate_avg, "o", markersize=12)
         elif numVfats <= 6:
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_xlabel("Threshold (DAC)")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("SBit Rate (Hz)")
             ax1[int(vfatCnt0/3), vfatCnt0%3].set_yscale("log")
-            ax1[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT# %02d"%vfat)
+            ax1[int(vfatCnt0/3), vfatCnt0%3].set_title("Total S-Bit Rate for VFAT# %02d"%vfat)
             ax1[int(vfatCnt0/3), vfatCnt0%3].grid()
             ax1[int(vfatCnt0/3), vfatCnt0%3].plot(threshold, noise_rate, "o", markersize=12)
+            ax3[int(vfatCnt0/3), vfatCnt0%3].set_xlabel("Threshold (DAC)")
+            ax3[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("SBit Rate (Hz)")
+            ax3[int(vfatCnt0/3), vfatCnt0%3].set_yscale("log")
+            ax3[int(vfatCnt0/3), vfatCnt0%3].set_title("Average S-Bit Rate for VFAT# %02d"%vfat)
+            ax3[int(vfatCnt0/3), vfatCnt0%3].grid()
+            ax3[int(vfatCnt0/3), vfatCnt0%3].plot(threshold, noise_rate_avg, "o", markersize=12)
         else:
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_xlabel("Threshold (DAC)")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("SBit Rate (Hz)")
             ax1[int(vfatCnt0/6), vfatCnt0%6].set_yscale("log")
-            ax1[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT# %02d"%vfat)
+            ax1[int(vfatCnt0/6), vfatCnt0%6].set_title("Total S-Bit Rate for VFAT# %02d"%vfat)
             ax1[int(vfatCnt0/6), vfatCnt0%6].grid()
             ax1[int(vfatCnt0/6), vfatCnt0%6].plot(threshold, noise_rate, "o", markersize=12)
+            ax3[int(vfatCnt0/6), vfatCnt0%6].set_xlabel("Threshold (DAC)")
+            ax3[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("SBit Rate (Hz)")
+            ax3[int(vfatCnt0/6), vfatCnt0%6].set_yscale("log")
+            ax3[int(vfatCnt0/6), vfatCnt0%6].set_title("Average S-Bit Rate for VFAT# %02d"%vfat)
+            ax3[int(vfatCnt0/6), vfatCnt0%6].grid()
+            ax3[int(vfatCnt0/6), vfatCnt0%6].plot(threshold, noise_rate_avg, "o", markersize=12)
 
         fig2, ax2 = plt.subplots(8, 8, figsize=(80,80))
         for sbit in noise_result[vfat]:
@@ -126,8 +166,11 @@ if __name__ == "__main__":
         vfatCnt0+=1
 
     fig1.tight_layout()
-    fig1.savefig((directoryName+"/sbit_cluster_noise_rate_"+oh+".pdf"))
+    fig1.savefig((directoryName+"/sbit_cluster_noise_rate_total_"+oh+".pdf"))
     plt.close(fig1)
+    fig3.tight_layout()
+    fig3.savefig((directoryName+"/sbit_cluster_noise_rate_average_"+oh+".pdf"))
+    plt.close(fig3)
 
 
 
