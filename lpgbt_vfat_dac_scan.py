@@ -22,7 +22,8 @@ REGISTER_DAC_MONITOR_MAP = {
     #"Imon CFD Ireflocal": 13, # ??
     #"Imon SLVS Ibias": 16, # ??
     #"Vmon BGR": 32, # ??
-    "CFG_CAL_DAC_V": 33,
+    "CFG_CAL_DAC_V_HIGH": 33,
+    "CFG_CAL_DAC_V_LOW": 33,
     "CFG_BIAS_PRE_VREF": 34,
     "CFG_THR_ARM_DAC": 35,
     "CFG_THR_ZCC_DAC": 36,
@@ -48,7 +49,8 @@ MAX_DAC_SIZE = {
      "CFG_HYST": 63,
      "CFG_THR_ARM_DAC": 255,
      "CFG_THR_ZCC_DAC": 255,
-     "CFG_CAL_DAC_V": 255,
+     "CFG_CAL_DAC_V_HIGH": 255,
+     "CFG_CAL_DAC_V_LOW": 255,
      "CFG_BIAS_PRE_VREF": 255,
      "CFG_VREF_ADC": 3 
 }
@@ -83,6 +85,7 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper_lis
     vfat_hyst_en_node = {}
     vfat_cfg_run_node = {}
     vfat_cfg_calmode_node = {}
+    vfat_cfg_calselpol_node = {}
     adc_monitor_select_node = {}
     adc0_cached_node = {}
     adc0_update_node = {}
@@ -109,12 +112,13 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper_lis
 
         dac_node[vfat] = {}
         for dac in dac_list:
-            if dac in ["CFG_CAL_DAC_I", "CFG_CAL_DAC_V"]:
+            if dac in ["CFG_CAL_DAC_I", "CFG_CAL_DAC_V_HIGH", "CFG_CAL_DAC_V_LOW"]:
                 dac = "CFG_CAL_DAC"
             dac_node[vfat][dac] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (oh_select, vfat, dac))
         vfat_hyst_en_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_EN_HYST" % (oh_select, vfat))
         vfat_cfg_run_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN" % (oh_select, vfat))
         vfat_cfg_calmode_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_CAL_MODE" % (oh_select, vfat))
+        vfat_cfg_calselpol_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_CAL_SEL_POL" % (oh_select, vfat))
         adc_monitor_select_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_MONITOR_SELECT" % (oh_select, vfat))
         adc0_cached_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC0_CACHED" % (oh_select, vfat))
         adc0_update_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.ADC0_UPDATE" % (oh_select, vfat))
@@ -147,10 +151,18 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper_lis
 
             # Setup DAC Monitor
             write_backend_reg(adc_monitor_select_node[vfat], REGISTER_DAC_MONITOR_MAP[dac])
+
+            calmode_initial = read_backend_reg(vfat_cfg_calmode_node[vfat])
+            calselpol_initial = read_backend_reg(vfat_cfg_calselpol_node[vfat])
             if dac=="CFG_CAL_DAC_I":
                 write_backend_reg(vfat_cfg_calmode_node[vfat], 0x2)
-            else:
+                write_backend_reg(vfat_cfg_calselpol_node[vfat], 0x0)
+            elif dac in ["CFG_CAL_DAC_V_HIGH", "CFG_CAL_DAC_V_LOW"]:
                 write_backend_reg(vfat_cfg_calmode_node[vfat], 0x1)
+                if dac=="CFG_CAL_DAC_V_HIGH":
+                    write_backend_reg(vfat_cfg_calselpol_node[vfat], 0x0)
+                elif dac=="CFG_CAL_DAC_V_LOW":
+                    write_backend_reg(vfat_cfg_calselpol_node[vfat], 0x1)
 
             # Set VFAT to Run Mode
             #write_backend_reg(vfat_cfg_run_node[vfat], 0x1)
@@ -158,14 +170,11 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper_lis
             # Initial value of DAC
             dac_initial = read_backend_reg(dac_node[vfat][dac])
 
-            pedestal = 0
             write_backend_reg(dac_node[vfat][dac], 0x0)
             for ii in range(0, niter):
                 if adc_ref == "internal": # use ADC0
                     adc_update_read = read_backend_reg(adc0_update_node[vfat]) # read/write to this register triggers a cache update
                     sleep(20e-6) # sleep for 20 us
-                    pedestal += read_backend_reg(adc0_cached_node[vfat])
-            pedestal = pedestal / niter
             
             # Looping over DAC values
             for reg in range(lower, upper + 1, step):
@@ -180,7 +189,6 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper_lis
                         adc_update_read = read_backend_reg(adc0_update_node[vfat]) # read/write to this register triggers a cache update
                         sleep(20e-6) # sleep for 20 us
                         adc_value.append(read_backend_reg(adc0_cached_node[vfat]))
-                        #adc_value.append(read_backend_reg(adc0_cached_node[vfat]) - pedestal)
                     elif adc_ref == "external": # use ADC1
                         adc_update_read = read_backend_reg(adc1_update_node[vfat]) # read/write to this register triggers a cache update
                         sleep(20e-6) # sleep for 20 us
@@ -194,6 +202,8 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper_lis
 
             # Set back DAC to initial value
             write_backend_reg(dac_node[vfat][dac], dac_initial)
+            write_backend_reg(vfat_cfg_calmode_node[vfat], calmode_initial)
+            write_backend_reg(vfat_cfg_calselpol_node[vfat], calselpol_initial)
 
             # Reset DAC Monitor
             write_backend_reg(adc_monitor_select_node[vfat], 0)

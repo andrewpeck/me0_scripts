@@ -102,7 +102,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, sbit_list, step, runtime, s_bi
                 write_backend_reg(dac_node[vfat], thr)
                 sleep(1e-3)
 
-                # Count hits in elink in given time
+                # Count hits in sbit in given time
                 write_backend_reg(reset_sbit_counter_node, 1)
                 sleep(runtime)
                 sbit_data[vfat][sbit][thr]["fired"] = read_backend_reg(channel_sbit_counter_node)
