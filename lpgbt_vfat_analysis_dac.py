@@ -183,13 +183,13 @@ def main(inFile, calFile, directoryName, oh):
             if cal_dac_derive and (DAC_reg=="CFG_CAL_DAC_V_HIGH" or DAC_reg=="CFG_CAL_DAC_V_LOW"):
                 cal_dac_data_x = ydata
                 cal_dac_data_y = xdata
-                fitData_cal_dac = np.polyfit(cal_dac_data_x, cal_dac_data_y, 1)
                 if DAC_reg=="CFG_CAL_DAC_V_HIGH":
+                    fitData_cal_dac = np.polyfit(cal_dac_data_x, cal_dac_data_y, 1)
                     vfat_cal_dac[vfat]["slope_high"] = fitData_cal_dac[0]
                     vfat_cal_dac[vfat]["intercept_high"] = fitData_cal_dac[1]
                 elif DAC_reg=="CFG_CAL_DAC_V_LOW":
-                    vfat_cal_dac[vfat]["slope_low"] = fitData_cal_dac[0]
-                    vfat_cal_dac[vfat]["intercept_low"] = fitData_cal_dac[1]
+                    vfat_cal_dac[vfat]["slope_low"] = 0
+                    vfat_cal_dac[vfat]["intercept_low"] = np.mean(cal_dac_data_y)
 
             xlabel_plot = ""
             if nominalDacValues[DAC_reg][1] == "uA":
