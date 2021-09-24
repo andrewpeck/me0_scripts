@@ -132,8 +132,8 @@ def main(inFile, calFile, directoryName, oh):
             datavfat = datareg[sel2].reset_index() # reset starting index of sliced dataframe to 0
             slopeTemp = np.array(calData.loc[calData["vfat"] == vfat].slope) # get slope for VFAT
             interTemp = np.array(calData.loc[calData["vfat"] == vfat].intercept) # get intercept for VFAT
-            print("VFAT: {}, slope: {}, intercept: {}".format(vfat, slopeTemp, interTemp))
-            print("vfat data: {}".format(datavfat["value"]))
+            #print("VFAT: {}, slope: {}, intercept: {}".format(vfat, slopeTemp, interTemp))
+            #print("vfat data: {}".format(datavfat["value"]))
 
             datavfat["value"] = (datavfat["value"] * slopeTemp) + interTemp # transform data from DAC to mV
             datavfat["error"] = (datavfat["error"] * slopeTemp)
@@ -144,7 +144,7 @@ def main(inFile, calFile, directoryName, oh):
                     datavfat["value"] -= nominal_iref
             datavfat["value"] /= nominalDacScalingFactors[DAC_reg] # use scale factor
             datavfat["error"] /= nominalDacScalingFactors[DAC_reg]
-            print("vfat data after transformation: {}".format(datavfat["value"]))
+            #print("vfat data after transformation: {}".format(datavfat["value"]))
             if DAC_reg == "CFG_THR_ARM_DAC":
                 thr_pd = thr_pd.append(datavfat)
             datavfat2 = datavfat
