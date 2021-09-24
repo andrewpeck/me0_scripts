@@ -112,9 +112,10 @@ def lpgbt_vfat_dac_scan(system, oh_select, vfat_list, dac_list, lower, upper_lis
 
         dac_node[vfat] = {}
         for dac in dac_list:
+            dac_actual = dac
             if dac in ["CFG_CAL_DAC_I", "CFG_CAL_DAC_V_HIGH", "CFG_CAL_DAC_V_LOW"]:
-                dac = "CFG_CAL_DAC"
-            dac_node[vfat][dac] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (oh_select, vfat, dac))
+                dac_actual = "CFG_CAL_DAC"
+            dac_node[vfat][dac] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.%s" % (oh_select, vfat, dac_actual))
         vfat_hyst_en_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_EN_HYST" % (oh_select, vfat))
         vfat_cfg_run_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_RUN" % (oh_select, vfat))
         vfat_cfg_calmode_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.CFG_CAL_MODE" % (oh_select, vfat))

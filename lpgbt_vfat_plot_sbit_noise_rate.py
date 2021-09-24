@@ -12,7 +12,6 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="Plotting VFAT Sbit Noise Rate")
     parser.add_argument("-f", "--filename", action="store", dest="filename", help="Noise rate result filename")
-    parser.add_argument("-r", "--use_dac_scan_results", action="store_true", dest="use_dac_scan_results", help="use_dac_scan_results = to use latest DAC scan results for converting threshold to fC")
     args = parser.parse_args()
 
     directoryName        = args.filename.split(".txt")[0]
@@ -78,11 +77,11 @@ if __name__ == "__main__":
                 noise_rate.append(0)
             break
         for sbit in noise_result[vfat]:
-            nsbits += 1
+            n_sbits += 1
             for i in range(0,len(threshold)):
                 thr = threshold[i]
                 noise_rate[i] += noise_result[vfat][sbit][thr]/time
-        noise_rate_avg = [noise/nsbits for noise in noise_rate]
+        noise_rate_avg = [noise/n_sbits for noise in noise_rate]
 
         if numVfats == 1:
             ax1.set_xlabel("Threshold (DAC)")
