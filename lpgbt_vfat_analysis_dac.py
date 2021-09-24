@@ -226,14 +226,6 @@ def main(inFile, calFile, directoryName, oh):
         if DAC_reg == "CFG_THR_ARM_DAC":
             thr_pd.to_csv(thr_filename_out)
 
-        if cal_dac_derive:
-            caldacfile = open(caldacFileName, "a")
-            for vfat in vfat_list:
-                slope = vfat_cal_dac[vfat]["slope_high"]
-                intercept = vfat_cal_dac[vfat]["intercept_high"] - vfat_cal_dac[vfat]["intercept_low"]
-                caldacfile.write("%d;%d;%.4f;%.4f\n"%(vfat, vfat_cal_dac[vfat]["vfat_serial_num"], slope, intercept))
-            caldacfile.close()
-
         fig.suptitle(DAC_reg, fontsize=32) # place DAC name for main title
         fig.subplots_adjust(top=0.88) # adjust main title
         fig.tight_layout()
@@ -241,6 +233,14 @@ def main(inFile, calFile, directoryName, oh):
         file.close()
         print("Total time to execute: %s s" % str(time() - startTime))
         plt.close()
+
+    if cal_dac_derive:
+        caldacfile = open(caldacFileName, "a")
+        for vfat in vfat_list:
+            slope = vfat_cal_dac[vfat]["slope_high"]
+            intercept = vfat_cal_dac[vfat]["intercept_high"] - vfat_cal_dac[vfat]["intercept_low"]
+            caldacfile.write("%d;%d;%.4f;%.4f\n"%(vfat, vfat_cal_dac[vfat]["vfat_serial_num"], slope, intercept))
+        caldacfile.close()
 
 if __name__ == "__main__":
 
