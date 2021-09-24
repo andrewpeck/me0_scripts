@@ -75,7 +75,7 @@ def main(inFile, calFile, directoryName, oh):
     nominal_iref = 10*0.5 #the nominal reference current is 10 uA and it has a scaling factor of 0.5
 
     cal_dac_derive = 0
-    vfat_list = datareg.vfat.unique()
+    vfat_list = dacData.vfat.unique()
     vfat_cal_dac = {}
     if "CFG_CAL_DAC_V_HIGH" in dacData.DAC_reg.unique() and "CFG_CAL_DAC_V_LOW" in dacData.DAC_reg.unique():
         print ("Deriving slope and intercept for CAL DAC")
