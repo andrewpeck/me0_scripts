@@ -77,12 +77,13 @@ def main(inFile, calFile, directoryName, oh):
     cal_dac_derive = 0
     vfat_list = dacData.vfat.unique()
     vfat_cal_dac = {}
+    caldacFileName = directoryName + "/" + oh + "_vfat_calib_info_calDac.txt"
     if "CFG_CAL_DAC_V_HIGH" in dacData.DAC_reg.unique() and "CFG_CAL_DAC_V_LOW" in dacData.DAC_reg.unique():
         print ("Deriving slope and intercept for CAL DAC")
         cal_dac_derive = 1
-        caldacFileName = directoryName + "/" + oh + "_vfat_calib_info_calDac.txt"
         caldacfile = open(caldacFileName, "w")
         caldacfile.write("vfat;vfat3_ser_num;cal_dacm;cal_dacb\n")
+        caldacfile.close()
         vfatid_filename = "vfat_data/"+oh+"_vfatID.txt"
         vfat_id_list = {}
         if os.path.isfile(vfatid_filename):
@@ -226,6 +227,7 @@ def main(inFile, calFile, directoryName, oh):
             thr_pd.to_csv(thr_filename_out)
 
         if cal_dac_derive:
+            caldacfile = open(caldacFileName, "a")
             for vfat in vfat_list:
                 slope = vfat_cal_dac[vfat]["slope_high"]
                 intercept = vfat_cal_dac[vfat]["intercept_high"] - vfat_cal_dac[vfat]["intercept_low"]
