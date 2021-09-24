@@ -238,7 +238,7 @@ def main(inFile, calFile, directoryName, oh):
         caldacfile = open(caldacFileName, "a")
         for vfat in vfat_list:
             slope = vfat_cal_dac[vfat]["slope_high"] * (1e-3 * 100) # in fC/DAC
-            intercept = vfat_cal_dac[vfat]["intercept_high"] - vfat_cal_dac[vfat]["intercept_low"] * (1e-3 * 100) # in fC
+            intercept = (vfat_cal_dac[vfat]["intercept_high"] - vfat_cal_dac[vfat]["intercept_low"]) * (1e-3 * 100) # in fC
             caldacfile.write("%d;%d;%.4f;%.4f\n"%(vfat, vfat_cal_dac[vfat]["vfat_serial_num"], slope, intercept))
         caldacfile.close()
 
