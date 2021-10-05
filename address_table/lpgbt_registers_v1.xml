@@ -2672,10 +2672,8 @@
                     mask="0x7f" />
             </node>
 
-            #===================================================================
-            #===================================================================
-            <!-- 15.3.2 ePortRx -->       #####???ALSO0000  change name!!
-            <node id="EPORTRX" address="0x152-0x150" description="">
+            <!-- 15.3.2 ePortRx -->
+            <node id="EPORTRX_RO" address="0x152-0x150" description="">
 
                 <node id="EPRX" address="0x0" description=""  
                     generate="true"
