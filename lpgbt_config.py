@@ -110,7 +110,7 @@ def configLPGBT(readback):
     # [0x021] CLKGConfig1
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CDRCONTROLOVERRIDEENABLE"), 0x0, readback)
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGDISABLEFRAMEALIGNERLOCKCONTROL"), 0x0, readback)
-    writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGCDRRES") ,0x1, readback)
+    writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGCDRRES"), 0x1, readback)
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGVCODAC"), 0x8, readback)
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGVCORAILMODE"), 0x1, readback)
 
@@ -202,7 +202,6 @@ def configLPGBT(readback):
     writeReg(getNode("LPGBT.RW.DEBUG.ULDPBYPASSSCRAMBLER"), 0x0, readback)
     writeReg(getNode("LPGBT.RW.DEBUG.ULDPBYPASSFECCODER"), 0x0, readback)
 
-
 def set_uplink_group_data_source(type, readback, pattern=0x55555555):
     setting = 0
     if (type=="normal"):
@@ -236,7 +235,6 @@ def set_uplink_group_data_source(type, readback, pattern=0x55555555):
         writeReg(getNode("LPGBT.RW.TESTING.DPDATAPATTERN1"), 0xff & (pattern>>8), readback) #
         writeReg(getNode("LPGBT.RW.TESTING.DPDATAPATTERN2"), 0xff & (pattern>>16), readback) #
         writeReg(getNode("LPGBT.RW.TESTING.DPDATAPATTERN3"), 0xff & (pattern>>24), readback) #
-
 
 def configure_eptx(readback):
     #[0x0a7] EPTXDataRate
@@ -282,7 +280,6 @@ def configure_eptx(readback):
     writeReg(getNode("LPGBT.RWF.EPORTCLK.EPCLK15DRIVESTRENGTH"), 0x3, readback)
     writeReg(getNode("LPGBT.RWF.EPORTCLK.EPCLK16DRIVESTRENGTH"), 0x3, readback)
 
-
 def invert_hsio(boss, readback):
     print ("Configuring pin inversion...")
     if (boss):
@@ -291,7 +288,6 @@ def invert_hsio(boss, readback):
     else:
         writeReg(getNode("LPGBT.RWF.CHIPCONFIG.HIGHSPEEDDATAININVERT"), 0x0, readback)
         writeReg(getNode("LPGBT.RWF.CHIPCONFIG.HIGHSPEEDDATAOUTINVERT"), 0x1, readback)
-
 
 def invert_eprx(boss, readback):
     if (boss):
@@ -320,17 +316,14 @@ def invert_eprx(boss, readback):
         writeReg(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX1INVERT"), 0x1, readback)
         writeReg(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX12INVERT"), 0x1, readback)
 
-
 def invert_epclk(boss, readback):
     if (boss):
         writeReg(getNode("LPGBT.RWF.EPORTCLK.EPCLK7INVERT"), 0x1, readback)
-
 
 def invert_eptx(boss, readback):
     if (boss):
         writeReg(getNode("LPGBT.RWF.EPORTTX.EPTX10INVERT"), 0x1, readback) #boss 4
         writeReg(getNode("LPGBT.RWF.EPORTTX.EPTX23INVERT"), 0x1, readback) #boss 11
-
 
 def configure_ec_channel(boss, readback):
     print ("Configuring external control channels...")
@@ -351,7 +344,6 @@ def configure_ec_channel(boss, readback):
         #writeReg(getNode("LPGBT.RWF.EPORTCLK.EPCLK28FREQ"), 0x2, readback)
         #writeReg(getNode("LPGBT.RWF.EPORTCLK.EPCLK28DRIVESTRENGTH"), 0x3, readback)
 
-
 def configure_gpio(boss, readback):
     print ("Configuring gpio...")
     if (boss):
@@ -364,7 +356,6 @@ def configure_gpio(boss, readback):
         writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x00, readback) # set as outputs
         writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), 0x00, readback) #
         writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), 0x00, readback) #
-
 
 def configure_downlink(readback):
     print ("Configuring downlink...")
@@ -383,7 +374,6 @@ def configure_downlink(readback):
 
     # [0x037] EQConfig
     writeReg(getNode("LPGBT.RWF.EQUALIZER.EQATTENUATION"), 0x3, readback)
-
 
 def configure_eprx(readback):
     print ("Configuring elink inputs...")
@@ -447,7 +437,6 @@ def configure_eprx(readback):
     for i in range (28):
         writeReg(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX%dTERM" % i), 1, readback)
 
-
 def reset_lpgbt(readback):
     writeReg(getNode("LPGBT.RW.RESET.RSTPLLDIGITAL"), 1, readback)
     writeReg(getNode("LPGBT.RW.RESET.RSTFUSES"),      1, readback)
@@ -461,7 +450,6 @@ def reset_lpgbt(readback):
     writeReg(getNode("LPGBT.RW.RESET.RSTRXLOGIC"),    0, readback)
     writeReg(getNode("LPGBT.RW.RESET.RSTTXLOGIC"),    0, readback)
 
-
 def configure_eport_dlls(readback):
     print ("Configuring eport dlls...")
     #2.2.2. Uplink: ePort Inputs DLLs
@@ -473,7 +461,6 @@ def configure_eport_dlls(readback):
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXENABLEREINIT"), 0x0, readback)
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDATAGATINGENABLE"), 0x1, readback)
 
-
 def configure_phase_shifter(readback):
     # turn on phase shifter clock
     writeReg(getNode("LPGBT.RWF.PHASE_SHIFTER.PS1DELAY_8"), 0x0, readback)
@@ -482,7 +469,6 @@ def configure_phase_shifter(readback):
     writeReg(getNode("LPGBT.RWF.PHASE_SHIFTER.PS1DRIVESTRENGTH"), 0x3, readback)
     writeReg(getNode("LPGBT.RWF.PHASE_SHIFTER.PS1FREQ"), 0x1, readback)
     writeReg(getNode("LPGBT.RWF.PHASE_SHIFTER.PS1PREEMPHASISMODE"), 0x0, readback)
-
 
 if __name__ == "__main__":
 
@@ -495,7 +481,21 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--input", action="store", dest="input_config_file", help="input_config_file = .txt or .xml file")
     parser.add_argument("-r", "--reset_before_config", action="store", dest="reset_before_config", default="0", help="reset_before_config = 1 or 0 (default)")
     parser.add_argument("-m", "--minimal", action="store", dest="minimal", default="0", help="minimal = Set 1 for a minimal configuration, 0 by default")
+    parser.add_argument("-lv","--lpgbt_v", action="store", dest="lpgbt_v", default="0", help="lpgbt_v = 0 or 1")
     args = parser.parse_args()
+
+    lpgbt_v = None
+    if args.lpgbt_v is None or args.lpgbt_v == "0":
+        print("Using lpgbt v0")
+        lpgbt_v = 0
+    elif (args.lpgbt_v == "1"):
+        print("Using lpgbt v1")
+        lpgbt_v = 1
+    else:
+        print("Please select either 0 or 1")
+        sys.exit()
+    if lpgbt_v is None:
+        sys.exit()
 
     if args.system == "chc":
         print ("Using Rpi CHeeseCake for configuration")
@@ -564,7 +564,7 @@ if __name__ == "__main__":
 
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(lpgbt_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)

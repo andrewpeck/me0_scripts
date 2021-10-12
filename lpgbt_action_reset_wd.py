@@ -13,25 +13,21 @@ def main(system, boss, action, oh_select, gbt_select):
     if action=="reset":
         print ("Reset lpGBT\n")
         mpoke(0x12C, 0x80)
-
         check_ready = 0
         t0 = time()
         while not check_ready:
             check_ready = read_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%s.GBT%s_READY" % (oh_select, gbt_select)))
         print ("Time taken for lpGBT to get back to READY state: %.4f sec\n"%(time()-t0))
-
     elif action=="enable":
         #if boss:
         #    print ("Enabling EC channel\n")
         #    mpoke(0xA8, 0x1F)
-        
         print ("Enabling WatchDog\n")
         mpoke(0xED, 0x03)
     elif action=="disable":
         #if boss:
         #    print ("Disabling EC channel\n")
         #    mpoke(0xA8, 0x0F)
-        
         print ("Disabling WatchDog\n")
         mpoke(0xED, 0x63)
 
@@ -44,6 +40,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-a", "--action", action="store", dest="action", help="action = reset, enable, disable")
+    parser.add_argument("-lv", "--lpgbt_v", action="store", dest="lpgbt_v", default="0", help="lpgbt_v = 0 or 1")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -106,9 +103,22 @@ if __name__ == "__main__":
     elif args.action == "enable":
         print ("Enabling Watchdog")
 
+    lpgbt_v = None
+    if args.lpgbt_v is None or args.lpgbt_v == "0":
+        print("Using lpgbt v0")
+        lpgbt_v = 0
+    elif (args.lpgbt_v == "1"):
+        print("Using lpgbt v1")
+        lpgbt_v = 1
+    else:
+        print("Please select either 0 or 1")
+        sys.exit()
+    if lpgbt_v is None:
+        sys.exit()
+
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(lpgbt_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)

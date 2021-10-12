@@ -298,6 +298,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--depth", action="store", dest="depth", default="10000", help="depth = number of times to check for cfg_run error")
     parser.add_argument("-b", "--bestphase", action="store", dest="bestphase", help="bestphase = Best value of the elinkRX phase (in hex), calculated from phase scan by default")
     parser.add_argument("-f", "--bestphase_file", action="store", dest="bestphase_file", help="bestphase_file = Text file with best value of the elinkRX phase for each VFAT (in hex), calculated from phase scan by default")
+    parser.add_argument("-lv", "--lpgbt_v", action="store", dest="lpgbt_v", default="0", help="lpgbt_v = 0 or 1")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -364,9 +365,22 @@ if __name__ == "__main__":
             print (Colors.YELLOW + "Only allowed options for use_channel_trimming: daq or sbit" + Colors.ENDC)
             sys.exit()
 
+    lpgbt_v = None
+    if args.lpgbt_v is None or args.lpgbt_v == "0":
+        print("Using lpgbt v0")
+        lpgbt_v = 0
+    elif (args.lpgbt_v == "1"):
+        print("Using lpgbt v1")
+        lpgbt_v = 1
+    else:
+        print("Please select either 0 or 1")
+        sys.exit()
+    if lpgbt_v is None:
+        sys.exit()
+
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(lpgbt_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)

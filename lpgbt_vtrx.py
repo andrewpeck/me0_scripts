@@ -211,6 +211,7 @@ if __name__ == "__main__":
     parser.add_argument("-e", "--enable", action="store", dest="enable", help="enable = 0 or 1; only use with type: name")
     parser.add_argument("-n", "--name", action="store", dest="name", nargs="+", help="name = biascur_reg, modcur_reg, empamp_reg; only use with type: name")
     parser.add_argument("-d", "--data", action="store", nargs="+", dest="data", help="data = list of data values to write")
+    parser.add_argument("-lv", "--lpgbt_v", action="store", dest="lpgbt_v", default="0", help="lpgbt_v = 0 or 1")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -333,9 +334,22 @@ if __name__ == "__main__":
                         sys.exit()
                     data_list.append(int(data,16))
 
+    lpgbt_v = None
+    if args.lpgbt_v is None or args.lpgbt_v == "0":
+        print("Using lpgbt v0")
+        lpgbt_v = 0
+    elif (args.lpgbt_v == "1"):
+        print("Using lpgbt v1")
+        lpgbt_v = 1
+    else:
+        print("Please select either 0 or 1")
+        sys.exit()
+    if lpgbt_v is None:
+        sys.exit()
+
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(lpgbt_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)

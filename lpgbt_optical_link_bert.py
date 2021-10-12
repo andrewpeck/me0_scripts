@@ -331,6 +331,7 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--func", action="store", dest="func", help="func = generate, check, all, stop")
     parser.add_argument("-b", "--bert_source", action="store", nargs="+", dest="bert_source", help="COURSE BERT SOURCE = See lpGBT manual Table 14.4 for options, default = DLFRAME")
     parser.add_argument("-t", "--time", action="store", dest="time", help="TIME = measurement time (See lpGBT manual Table 14.5 for options), default: BC_MT_2e35")
+    parser.add_argument("-lv", "--lpgbt_v", action="store", dest="lpgbt_v", default="0", help="lpgbt_v = 0 or 1")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -445,9 +446,22 @@ if __name__ == "__main__":
             print (Colors.YELLOW + "BERT measurement time only required for pattern checking" + Colors.ENDC)
             sys.exit()
 
+    lpgbt_v = None
+    if args.lpgbt_v is None or args.lpgbt_v == "0":
+        print("Using lpgbt v0")
+        lpgbt_v = 0
+    elif (args.lpgbt_v == "1"):
+        print("Using lpgbt v1")
+        lpgbt_v = 1
+    else:
+        print("Please select either 0 or 1")
+        sys.exit()
+    if lpgbt_v is None:
+        sys.exit()
+
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(lpgbt_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)

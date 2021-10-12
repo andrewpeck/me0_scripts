@@ -43,7 +43,6 @@
                     mask="0xff" />
             </node> <!--CHIPID-->
 
-
             <!-- this node is partial!! -->
             <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#calibration-data -->
             <node id="CALIBRATION" address="0x8" description="Calibration Data">
@@ -994,6 +993,7 @@
             <!-- ePortRx -->
             <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#eportrx -->
             <node id="EPORTRX" address="0xC4" description="">
+
                 <!-- [0x0c4] EPRX0Control -->
                 <!-- Configuration of ePortRx Group 0 -->
                 <node id="EPRX03ENABLE" address="0x0" permission="rw"
@@ -1017,7 +1017,6 @@
 
                 <!-- [0x0c5] EPRX1Control -->
                 <!-- Configuration of ePortRx Group 1 -->
-
                 <node id="EPRX13ENABLE" address="0x1" permission="rw"
                     description="Enables channel 3 in group 1."
                     mask="0x80" />

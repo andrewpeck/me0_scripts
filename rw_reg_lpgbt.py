@@ -3,7 +3,8 @@ import sys, os, subprocess
 from collections import OrderedDict
 
 DEBUG = True
-ADDRESS_TABLE_TOP = "./address_table/lpgbt_registers.xml"
+ADDRESS_TABLE_TOP_V0 = "./address_table/lpgbt_registers_v0.xml"
+ADDRESS_TABLE_TOP_V1 = "./address_table/lpgbt_registers_v1.xml"
 nodes = OrderedDict()
 system = ""
 reg_list_dryrun = {}
@@ -215,9 +216,11 @@ def main():
     #print len(kids), kids.name
 
 # Functions related to parsing lpgbt_registers.xml
-def parseXML(filename = None, num_of_oh = None):
-    if filename == None:
-        filename = ADDRESS_TABLE_TOP
+def parseXML(lpgbt_v, num_of_oh = None):
+    if lpgbt_v==0:
+        filename = ADDRESS_TABLE_TOP_V0
+    elif lpgbt_v==1:
+        filename = ADDRESS_TABLE_TOP_V1
     print ("Parsing",filename,"...")
     tree = xml.parse(filename)
     root = tree.getroot()[0]
