@@ -47,13 +47,10 @@ def main(system, boss, gbt, run_time_min, gain, oh_v):
                     asense2_value = read_adc(1, gain, system)
                     asense3_value = read_adc(3, gain, system)
                 if oh_v == 2:
-                    if boss == 1:
-                        asense0_value = read_adc(6, gain, system)
-                        asense1_value = read_adc(1, gain, system)
-                        asense2_value = read_adc(0, gain, system)
-                        asense3_value = read_adc(3, gain, system)
-                    elif boss == 0:
-                        #???????????????????????
+                    asense0_value = read_adc(6, gain, system)
+                    asense1_value = read_adc(1, gain, system)
+                    asense2_value = read_adc(0, gain, system)
+                    asense3_value = read_adc(3, gain, system)
                 asense0_converted = asense_current_conversion(asense0_value)
                 asense1_converted = asense_temp_voltage_conversion(asense1_value)
                 asense2_converted = asense_current_conversion(asense2_value)
@@ -206,33 +203,25 @@ if __name__ == "__main__":
         print(Colors.YELLOW + "Only valid options: chc, backend, dongle, dryrun" + Colors.ENDC)
         sys.exit()
 
-    boss = None
     if args.oh_v == "1":
         print("Using OH v1")
         oh_v = 1
-        if args.lpgbt is None:
-            print(Colors.YELLOW + "Please select boss." + Colors.ENDC)
-            sys.exit()
-        elif args.lpgbt == "boss":
-            print("Using boss LPGBT")
-            boss = 1
-        elif args.lpgbt == "sub":
-            print(Colors.YELLOW + "Only boss allowed" + Colors.ENDC)
-            sys.exit()
     elif args.oh_v == "2":
         print("Using OH v2")
         oh_v = 2
-        if args.lpgbt is None or args.lpgbt != "boss" or args.lpgbt != "sub":
-            print(Colors.YELLOW + "Please select boss or sub" + Colors.ENDC)
-            sys.exit()
-        elif args.lpgbt == "boss":
-            print("Using boss LPGBT")
-            boss = 1
-        elif args.lpgbt == "sub":
-            print("Using sub LPGBT")
-            boss = 0
     else:
         print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
+        sys.exit()
+
+    boss = None
+    if (args.lpgbt == "boss"):
+        print("Using boss LPGBT")
+        boss = 1
+    elif (args.lpgbt == "sub"):
+        print(Colors.YELLOW + "Only boss allowed" + Colors.ENDC)
+        sys.exit()
+    else:
+        print(Colors.YELLOW + "Please select boss" + Colors.ENDC)
         sys.exit()
     if boss is None:
         sys.exit()

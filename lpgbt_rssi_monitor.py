@@ -38,7 +38,10 @@ def main(system, boss, run_time_min, gain, voltage, oh_v):
 
     while int(time()) <= end_time:
         with open(filename, "a") as file:
-            value = read_adc(7, gain, system)
+            if oh_v == 1:
+                value = read_adc(7, gain, system)
+            if oh_v == 2:
+                value = read_adc(5, gain, system)
             rssi_current = rssi_current_conversion(value, gain, voltage, oh_v) * 1e6 # in uA
             second = time() - start_time
             seconds.append(second)
