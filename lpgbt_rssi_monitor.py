@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import datetime
 
-def main(system, boss, run_time_min, gain, voltage, ver):
+def main(system, boss, run_time_min, gain, voltage, oh_v):
 
     init_adc()
     print("ADC Readings:")
@@ -39,7 +39,7 @@ def main(system, boss, run_time_min, gain, voltage, ver):
     while int(time()) <= end_time:
         with open(filename, "a") as file:
             value = read_adc(7, gain, system)
-            rssi_current = rssi_current_conversion(value, gain, voltage, ver) * 1e6 # in uA
+            rssi_current = rssi_current_conversion(value, gain, voltage, oh_v) * 1e6 # in uA
             second = time() - start_time
             seconds.append(second)
             rssi.append(rssi_current)
@@ -88,24 +88,6 @@ def powerdown_adc():
 
 
 def read_adc(channel, gain, system):
-    # ADCInPSelect[3:0]	|  Input
-    # ------------------|----------------------------------------
-    # 4"d0	        |  ADC0 (external pin)
-    # 4"d1	        |  ADC1 (external pin)
-    # 4"d2	        |  ADC2 (external pin)
-    # 4"d3	        |  ADC3 (external pin)
-    # 4"d4	        |  ADC4 (external pin)
-    # 4"d5	        |  ADC5 (external pin)
-    # 4"d6	        |  ADC6 (external pin)
-    # 4"d7	        |  ADC7 (external pin)
-    # 4"d8	        |  EOM DAC (internal signal)
-    # 4"d9	        |  VDDIO * 0.42 (internal signal)
-    # 4"d10	        |  VDDTX * 0.42 (internal signal)
-    # 4"d11	        |  VDDRX * 0.42 (internal signal)
-    # 4"d12	        |  VDD * 0.42 (internal signal)
-    # 4"d13	        |  VDDA * 0.42 (internal signal)
-    # 4"d14	        |  Temperature sensor (internal signal)
-    # 4"d15	        |  VREF/2 (internal signal)
 
     writeReg(getNode("LPGBT.RW.ADC.ADCINPSELECT"), channel, 0)
     writeReg(getNode("LPGBT.RW.ADC.ADCINNSELECT"), 0xf, 0)
@@ -136,19 +118,19 @@ def read_adc(channel, gain, system):
 
     return val
 
-def rssi_current_conversion(rssi_adc, gain, input_voltage, ver):
+def rssi_current_conversion(rssi_adc, gain, input_voltage, oh_v):
 
     rssi_current = -9999
     rssi_adc_converted = 1.0 * (rssi_adc/1024.0) # 10-bit ADC, range 0-1 V
     #rssi_voltage = rssi_adc_converted/gain # Gain
     rssi_voltage = rssi_adc_converted
 
-    if ver == 1:
+    if oh_v == 1:
         # Resistor values
         R1 = 4.7 * 1000 # 4.7 kOhm
         v_r = rssi_voltage
         rssi_current = (input_voltage - v_r)/R1 # rssi current
-    elif ver == 2:
+    elif oh_v == 2:
         # Resistor values
         R1 = 4.7 * 1000 # 4.7 kOhm
         R2 = 1000.0 * 1000 # 1 MOhm
@@ -168,7 +150,6 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--voltage", action="store", dest="voltage", default = "2.5", help="voltage = exact value of the 2.5V input voltage to OH")
-    parser.add_argument("-z", "--ver", action="store", dest="ver", help="ver = OH version 1 or 2")
     parser.add_argument("-m", "--minutes", action="store", dest="minutes", help="minutes = int. # of minutes you want to run")
     parser.add_argument("-a", "--gain", action="store", dest="gain", default = "2", help="gain = Gain for RSSI ADC: 2, 8, 16, 32")
     args = parser.parse_args()
@@ -189,17 +170,37 @@ if __name__ == "__main__":
         print(Colors.YELLOW + "Only valid options: chc, backend, dongle, dryrun" + Colors.ENDC)
         sys.exit()
 
+    boss = None
     if args.oh_v == "1":
         print("Using OH v1")
         oh_v = 1
+        if args.lpgbt is None:
+            print(Colors.YELLOW + "Please select boss." + Colors.ENDC)
+            sys.exit()
+        elif args.lpgbt == "boss":
+            print("Using boss LPGBT")
+            boss = 1
+        elif args.lpgbt == "sub":
+            print(Colors.YELLOW + "Only boss allowed" + Colors.ENDC)
+            sys.exit()
     elif args.oh_v == "2":
         print("Using OH v2")
         oh_v = 2
+        if args.lpgbt is None or args.lpgbt != "boss" or args.lpgbt != "sub":
+            print(Colors.YELLOW + "Please select boss or sub" + Colors.ENDC)
+            sys.exit()
+        elif args.lpgbt == "boss":
+            print("Using boss LPGBT")
+            boss = 1
+        elif args.lpgbt == "sub":
+            print("Using sub LPGBT")
+            boss = 0
     else:
         print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
         sys.exit()
+    if boss is None:
+        sys.exit()
 
-    boss = None
     if args.lpgbt is None:
         print(Colors.YELLOW + "Please select boss or sub" + Colors.ENDC)
         sys.exit()
@@ -263,7 +264,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, boss, args.minutes, gain, int(args.voltage), int(args.ver))
+        main(args.system, boss, args.minutes, gain, int(args.voltage), oh_v)
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

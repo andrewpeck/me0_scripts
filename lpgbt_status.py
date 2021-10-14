@@ -203,12 +203,12 @@ def main(system, oh_v, boss):
                 name = ""
                 if (i == 0):  conv = 1; name = "ASENSE_2"
                 if (i == 1):  conv = 1; name = "ASENSE_1"
-                if (i == 2):  conv = 1; name = "N/A"
+                if (i == 2):  conv = 1; name = "Unused"
                 if (i == 3):  conv = 1; name = "ASENSE_3"
-                if (i == 4):  conv = 1; name = "N/A"
-                if (i == 5):  conv = 1 * 2.0; name = "N/A"
-                if (i == 6):  conv = 1 * 3.0; name = "ASENSE_0"
-                if (i == 7):  conv = 1; name = "?????"
+                if (i == 4):  conv = 1; name = "Unused"
+                if (i == 5):  conv = 1; name = "Unused"
+                if (i == 6):  conv = 1; name = "ASENSE_0"
+                if (i == 7):  conv = 1; name = "Precision calibration resistor"
                 if (i == 8):  conv = 1; name = "EOM DAC (internal signal)"
                 if (i == 9):  conv = 1 / 0.42; name = "VDDIO * 0.42 (internal signal)"
                 if (i == 10):  conv = 1 / 0.42; name = "VDDTX * 0.42 (internal signal)"
@@ -219,17 +219,17 @@ def main(system, oh_v, boss):
                 if (i == 15):  conv = 1 / 0.50; name = "VREF/2 (internal signal)"
                 read = read_adc(i, system)
                 print("\tch %X: 0x%03X = %f, reading = %f (%s)" % (i, read, read / 1024., conv * read / 1024., name))
-        elif boss == 2:
+        elif boss == 0:
             for i in range(16):
                 name = ""
-                if (i==0 ):  conv=1; name="N/A"
-                if (i==1 ):  conv=1; name="ASENSE_2"
-                if (i==2 ):  conv=1; name="ASENSE_1"
-                if (i==3 ):  conv=1; name="ASENSE_3"
-                if (i==4 ):  conv=1; name="ASENSE_0"
-                if (i==5 ):  conv=1*2.0; name="1V2_DIV2"
-                if (i==6 ):  conv=1*3.0; name="2V5_DIV3"
-                if (i==7 ):  conv=1; name="RSSI"
+                if (i==0 ):  conv=1; name="VTRx+ Temperature (TH1)"
+                if (i==1 ):  conv=1; name="2.5 V Voltage Divider"
+                if (i==2 ):  conv=1; name="Unused"
+                if (i==3 ):  conv=1; name="Precision Calibration Resistor"
+                if (i==4 ):  conv=1; name="Unused"
+                if (i==5 ):  conv=1; name="VTRx+ RSSI"
+                if (i==6 ):  conv=1; name="OH Temperature"
+                if (i==7 ):  conv=1; name="Unused"
                 if (i==8 ):  conv=1; name="EOM DAC (internal signal)"
                 if (i==9 ):  conv=1/0.42; name="VDDIO * 0.42 (internal signal)"
                 if (i==10):  conv=1/0.42; name="VDDTX * 0.42 (internal signal)"
@@ -273,25 +273,6 @@ def powerdown_adc():
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x0, 0) # vref tune
 
 def read_adc(channel, system):
-    # ADCInPSelect[3:0]	|  Input
-    # ------------------|----------------------------------------
-    # 4"d0	        |  ADC0 (external pin)
-    # 4"d1	        |  ADC1 (external pin)
-    # 4"d2	        |  ADC2 (external pin)
-    # 4"d3	        |  ADC3 (external pin)
-    # 4"d4	        |  ADC4 (external pin)
-    # 4"d5	        |  ADC5 (external pin)
-    # 4"d6	        |  ADC6 (external pin)
-    # 4"d7	        |  ADC7 (external pin)
-    # 4"d8	        |  EOM DAC (internal signal)
-    # 4"d9	        |  VDDIO * 0.42 (internal signal)
-    # 4"d10	        |  VDDTX * 0.42 (internal signal)
-    # 4"d11	        |  VDDRX * 0.42 (internal signal)
-    # 4"d12	        |  VDD * 0.42 (internal signal)
-    # 4"d13	        |  VDDA * 0.42 (internal signal)
-    # 4"d14	        |  Temperature sensor (internal signal)
-    # 4"d15	        |  VREF/2 (internal signal)
-
     # "LPGBT.RW.ADC.ADCINPSELECT"
     # "LPGBT.RW.ADC.ADCINNSELECT"
     #mpoke (0x111, channel<<4 | 0xf)
@@ -363,7 +344,7 @@ if __name__ == "__main__":
 
     boss = None
     if args.lpgbt is None:
-        print (Colors.YELLOW + "Please select boss or sub" + Colors.ENDC)
+        print (Colors.YELLOW + "Please select either boss or sub for OH v2, and boss for OH v1" + Colors.ENDC)
         sys.exit()
     elif (args.lpgbt=="boss"):
         print ("Checking Status of boss LPGBT")
@@ -413,7 +394,7 @@ if __name__ == "__main__":
     #    check_lpgbt_link_ready(args.ohid, args.gbtid)
 
     try:
-        main(args.system, boss)
+        main(args.system, oh_v, boss)
     except KeyboardInterrupt:
         print (Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

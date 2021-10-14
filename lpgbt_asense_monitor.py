@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import datetime
 
-def main(system, boss, gbt, run_time_min, gain):
+def main(system, boss, gbt, run_time_min, gain, oh_v):
 
     init_adc()
     print("ADC Readings:")
@@ -38,33 +38,43 @@ def main(system, boss, gbt, run_time_min, gain):
     start_time = int(time())
     end_time = int(time()) + (60 * run_time_min)
 
-    while int(time()) <= end_time:
-        with open(filename, "a") as file:
-            asense0_value = read_adc(4, gain, system)
-            asense1_value = read_adc(2, gain, system)
-            asense2_value = read_adc(1, gain, system)
-            asense3_value = read_adc(3, gain, system)
-            asense0_converted = asense_current_conversion(asense0_value)
-            asense1_converted = asense_temp_voltage_conversion(asense1_value)
-            asense2_converted = asense_current_conversion(asense2_value)
-            asense3_converted = asense_temp_voltage_conversion(asense3_value)
-            second = time() - start_time
-            seconds.append(second)
-            asense0.append(asense0_converted)
-            asense1.append(asense1_converted)
-            asense2.append(asense2_converted)
-            asense3.append(asense3_converted)
-            minutes.append(second/60)
-            live_plot_current(ax1, minutes, asense0, asense2, run_time_min, gbt)
-            live_plot_temp(ax2, minutes, asense1, asense3, run_time_min, gbt)
 
-            file.write(str(second) + "\t" + str(asense0_converted) + "\t" + str(asense1_converted) + "\t" + str(asense2_converted) + "\t" + str(asense3_converted) + "\n" )
-            if gbt in [0,1]:
-                print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG2.5V current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt2 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2V current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt1 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
-            else:
-                print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG1.2VD current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt3 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2VA current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt4 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
+        while int(time()) <= end_time:
+            with open(filename, "a") as file:
+                if oh_v == 1:
+                    asense0_value = read_adc(4, gain, system)
+                    asense1_value = read_adc(2, gain, system)
+                    asense2_value = read_adc(1, gain, system)
+                    asense3_value = read_adc(3, gain, system)
+                if oh_v == 2:
+                    if boss == 1:
+                        asense0_value = read_adc(6, gain, system)
+                        asense1_value = read_adc(1, gain, system)
+                        asense2_value = read_adc(0, gain, system)
+                        asense3_value = read_adc(3, gain, system)
+                    elif boss == 2:
+                        #???????????????????????
+                asense0_converted = asense_current_conversion(asense0_value)
+                asense1_converted = asense_temp_voltage_conversion(asense1_value)
+                asense2_converted = asense_current_conversion(asense2_value)
+                asense3_converted = asense_temp_voltage_conversion(asense3_value)
+                second = time() - start_time
+                seconds.append(second)
+                asense0.append(asense0_converted)
+                asense1.append(asense1_converted)
+                asense2.append(asense2_converted)
+                asense3.append(asense3_converted)
+                minutes.append(second/60)
+                live_plot_current(ax1, minutes, asense0, asense2, run_time_min, gbt)
+                live_plot_temp(ax2, minutes, asense1, asense3, run_time_min, gbt)
 
-            sleep(1)
+                file.write(str(second) + "\t" + str(asense0_converted) + "\t" + str(asense1_converted) + "\t" + str(asense2_converted) + "\t" + str(asense3_converted) + "\n" )
+                if gbt in [0,1]:
+                    print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG2.5V current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt2 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2V current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt1 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
+                else:
+                    print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG1.2VD current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt3 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2VA current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt4 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
+
+                sleep(1)
 
     figure_name1 = foldername + now + "_pg_current_plot.pdf"
     fig1.savefig(figure_name1, bbox_inches="tight")
@@ -120,24 +130,6 @@ def powerdown_adc():
 
 
 def read_adc(channel, gain, system):
-    # ADCInPSelect[3:0]	|  Input
-    # ------------------|----------------------------------------
-    # 4"d0	        |  ADC0 (external pin)
-    # 4"d1	        |  ADC1 (external pin)
-    # 4"d2	        |  ADC2 (external pin)
-    # 4"d3	        |  ADC3 (external pin)
-    # 4"d4	        |  ADC4 (external pin)
-    # 4"d5	        |  ADC5 (external pin)
-    # 4"d6	        |  ADC6 (external pin)
-    # 4"d7	        |  ADC7 (external pin)
-    # 4"d8	        |  EOM DAC (internal signal)
-    # 4"d9	        |  VDDIO * 0.42 (internal signal)
-    # 4"d10	        |  VDDTX * 0.42 (internal signal)
-    # 4"d11	        |  VDDRX * 0.42 (internal signal)
-    # 4"d12	        |  VDD * 0.42 (internal signal)
-    # 4"d13	        |  VDDA * 0.42 (internal signal)
-    # 4"d14	        |  Temperature sensor (internal signal)
-    # 4"d15	        |  VREF/2 (internal signal)
 
     writeReg(getNode("LPGBT.RW.ADC.ADCINPSELECT"), channel, 0)
     writeReg(getNode("LPGBT.RW.ADC.ADCINNSELECT"), 0xf, 0)
@@ -214,29 +206,33 @@ if __name__ == "__main__":
         print(Colors.YELLOW + "Only valid options: chc, backend, dongle, dryrun" + Colors.ENDC)
         sys.exit()
 
+    boss = None
     if args.oh_v == "1":
         print("Using OH v1")
         oh_v = 1
+        if args.lpgbt is None:
+            print(Colors.YELLOW + "Please select boss." + Colors.ENDC)
+            sys.exit()
+        elif args.lpgbt == "boss":
+            print("Using boss LPGBT")
+            boss = 1
+        elif args.lpgbt == "sub":
+            print(Colors.YELLOW + "Only boss allowed" + Colors.ENDC)
+            sys.exit()
     elif args.oh_v == "2":
         print("Using OH v2")
         oh_v = 2
+        if args.lpgbt is None or args.lpgbt != "boss" or args.lpgbt != "sub":
+            print(Colors.YELLOW + "Please select boss or sub" + Colors.ENDC)
+            sys.exit()
+        elif args.lpgbt == "boss":
+            print("Using boss LPGBT")
+            boss = 1
+        elif args.lpgbt == "sub":
+            print("Using sub LPGBT")
+            boss = 0
     else:
         print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
-        sys.exit()
-
-    boss = None
-    if args.lpgbt is None:
-        print(Colors.YELLOW + "Please select boss or sub" + Colors.ENDC)
-        sys.exit()
-    elif (args.lpgbt == "boss"):
-        print("Using boss LPGBT")
-        boss = 1
-    elif (args.lpgbt == "sub"):
-        #print("Using sub LPGBT")
-        print (Colors.YELLOW + "Only boss allowed" + Colors.ENDC)
-        boss = 0
-    else:
-        print(Colors.YELLOW + "Please select boss" + Colors.ENDC)
         sys.exit()
     if boss is None:
         sys.exit()
@@ -286,7 +282,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, boss, gbt, args.minutes, gain)
+        main(args.system, boss, gbt, args.minutes, gain, oh_v)
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
