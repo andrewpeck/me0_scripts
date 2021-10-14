@@ -52,7 +52,7 @@ def main(system, boss, gbt, run_time_min, gain, oh_v):
                         asense1_value = read_adc(1, gain, system)
                         asense2_value = read_adc(0, gain, system)
                         asense3_value = read_adc(3, gain, system)
-                    elif boss == 2:
+                    elif boss == 0:
                         #???????????????????????
                 asense0_converted = asense_current_conversion(asense0_value)
                 asense1_converted = asense_temp_voltage_conversion(asense1_value)
