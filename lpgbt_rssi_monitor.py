@@ -201,22 +201,6 @@ if __name__ == "__main__":
     if boss is None:
         sys.exit()
 
-    if args.lpgbt is None:
-        print(Colors.YELLOW + "Please select boss or sub" + Colors.ENDC)
-        sys.exit()
-    elif (args.lpgbt == "boss"):
-        print("Using boss LPGBT")
-        boss = 1
-    elif (args.lpgbt == "sub"):
-        #print("Using sub LPGBT")
-        print (Colors.YELLOW + "Only boss allowed" + Colors.ENDC)
-        boss = 0
-    else:
-        print(Colors.YELLOW + "Please select boss" + Colors.ENDC)
-        sys.exit()
-    if boss is None:
-        sys.exit()
-
     if args.system == "backend":
         if args.ohid is None:
             print(Colors.YELLOW + "Need OHID for backend" + Colors.ENDC)
@@ -239,10 +223,6 @@ if __name__ == "__main__":
         print(Colors.YELLOW + "Allowed values of gain = 2, 8, 16, 32" + Colors.ENDC)
         sys.exit()
     gain = int(args.gain)
-
-    if args.ver not in ["1", "2"]:
-        print(Colors.YELLOW + "Allowed versions = 1 or 2" + Colors.ENDC)
-        sys.exit()
 
     # Parsing Registers XML File
     print("Parsing xml file...")
