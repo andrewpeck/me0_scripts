@@ -183,7 +183,7 @@ class Colors:
     ENDC    = "\033[0m"
 
 def main():
-    parseXML()
+    parseXML(1)
     #for nodename in nodes:
     #    print (i)
     #    if (i>0):
@@ -216,10 +216,10 @@ def main():
     #print len(kids), kids.name
 
 # Functions related to parsing lpgbt_registers.xml
-def parseXML(lpgbt_v, num_of_oh = None):
-    if lpgbt_v==0:
+def parseXML(oh_v, num_of_oh = None):
+    if oh_v==1:
         filename = ADDRESS_TABLE_TOP_V0
-    elif lpgbt_v==1:
+    elif oh_v==2:
         filename = ADDRESS_TABLE_TOP_V1
     print ("Parsing",filename,"...")
     tree = xml.parse(filename)

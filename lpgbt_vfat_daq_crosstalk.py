@@ -157,6 +157,7 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="LpGBT VFAT Cross Talk Check using DAQ data")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
+    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", default="1", help="oh_v = 1 or 2")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
@@ -167,7 +168,6 @@ if __name__ == "__main__":
     parser.add_argument("-u", "--use_channel_trimming", action="store", dest="use_channel_trimming", help="use_channel_trimming = to use latest trimming results for either options - daq or sbit (default = None)")
     parser.add_argument("-n", "--nl1a", action="store", dest="nl1a", help="nl1a = fixed number of L1A cycles")
     parser.add_argument("-b", "--bxgap", action="store", dest="bxgap", default="500", help="bxgap = Nr. of BX between two L1As (default = 500 i.e. 12.5 us)")
-    parser.add_argument("-lv", "--lpgbt_v", action="store", dest="lpgbt_v", default="0", help="lpgbt_v = 0 or 1")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -186,6 +186,16 @@ if __name__ == "__main__":
         print ("Dry Run - not actually running vfat bert")
     else:
         print (Colors.YELLOW + "Only valid options: backend, dryrun" + Colors.ENDC)
+        sys.exit()
+
+    if args.oh_v == "1":
+        print("Using OH v1")
+        oh_v = 1
+    elif args.oh_v == "2":
+        print("Using OH v2")
+        oh_v = 2
+    else:
+        print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
         sys.exit()
 
     if args.ohid is None:
@@ -246,22 +256,9 @@ if __name__ == "__main__":
             print (Colors.YELLOW + "Only allowed options for use_channel_trimming: daq or sbit" + Colors.ENDC)
             sys.exit()
 
-    lpgbt_v = None
-    if args.lpgbt_v is None or args.lpgbt_v == "0":
-        print("Using lpgbt v0")
-        lpgbt_v = 0
-    elif (args.lpgbt_v == "1"):
-        print("Using lpgbt v1")
-        lpgbt_v = 1
-    else:
-        print("Please select either 0 or 1")
-        sys.exit()
-    if lpgbt_v is None:
-        sys.exit()
-
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML(lpgbt_v)
+    parseXML(oh_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)

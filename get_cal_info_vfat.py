@@ -148,10 +148,10 @@ def main(oh_select, type, write):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Retrieve VFAT calibration info from database.')
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
+    parser.add_argument("-y","--oh_v", action="store", dest="oh_v", default="1", help="oh_v = 1 or 2")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-w", "--write", action="store_true", dest="write", help="write calib data to file")
     parser.add_argument("-t", "--type", action="store", dest="type", help="type = hw_id or file")
-    parser.add_argument("-lv","--lpgbt_v", action="store", dest="lpgbt_v", help="lpgbt_v = 0 or 1")
     #parser.add_argument("-i", "--inFile", action="store", dest="inFile", help="input file with list of VFAT serial numbers")
     args = parser.parse_args()
 
@@ -173,6 +173,16 @@ if __name__ == '__main__':
         print (Colors.YELLOW + "Only valid options: backend, dryrun" + Colors.ENDC)
         sys.exit()
 
+    if args.oh_v == "1":
+        print("Using OH v1")
+        oh_v = 1
+    elif args.oh_v == "2":
+        print("Using OH v2")
+        oh_v = 2
+    else:
+        print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
+        sys.exit()
+
     if args.ohid is None:
         print(Colors.YELLOW + "Need OHID" + Colors.ENDC)
         sys.exit()
@@ -186,22 +196,9 @@ if __name__ == '__main__':
         #print(Colors.YELLOW + "Input type can only be hw_id or file" + Colors.ENDC)
         sys.exit()
 
-    lpgbt_v = None
-    if args.lpgbt_v is None or args.lpgbt_v == "0":
-        print("Using lpgbt v0")
-        lpgbt_v = 0
-    elif (args.lpgbt_v == "1"):
-        print("Using lpgbt v1")
-        lpgbt_v = 1
-    else:
-        print("Please select either 0 or 1")
-        sys.exit()
-    if lpgbt_v is None:
-        sys.exit()
-
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML(lpgbt_v)
+    parseXML(oh_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
