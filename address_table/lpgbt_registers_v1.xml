@@ -45,7 +45,7 @@
             </node> <!--CHIPID-->
 
 
-            <!-- 15.1.2 CHIPID -->>
+            <!-- 15.1.2 CALIBRATION DATA -->>
             <node id="CALIBRATION" address="0x8" description="Calibration Data">
                 
                 <!-- [0x008] DACCAL0 -->
@@ -177,15 +177,15 @@
                     mask="0x0f"   />
 
                 <!-- [0x01a TEMPCALH ]  -->                                   
-                <!-- Calibration data for the ADC. Usage is TBD -->              
+                <!-- Calibration data for the temperature sensor. -->              
                 <node id="TEMPCAL_8TO15" address="0x01a-0x8" permission="rw"     
-                    description="Calibration data for the ADC. Usage is TBD"
+                    description="Calibration data for the temperature sensor. Usage is TBD."
                     mask="0xff"   />
 
                 <!-- [0x01b TEMPCALL ]  -->                                   
-                <!-- Calibration data for the ADC. Usage is TBD -->              
+                <!-- Calibration data for the temperature sensor. -->              
                 <node id="TEMPCAL_0TO7" address="0x01b-0x8" permission="rw"     
-                    description="Calibration data for the ADC. Usage is TBD"
+                    description="Calibration data for the temperature sensor. Usage is TBD."
                     mask="0xff"   />
 
                 <!-- [0x01c] VREFCNTR -->
@@ -528,13 +528,13 @@
                 <!-- [0x03e] PGConfig -->
                 <!-- Power Good configuration. -->
                 <node id="PGENABLE" address="0x0" permission="rw"
-                    description="7 -- Enable Power Good feature. For more details see Power-up state machine"
+                    description="Enable Power Good feature. For more details see Power-up state machine."
                     mask="0x80" />
                 <node id="PGLEVEL" address="0x0" permission="rw"
-                    description="PGLevel Enable Power Good feature. For more details see Power-up state machine. Voltage level [V]: 0=0.70, 1=0.75, 2=0.80, 3=0.85, 4=0.90, 5=0.95, 6=1.00, 7=1.05"
+                    description="Enable Power Good feature. For more details see Power-up state machine. Voltage level [V]: 0=0.80, 1=0.85, 2=0.90, 3=0.95, 4=1.00, 5=1.05, 6=1.10, 7=1.15"
                     mask="0x70" />
                 <node id="PGDELAY" address="0x0" permission="rw"
-                    description="PGDelay Wait time. Wait time: 0 =disabled, 1 =1 us, 2 =5 us, 3 =10 us, 4 =50 us, 5 =100 us, 6 =500 us, 7 =1 ms, 8 =5 ms, 9 =10 ms, 10=20 ms, 11=50 ms, 12=100 ms, 13=200 ms, 14=500 ms, 15=1 s"
+                    description="PGDelay[3:0]   Wait time: 0=disabled, 1 =1us, 2 =5us, 3=10 us, 4=50us, 5=100us, 6=500us, 7=1ms, 8=5ms, 9=10 ms, 10=20 ms, 11=50 ms, 12=100 ms, 13=200ms, 14=500ms, 15=1s"
                     mask="0x0f" />
             </node>
 
@@ -681,62 +681,62 @@
 
                 <!-- [0x053] PIODirH -->
                 <!-- Direction control for Parallel IO port -->
-                <node id="PIODIR_8TO15" address="0x0" permission="rw"
+                <node id="PIODIRH" address="0x0" permission="rw"
                     description="PIODIR[n] Function. Function: 1'b0=Pin configured as an input, 1'b1=Pin configured as an output"
                     mask="0xff" />
 
                 <!-- [0x054] PIODirL -->
                 <!-- Direction control for Parallel IO port -->
-                <node id="PIODIR_0TO7" address="0x1" permission="rw"
+                <node id="PIODIRL" address="0x1" permission="rw"
                     description="PIODir[n] Function. Function: 1'b0=Pin configured as an input, 1'b1=Pin configured as an output"
                     mask="0xff" />
 
 
                 <!-- [0x055] PIOOutH -->
                 <!-- Output control for Parallel IO port (when pin is configured as output) -->
-                <node id="PIOOUT_8TO15" address="0x2" permission="rw"
+                <node id="PIOOUTH" address="0x2" permission="rw"
                     description="PIOOut[n] Output. Output: 1'b0=Low, 1'b1=High"
                     mask="0xff" />
 
                 <!-- [0x056] PIOOutL -->
                 <!-- Output control for Parallel IO port (when pin is configured as output) -->
-                <node id="PIOOUT_0TO7" address="0x3" permission="rw"
+                <node id="PIOOUTL" address="0x3" permission="rw"
                     description="PIOOut[n] Output. Output: 1'b0=Low, 1'b1=High"
                     mask="0xff" />
 
                 <!-- [0x057] PIOPullEnaH -->
                 <!-- Pull-up/pull-down control for Parallel IO port -->
-                <node id="PIOPULLENABLE_8TO15" address="0x4" permission="rw"
+                <node id="PIOPULLENABLEH" address="0x4" permission="rw"
                     description="PIOPullEnable[n] Pull-up/Pull-down resistor: 1'b0=Disabled, 1'b1=Enabled"
                     mask="0xff" />
 
                 <!-- [0x058] PIOPullEnaL -->
                 <!-- Pull-up/pull-down control for Parallel IO port -->
-                <node id="PIOPULLENABLE_0TO7" address="0x5" permission="rw"
+                <node id="PIOPULLENABLEL" address="0x5" permission="rw"
                     description="PIOPullEnable[n] Pull-up/Pull-down resistor: 1'b0=Disabled, 1'b1=Enabled"
                     mask="0xff" />
 
                 <!-- [0x059] PIOUpDownH -->
                 <!-- Selects pull-up or pull-down resistor for Parallel IO port when enabled in PIOPullEna register. See CMOS I/O Pin Characteristics for more details -->
-                <node id="PIOUPDOWN_8TO15" address="0x6" permission="rw"
+                <node id="PIOUPDOWNH" address="0x6" permission="rw"
                     description="PIOPullEnable[n] Pull-up/Pull-down resistor: 1'b0=Pull-down, 1'b1=Pull-up"
                     mask="0xff" />
 
                 <!-- [0x05a] PIOUpDownL -->
                 <!-- Selects pull-up or pull-down resistor for Parallel IO port when enabled in PIOPullEna register. See CMOS I/O Pin Characteristics for more details -->
-                <node id="PIOUPDOWN_0TO7" address="0x7" permission="rw"
+                <node id="PIOUPDOWNL" address="0x7" permission="rw"
                     description="PIOPullEnable[n] Pull-up/Pull-down resistor: 1'b0=Pull-down, 1'b1=Pull-up"
                     mask="0xff" />
 
                 <!-- [0x05b] PIODriveStrengthH -->
                 <!-- Selects driving strength for Parallel IO port when configured as an output. See CMOS I/O Pin Characteristics for more details -->
-                <node id="PIODRIVESTRENGTH_8TO15" address="0x8" permission="rw"
+                <node id="PIODRIVESTRENGTHH" address="0x8" permission="rw"
                     description="PIODriveStrength[n] Drive Strength: 1'b0=Low, 1'b1=High"
                     mask="0xff" />
 
                 <!-- [0x05c] PIODriveStrengthL -->
                 <!-- Selects driving strength for Parallel IO port when configured as an output -->
-                <node id="PIODRIVESTRENGTH_0TO7" address="0x9" permission="rw"
+                <node id="PIODRIVESTRENGTHL" address="0x9" permission="rw"
                     description="PIODriveStrength[n] Drive Strength: 1'b0=Low, 1'b1=High"
                     mask="0xff" />
             </node>
@@ -783,13 +783,13 @@
                     description="Sets the width of pre-emphasis pulse for clock ${PSCLK_IDX} output in self timed mode. Pulse length [ps]: 0=0, 1=0, 2=0, 3=0, 4=0, 5=0, 6=0, 7=0"
                     mask="0x7" />
 
-                <!-- [0x069] $PSLowRes -->
-                <!-- Power supply resistance control for phase-shifter drivers -->
                 <node id="PS${PSCLK_IDX}LOWRES" address="0x3" permission="rw"
                     description="Decreases the power supply filter resistance in PS${PSCLK_IDX} driver"
                     mask="" />
             </node>
 
+            <!-- [0x069] $PSLowRes -->
+            <!-- Power supply resistance control for phase-shifter drivers -->
             <node id="PSLOWRES" address="0x69" description="">
                 <node id="PS3LOWRES" address="0x0" permission="rw"
                     description="Decreases the power supply filter resistance in PS3 driver"
@@ -976,7 +976,7 @@
                 <node id="EPTXECTRISTATE" address="0x2" permission="rw"
                     description=" Enable tri-state operation of EC channel output in simplex modes"
                     mask="0x02" />
-                <node id="EPTXECINVERT" address="0x1" permission="rw"
+                <node id="EPTXECENABLE" address="0x1" permission="rw"
                     description="Enable EC channel output"
                     mask="0x01" />
 
@@ -1009,7 +1009,7 @@
                         mask="0x7" />
                 </node>
 
-                <!-- [0x0be-0x0c5] EPTX01_00ChnCntr -->
+                <!-- [0x0be] EPTX01_00ChnCntr -->
                 <!-- Output driver settings for ePortTx group 0 -->
                 <node id="EPTX01INVERT" address="0x16" permission="rw"
                     description="Invert data for channel 1 in ePortTx Group 0"
@@ -1386,8 +1386,8 @@
                 <node id="EPRXECTERM" address="0x24" permission="rw"
                     description="Enables the 100 Ohm termination for EC channel."
                     mask="0x02" />
-                <node id="EPRXECENABLE" address="0x24" permission="rw"
-                    description=" Enable pull up for the EC channel."
+                <node id="EPRXECPULLUPENABLE" address="0x24" permission="rw"
+                    description="Enable pull up for the EC channel."
                     mask="0x01" />
 
                 <!-- [0x0ed] EPRXEq10Control -->
@@ -1839,37 +1839,37 @@
 
                 <!-- [0x11a] FUSEBlowDataA -->
                 <!-- Data to be programmed to the fuses. -->
-                <node id="FUSEBLOWDATA_0TO7" address="0x1" permission="rw"
+                <node id="FUSEBLOWDATAA" address="0x1" permission="rw"
                     description="Bits 7:0 of the data word."
                     mask="0xff" />
 
                 <!-- [0x11b] FUSEBlowDataB -->
                 <!-- Data to be programmed to the fuses. -->
-                <node id="FUSEBLOWDATA_8TO15" address="0x2" permission="rw"
+                <node id="FUSEBLOWDATAB" address="0x2" permission="rw"
                     description="Bits 15:8 of the data word."
                     mask="0xff" />
 
                 <!-- [0x11c] FUSEBlowDataC -->
                 <!-- Data to be programmed to the fuses. -->
-                <node id="FUSEBLOWDATAC_16TO23" address="0x3" permission="rw"
+                <node id="FUSEBLOWDATAC" address="0x3" permission="rw"
                     description="Bits 23:16 of the data word."
                     mask="0xff" />
 
                 <!-- [0x11d] FUSEBlowDataD -->
                 <!-- Data to be programmed to the fuses. -->
-                <node id="FUSEBLOWDATA_24TO31" address="0x4" permission="rw"
+                <node id="FUSEBLOWDATAD" address="0x4" permission="rw"
                     description="Bits 31:24 of the data word."
                     mask="0xff" />
 
                 <!-- [0x11e] FUSEBlowAddH -->
                 <!-- Address of the fuse block to be programmed. -->
-                <node id="FUSEBLOWADDRESS_8TO15" address="0x5" permission="rw"
+                <node id="FUSEBLOWADDH" address="0x5" permission="rw"
                     description="Bits 15:8 of the address."
                     mask="0xff" />
 
                 <!-- [0x11f] FUSEBlowAddL -->
                 <!-- Address of the fuse block to be programmed. -->
-                <node id="FUSEBLOWADDRESS_0TO7" address="0x6" permission="rw"
+                <node id="FUSEBLOWADDL" address="0x6" permission="rw"
                     description="Bits 7:0 of the address."
                     mask="0xff" />
 
@@ -2440,16 +2440,16 @@
 
                 <!-- [0x141] CLKTree -->
                 <!-- Clock tree disable feature. Could be used for TMR testing -->
-                <node id="CLKTREEMAGICNUMBER" address="0x1" permission="rw"
+                <node id="CLKTREEMAGICNUMBER" address="0x00" permission="rw"
                     description=" Has to be set to 5'h15 in order for clock masking (disabling) to be active"
                     mask="0xf8" />
-                <node id="CLKCTREEDISABLE" address="0x1" permission="rw"
+                <node id="CLKCTREEDISABLE" address="0x00" permission="rw"
                     description="If asserted and ClkTreeMagicNumber set to 5'h15, branch C of clock tree is disabled"
                     mask="0x40" />
-                <node id="CLKBTREEDISABLE" address="0x1" permission="rw"
+                <node id="CLKBTREEDISABLE" address="0x00" permission="rw"
                     description="If asserted and ClkTreeMagicNumber set to 5'h15, branch B of clock tree is disabled"
                     mask="0x20" />
-                <node id="CLKATREEDISABLE" address="0x1" permission="rw"
+                <node id="CLKATREEDISABLE" address="0x00" permission="rw"
                     description=" If asserted and ClkTreeMagicNumber set to 5'h15, branch A of clock tree is disabled"
                     mask="0x10" />
 
@@ -2464,7 +2464,7 @@
                 <node id="DLDPBYPASSDESCRAMBLER" address="0x1" permission="rw"
                     description="Bypass de-scrambler in the downlink data path"
                     mask="0x20" />
-                <node id="DLDPFECERRCNTENA" address="0x1" permission="rw"
+                <node id="DLDPFECCOUNTERENABLE" address="0x1" permission="rw"
                     description="Enable downlink FEC counter."
                     mask="0x10" />
                 <node id="ULDPBYPASSINTERLEAVER" address="0x1" permission="rw"
@@ -2491,25 +2491,25 @@
 
                 <!-- [0x145] TO2SEL -->
                 <!-- Control register for test output -->
-                <node id="TO1SELECT" address="0x4" permission="rw"
+                <node id="TO2SELECT" address="0x4" permission="rw"
                     description="Selects a signal to be outputted on TSTOUT2 according to TOnSelect"
                     mask="0xFF" />
 
                 <!-- [0x146] TO3SEL -->
                 <!-- Control register for test output -->
-                <node id="TO1SELECT" address="0x5" permission="rw"
+                <node id="TO3SELECT" address="0x5" permission="rw"
                     description="Selects a signal to be outputted on TSTOUT3 according to TOnSelect"
                     mask="0xFF" />
 
                 <!-- [0x147] TO4SEL -->
                 <!-- Control register for test output -->
-                <node id="TO1SELECT" address="0x6" permission="rw"
+                <node id="TO4SELECT" address="0x6" permission="rw"
                     description="Selects a signal to be outputted on TSTOUT4 according to TOnSelect"
                     mask="0xFF" />
 
                 <!-- [0x148] TO5SEL -->
                 <!-- Control register for test output -->
-                <node id="TO1SELECT" address="0x7" permission="rw"
+                <node id="TO5SELECT" address="0x7" permission="rw"
                     description="Selects a signal to be outputted on TSTOUT5 according to TOnSelect"
                     mask="0xFF" />
 
