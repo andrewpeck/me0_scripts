@@ -201,43 +201,43 @@ def main(system, oh_v, boss):
         if boss == 1:
             for i in range(16):
                 name = ""
-                if (i == 0):  conv = 1; name = "ASENSE_2"
-                if (i == 1):  conv = 1; name = "ASENSE_1"
-                if (i == 2):  conv = 1; name = "Unused"
-                if (i == 3):  conv = 1; name = "ASENSE_3"
-                if (i == 4):  conv = 1; name = "Unused"
-                if (i == 5):  conv = 1; name = "Unused"
-                if (i == 6):  conv = 1; name = "ASENSE_0"
-                if (i == 7):  conv = 1; name = "Precision calibration resistor"
-                if (i == 8):  conv = 1; name = "EOM DAC (internal signal)"
-                if (i == 9):  conv = 1 / 0.42; name = "VDDIO * 0.42 (internal signal)"
-                if (i == 10):  conv = 1 / 0.42; name = "VDDTX * 0.42 (internal signal)"
-                if (i == 11):  conv = 1 / 0.42; name = "VDDRX * 0.42 (internal signal)"
-                if (i == 12):  conv = 1 / 0.42; name = "VDD * 0.42 (internal signal)"
-                if (i == 13):  conv = 1 / 0.42; name = "VDDA * 0.42 (internal signal)"
+                if (i == 0 ):  conv = 1; name = "ASENSE_2"
+                if (i == 1 ):  conv = 1; name = "ASENSE_1"
+                if (i == 2 ):  conv = 1; name = "Unused"
+                if (i == 3 ):  conv = 1; name = "ASENSE_3"
+                if (i == 4 ):  conv = 1; name = "Unused"
+                if (i == 5 ):  conv = 1; name = "Unused"
+                if (i == 6 ):  conv = 1; name = "ASENSE_0"
+                if (i == 7 ):  conv = 1; name = "Precision calibration resistor"
+                if (i == 8 ):  conv = 1; name = "Voltage DAC output (internal signal)"
+                if (i == 9 ):  conv = 1/0.42; name = "VSSA (internal signal)"
+                if (i == 10):  conv = 1/0.42; name = "VDDTX * 0.42 (internal signal)"
+                if (i == 11):  conv = 1/0.42; name = "VDDRX * 0.42 (internal signal)"
+                if (i == 12):  conv = 1/0.42; name = "VDD * 0.42 (internal signal)"
+                if (i == 13):  conv = 1/0.42; name = "VDDA * 0.42 (internal signal)"
                 if (i == 14):  conv = 1; name = "Temperature sensor (internal signal)"
-                if (i == 15):  conv = 1 / 0.50; name = "VREF/2 (internal signal)"
+                if (i == 15):  conv = 1/0.50; name = "VREF/2 (internal signal)"
                 read = read_adc(i, system)
                 print("\tch %X: 0x%03X = %f, reading = %f (%s)" % (i, read, read / 1024., conv * read / 1024., name))
         elif boss == 0:
             for i in range(16):
                 name = ""
-                if (i==0 ):  conv=1; name="VTRx+ Temperature (TH1)"
-                if (i==1 ):  conv=1; name="2.5 V Voltage Divider"
-                if (i==2 ):  conv=1; name="Unused"
-                if (i==3 ):  conv=1; name="Precision Calibration Resistor"
-                if (i==4 ):  conv=1; name="Unused"
-                if (i==5 ):  conv=1; name="VTRx+ RSSI"
-                if (i==6 ):  conv=1; name="OH Temperature"
-                if (i==7 ):  conv=1; name="Unused"
-                if (i==8 ):  conv=1; name="EOM DAC (internal signal)"
-                if (i==9 ):  conv=1/0.42; name="VDDIO * 0.42 (internal signal)"
-                if (i==10):  conv=1/0.42; name="VDDTX * 0.42 (internal signal)"
-                if (i==11):  conv=1/0.42; name="VDDRX * 0.42 (internal signal)"
-                if (i==12):  conv=1/0.42; name="VDD * 0.42 (internal signal)"
-                if (i==13):  conv=1/0.42; name="VDDA * 0.42 (internal signal)"
-                if (i==14):  conv=1; name="Temperature sensor (internal signal)"
-                if (i==15):  conv=1/0.50; name="VREF/2 (internal signal)"
+                if (i == 0 ):  conv = 1; name = "VTRx+ Temperature (TH1)"
+                if (i == 1 ):  conv = 1; name = "2.5 V Voltage Divider"
+                if (i == 2 ):  conv = 1; name = "Unused"
+                if (i == 3 ):  conv = 1; name = "Precision Calibration Resistor"
+                if (i == 4 ):  conv = 1; name = "Unused"
+                if (i == 5 ):  conv = 1; name = "VTRx+ RSSI"
+                if (i == 6 ):  conv = 1; name = "OH Temperature"
+                if (i == 7 ):  conv = 1; name = "Unused"
+                if (i == 8 ):  conv = 1; name = "Voltage DAC output (internal signal)"
+                if (i == 9 ):  conv = 1/0.42; name = "VSSA (internal signal)"
+                if (i == 10):  conv = 1/0.42; name = "VDDTX * 0.42 (internal signal)"
+                if (i == 11):  conv = 1/0.42; name = "VDDRX * 0.42 (internal signal)"
+                if (i == 12):  conv = 1/0.42; name = "VDD * 0.42 (internal signal)"
+                if (i == 13):  conv = 1/0.42; name = "VDDA * 0.42 (internal signal)"
+                if (i == 14):  conv = 1; name = "Temperature sensor (internal signal)"
+                if (i == 15):  conv = 1/0.50; name = "VREF/2 (internal signal)"
                 read = read_adc(i, system)
                 print ("\tch %X: 0x%03X = %f, reading = %f (%s)" % (i, read, read/1024., conv*read/1024., name))
 
@@ -255,7 +255,6 @@ def init_adc():
     writeReg(getNode("LPGBT.RW.ADC.VDDMONENA"), 0x1, 0) # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDTXMONENA"), 0x1, 0) # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDRXMONENA"), 0x1, 0) # enable dividers
-    writeReg(getNode("LPGBT.RW.ADC.VDDPSTMONENA"), 0x1, 0) # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDANMONENA"), 0x1, 0) # enable dividers
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFENABLE"), 0x1, 0) # vref enable
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x63, 0) # vref tune
@@ -267,7 +266,6 @@ def powerdown_adc():
     writeReg(getNode("LPGBT.RW.ADC.VDDMONENA"), 0x0, 0) # disable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDTXMONENA"), 0x0, 0) # disable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDRXMONENA"), 0x0, 0) # disable dividers
-    writeReg(getNode("LPGBT.RW.ADC.VDDPSTMONENA"), 0x0, 0) # disable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDANMONENA"), 0x0, 0) # disable dividers
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFENABLE"), 0x0, 0) # vref disable
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x0, 0) # vref tune
