@@ -23,14 +23,14 @@ def main(system, oh_v, boss, input_config_file, reset_before_config, minimal, re
 
         if not minimal:
             # eportrx dll configuration
-            configure_eport_dlls(readback)
+            configure_eport_dlls(oh_v, readback)
 
             # eportrx channel configuration
             configure_eprx(readback)
 
         # configure downlink
         if (boss):
-            configure_downlink(readback)
+            configure_downlink(oh_v, readback)
 
         if not minimal:
             # configure eport tx
@@ -42,7 +42,7 @@ def main(system, oh_v, boss, input_config_file, reset_before_config, minimal, re
                 configure_phase_shifter(readback)
 
             # configure ec channels
-            configure_ec_channel(boss, readback)
+            configure_ec_channel(oh_v, boss, readback)
 
         # invert hsio
         # Not needed in ASIAGO_v2
@@ -170,7 +170,7 @@ def configLPGBT(oh_v, readback):
         writeReg(getNode("LPGBT.RWF.LINE_DRIVER.LDMODULATIONCURRENT"), 0x7F, readback)
 
         # [0x03E] PGCONFIG
-        writeReg(getNode("LPGBT.RWF.POWER_GOOD.PGLEVEL"), 0x0, readback)
+        writeReg(getNode("LPGBT.RWF.POWER_GOOD.PGLEVEL"), 0x4, readback)
 
     # Configure ClockGen Block:
     # [0x01f] EPRXLOCKFILTER
@@ -438,8 +438,6 @@ def configure_downlink(oh_v, readback):
         writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.FAMAXHEADERFOUNDCOUNTAFTERNF"), 0x10, readback)
         # [0x031] FAMaxHeaderNotFoundCount
         writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.FAMAXHEADERNOTFOUNDCOUNT"), 0x10, readback)
-        # [0x032] FAFAMaxSkipCycleCountAfterNF
-        writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.FAMAXSKIPCYCLECOUNTAFTERNF"), 0x00, readback)
 
     # [0x037] EQConfig
     writeReg(getNode("LPGBT.RWF.EQUALIZER.EQATTENUATION"), 0x3, readback)
@@ -519,7 +517,7 @@ def reset_lpgbt(readback):
     writeReg(getNode("LPGBT.RW.RESET.RSTRXLOGIC"),    0, readback)
     writeReg(getNode("LPGBT.RW.RESET.RSTTXLOGIC"),    0, readback)
 
-def configure_eport_dlls(readback):
+def configure_eport_dlls(oh_v, readback):
     print ("Configuring eport dlls...")
     #2.2.2. Uplink: ePort Inputs DLLs
     #[0x034] EPRXDllConfig
@@ -528,7 +526,11 @@ def configure_eport_dlls(readback):
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDLLFSMCLKALWAYSON"), 0x0, readback)
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDLLCOARSELOCKDETECTION"), 0x0, readback)
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXENABLEREINIT"), 0x0, readback)
-    writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDATAGATINGENABLE"), 0x1, readback)
+    if oh_v == 1:
+        writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDATAGATINGENABLE"), 0x1, readback)
+    elif oh_v == 2:
+        writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDATAGATINGDISABLE"), 0x0, readback)
+
 
 def configure_phase_shifter(readback):
     # turn on phase shifter clock
