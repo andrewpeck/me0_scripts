@@ -71,7 +71,6 @@ def init_adc():
     writeReg(getNode("LPGBT.RW.ADC.VDDMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDTXMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDRXMONENA"), 0x1, 0)  # enable dividers
-    writeReg(getNode("LPGBT.RW.ADC.VDDPSTMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDANMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFENABLE"), 0x1, 0)  # vref enable
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x63, 0) # vref tune
@@ -84,7 +83,6 @@ def powerdown_adc():
     writeReg(getNode("LPGBT.RW.ADC.VDDMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDTXMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDRXMONENA"), 0x0, 0)  # disable dividers
-    writeReg(getNode("LPGBT.RW.ADC.VDDPSTMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDANMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFENABLE"), 0x0, 0)  # vref disable
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x0, 0) # vref tune
@@ -149,7 +147,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="RSSI Monitor for ME0 Optohybrid")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", default="1", help="oh_v = 1 or 2")
-    parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss")
+    parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss for oh_v1 and only sub for oh_v2")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--voltage", action="store", dest="voltage", default = "2.5", help="voltage = exact value of the 2.5V input voltage to OH")
@@ -177,24 +175,24 @@ if __name__ == "__main__":
     if args.oh_v == "1":
         print("Using OH v1")
         oh_v = 1
-        if args.lpgbt is None:
+        if args.lpgbt is None or args.lpgbt != "boss" or args.lpgbt != "sub":
             print(Colors.YELLOW + "Please select boss." + Colors.ENDC)
             sys.exit()
         elif args.lpgbt == "boss":
             print("Using boss LPGBT")
             boss = 1
         elif args.lpgbt == "sub":
-            print(Colors.YELLOW + "Only boss allowed" + Colors.ENDC)
+            print(Colors.YELLOW + "Only boss allowed oh_v1" + Colors.ENDC)
             sys.exit()
     elif args.oh_v == "2":
         print("Using OH v2")
         oh_v = 2
         if args.lpgbt is None or args.lpgbt != "boss" or args.lpgbt != "sub":
-            print(Colors.YELLOW + "Please select boss or sub" + Colors.ENDC)
+            print(Colors.YELLOW + "Please select sub" + Colors.ENDC)
             sys.exit()
         elif args.lpgbt == "boss":
-            print("Using boss LPGBT")
-            boss = 1
+            print(Colors.YELLOW + "Only sub allowed oh_v2" + Colors.ENDC)
+            sys.exit()
         elif args.lpgbt == "sub":
             print("Using sub LPGBT")
             boss = 0
