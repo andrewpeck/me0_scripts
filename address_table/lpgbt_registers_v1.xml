@@ -778,14 +778,9 @@
                 <node id="PS${PSCLK_IDX}PREEMPHASISMODE" address="0x2" permission="rw"
                     description="Sets the pre-emphasis mode for clock ${PSCLK_IDX}. Mode: 2'd0=disabled, 2'd1=disabled, 2'd2=Self timed, 2'd3=Clock timed"
                     mask="0x18" />
-
                 <node id="PS${PSCLK_IDX}PREEMPHASISWIDTH" address="0x2" permission="rw"
                     description="Sets the width of pre-emphasis pulse for clock ${PSCLK_IDX} output in self timed mode. Pulse length [ps]: 0=0, 1=0, 2=0, 3=0, 4=0, 5=0, 6=0, 7=0"
                     mask="0x7" />
-
-                <node id="PS${PSCLK_IDX}LOWRES" address="0x3" permission="rw"
-                    description="Decreases the power supply filter resistance in PS${PSCLK_IDX} driver"
-                    mask="" />
             </node>
 
             <!-- [0x069] $PSLowRes -->
