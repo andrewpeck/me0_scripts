@@ -17,7 +17,7 @@ class Colors:
     RED     = "\033[91m"
     ENDC    = "\033[0m"
 
-def main(system, boss):
+def main(system, oh_v, boss):
 
     print ("\Starting LED show\n")
     brightnessStart = 0
@@ -36,10 +36,16 @@ def main(system, boss):
         for b in range(brightnessStart, brightnessEnd, step): # one brightness cycle from on to off or off to on (100 steps per cycle)
             for i in range(10): # generate 10 clocks at a specific brightness
                 for j in range(100): # generate a PWM waveform for one clock, setting the duty cycle according to the brightness
-                    on = 0x80
-                    if j >= b:
-                        on = 0x00
-                    writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), on, 0)
+                    if oh_v == 1:
+                        on = 0x80
+                        if j >= b:
+                            on = 0x00
+                        writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), on, 0)
+                    else:
+                        on = 0x20
+                        if j >= b:
+                            on = 0x00
+                        writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), on, 0)
 
         stop = raw_input(Colors.YELLOW + "Please type \"stop\" to stop the show: " + Colors.ENDC)
         if stop=="stop":
@@ -180,7 +186,7 @@ if __name__ == "__main__":
 
     # LPGBT LED Show
     try:
-        main(args.system, boss)
+        main(args.system, oh_v, boss)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

@@ -46,12 +46,22 @@ def lpgbt_vfat_reset(system, oh_select, vfat_list):
         # Set GPIO as output
         gpio_dirH_output = 0
         gpio_dirL_output = 0
-        if boss:
-            gpio_dirH_output = 0x80 | 0x01
-            gpio_dirL_output = 0x01 | 0x04
-        else:
-            gpio_dirH_output = 0x02 | 0x04 | 0x08
-            gpio_dirL_output = 0x00
+
+        if oh_v == 1:
+            if (boss):
+                writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x80 | 0x01, readback) # set as outputs
+                writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x01 | 0x04, readback) # set as outputs
+            else:
+                writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x02 | 0x04 | 0x08, readback) # set as outputs
+                writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x00, readback) # set as outputs
+        elif of_v == 2:
+            if (boss):
+                writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x01 | 0x02 , readback) # set as outputs (8, 9)
+                writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x01 | 0x04 | 0x20, readback) # set as outputs (0, 2, 5)
+            else:
+                writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x01 | 0x02 | 0x04 | 0x08 | 0x20, readback) # set as outputs
+                writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x01 | 0x02 | 0x08, readback) # set as outputs
+                
         if system == "backend":
             mpoke(gpio_dirH_addr, gpio_dirH_output)
             mpoke(gpio_dirL_addr, gpio_dirL_output)
@@ -84,8 +94,8 @@ def lpgbt_vfat_reset(system, oh_select, vfat_list):
                 gpio_out_addr = gpio_outL_addr
                 gpio_out_node = gpio_outL_node
                 if boss:
-                    data_enable |= 0x80  # To keep GPIO LED on ASIAGO ON
-                    data_disable |= 0x80  # To keep GPIO LED on ASIAGO ON
+                    data_enable |= 0x20  # To keep GPIO LED on ASIAGO ON
+                    data_disable |= 0x20  # To keep GPIO LED on ASIAGO ON
             else:
                 gpio_out_addr = gpio_outH_addr
                 gpio_out_node = gpio_outH_node

@@ -127,8 +127,7 @@ if __name__ == "__main__":
         print(Colors.YELLOW + "Cannot select gbtids when running chc" + Colors.ENDC)
         sys.exit()
     elif args.gbtids is None and args.system == "chc":
-        args.gbtids  = -9999
-        gbtid_list.append(args.gbtids)
+        gbtid_list.append(-9999)
     else:
         for gbtid in args.gbtids:
             gbtid_int = int(gbtid)

@@ -427,7 +427,7 @@ def configure_gpio(oh_v, boss, readback):
         else:
             writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x01 | 0x02 | 0x04 | 0x08 | 0x20, readback) # set as outputs
             writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x01 | 0x02 | 0x08, readback) # set as outputs
-            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), 0x20, readback) # enable sound
+            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), 0x00, readback) # enable sound
             writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), 0x00, readback)
 
 
