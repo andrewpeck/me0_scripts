@@ -41,7 +41,7 @@ NODE_IC_EXEC_READ = None
 #}
 #}
 
-# For ME0 GEB
+# For ME0 GEBcheck_lpgbt_link_ready
 VFAT_TO_GBT_ELINK_GPIO_ME0 = {
         17 : ("sub"  , 1, 6,  10),
         16 : ("sub"  , 1, 24, 9),

@@ -15,10 +15,11 @@ def convert_gpio_reg(gpio):
 def lpgbt_vfat_reset(system, oh_select, gbtid_list):
     print("SUB RESET\n")
 
-    gpio_dirH_addr = 0x053
-    gpio_outH_addr = 0x055
     gpio_dirH_node = getNode("LPGBT.RWF.PIO.PIODIRH")
     gpio_outH_node = getNode("LPGBT.RWF.PIO.PIOOUTH")
+
+    gpio_dirH_addr = gpio_dirH_node.address
+    gpio_outH_addr = gpio_outH_node.address
 
     gpio = 9
     boss = 1
@@ -36,7 +37,7 @@ def lpgbt_vfat_reset(system, oh_select, gbtid_list):
 
         # Set GPIO as output
         gpio_dirH_output = 0x02
-        
+
         if system == "backend":
             mpoke(gpio_dirH_addr, gpio_dirH_output)
         else:
@@ -80,22 +81,22 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc, backend or dryrun")
     parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", default="1", help="oh_v = 1 or 2")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
-    parser.add_argument("-g", "--gbtids", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
+    parser.add_argument("-g", "--gbtids", action="store", nargs="+", dest="gbtid", help="list of gbtids = 0-7 (only needed for backend)")
     
     args = parser.parse_args()
 
     if args.system == "chc":
-        print("Using Rpi CHeeseCake for VFAT reset")
+        print("Using Rpi CHeeseCake for sub reset")
+        args.ohid = 0
+        args.gbtids  = 0
     elif args.system == "backend":
-        print("Using Backend for VFAT reset")
-        # print ("Only chc (Rpi Cheesecake) or dryrun supported at the moment")
-        # sys.exit()
+        print("Using Backend for sub reset")
     elif args.system == "dongle":
         # print ("Using USB Dongle for VFAT reset")
         print(Colors.YELLOW + "Only Backend or dryrun supported" + Colors.ENDC)
         sys.exit()
     elif args.system == "dryrun":
-        print("Dry Run - not actually running vfat bert")
+        print("Dry Run - not actually running")
     else:
         print(Colors.YELLOW + "Only valid options: backend, dryrun" + Colors.ENDC)
         sys.exit()

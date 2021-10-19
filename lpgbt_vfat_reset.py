@@ -15,14 +15,15 @@ def convert_gpio_reg(gpio):
 def lpgbt_vfat_reset(system, oh_select, vfat_list):
     print("LPGBT VFAT RESET\n")
 
-    gpio_dirH_addr = 0x052
-    gpio_dirL_addr = 0x053
-    gpio_outH_addr = 0x054
-    gpio_outL_addr = 0x055
     gpio_dirH_node = getNode("LPGBT.RWF.PIO.PIODIRH")
     gpio_dirL_node = getNode("LPGBT.RWF.PIO.PIODIRL")
     gpio_outH_node = getNode("LPGBT.RWF.PIO.PIOOUTH")
     gpio_outL_node = getNode("LPGBT.RWF.PIO.PIOOUTL")
+
+    gpio_dirH_addr = gpio_dirH_node.address
+    gpio_dirL_addr = gpio_dirL_node.address
+    gpio_outH_addr = gpio_outH_node.address
+    gpio_outL_addr = gpio_outL_node.address
 
     for vfat in vfat_list:
         lpgbt, gbt_select, elink, gpio = vfat_to_gbt_elink_gpio(vfat)
@@ -67,15 +68,27 @@ def lpgbt_vfat_reset(system, oh_select, vfat_list):
         data_disable = 0x00
         gpio_out_addr = 0
         gpio_out_node = ""
-        if gpio <= 7:
-            gpio_out_addr = gpio_outL_addr
-            gpio_out_node = gpio_outL_node
-        else:
-            gpio_out_addr = gpio_outH_addr
-            gpio_out_node = gpio_outH_node
-            if boss:
-                data_enable |= 0x80  # To keep GPIO LED on ASIAGO ON
-                data_disable |= 0x80  # To keep GPIO LED on ASIAGO ON
+
+        if oh_v == 1:
+            if gpio <= 7:
+                gpio_out_addr = gpio_outL_addr
+                gpio_out_node = gpio_outL_node
+            else:
+                gpio_out_addr = gpio_outH_addr
+                gpio_out_node = gpio_outH_node
+                if boss:
+                    data_enable |= 0x80  # To keep GPIO LED on ASIAGO ON
+                    data_disable |= 0x80  # To keep GPIO LED on ASIAGO ON
+        elif oh_v == 2:
+            if gpio <= 7:
+                gpio_out_addr = gpio_outL_addr
+                gpio_out_node = gpio_outL_node
+                if boss:
+                    data_enable |= 0x80  # To keep GPIO LED on ASIAGO ON
+                    data_disable |= 0x80  # To keep GPIO LED on ASIAGO ON
+            else:
+                gpio_out_addr = gpio_outH_addr
+                gpio_out_node = gpio_outH_node
 
         # Reset - 1
         if system == "backend":
