@@ -3,7 +3,6 @@ from time import sleep, time
 import sys
 import argparse
 
-
 def convert_gpio_reg(gpio):
     reg_data = 0
     if gpio <= 7:
@@ -12,7 +11,6 @@ def convert_gpio_reg(gpio):
         bit = gpio - 8
     reg_data |= (0x01 << bit)
     return reg_data
-
 
 def lpgbt_vfat_reset(system, oh_select, vfat_list):
     print("LPGBT VFAT RESET\n")
@@ -181,4 +179,3 @@ if __name__ == "__main__":
 
     # Termination
     rw_terminate()
-

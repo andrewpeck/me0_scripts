@@ -59,7 +59,7 @@ def main(system, oh_v, boss, input_config_file, reset_before_config, minimal, re
             invert_eptx(boss, readback)
 
             # configure reset + led outputs
-            configure_gpio(boss, readback)
+            configure_gpio(oh_v, boss, readback)
             
         # enable TX2 (also TX1 which is enabled by default) channel on VTRX+
         if boss and not readback:
@@ -405,18 +405,31 @@ def configure_ec_channel(oh_v, boss, readback):
         #writeReg(getNode("LPGBT.RWF.EPORTCLK.EPCLK28FREQ"), 0x2, readback)
         #writeReg(getNode("LPGBT.RWF.EPORTCLK.EPCLK28DRIVESTRENGTH"), 0x3, readback)
 
-def configure_gpio(boss, readback):
+def configure_gpio(oh_v, boss, readback):
     print ("Configuring gpio...")
-    if (boss):
-        writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x80 | 0x01, readback) # set as outputs
-        writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x01 | 0x04, readback) # set as outputs
-        writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), 0x80, readback) # enable LED
-        writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), 0x00, readback) #
-    else:
-        writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x02 | 0x04 | 0x08, readback) # set as outputs
-        writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x00, readback) # set as outputs
-        writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), 0x00, readback) #
-        writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), 0x00, readback) #
+    if oh_v == 1:
+        if (boss):
+            writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x80 | 0x01, readback) # set as outputs
+            writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x01 | 0x04, readback) # set as outputs
+            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), 0x80, readback) # enable LED
+            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), 0x00, readback) #
+        else:
+            writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x02 | 0x04 | 0x08, readback) # set as outputs
+            writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x00, readback) # set as outputs
+            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), 0x00, readback) #
+            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), 0x00, readback) #
+    elif of_v == 2:
+        if (boss):
+            writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x01, readback) # set as outputs
+            writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x01 | 0x04 | 0x20, readback) # set as outputs
+            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), 0x00, readback) # 
+            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), 0x20, readback) # enable LED
+        else:
+            writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x02 | 0x04 | 0x08, readback) # set as outputs
+            writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x00, readback) # set as outputs
+            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), 0x00, readback) #
+            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), 0x00, readbac
+
 
 def configure_downlink(oh_v, readback):
     print ("Configuring downlink...")
