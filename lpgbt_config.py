@@ -428,7 +428,7 @@ def configure_gpio(oh_v, boss, readback):
             writeReg(getNode("LPGBT.RWF.PIO.PIODIRH"), 0x02 | 0x04 | 0x08, readback) # set as outputs
             writeReg(getNode("LPGBT.RWF.PIO.PIODIRL"), 0x00, readback) # set as outputs
             writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), 0x00, readback) #
-            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), 0x00, readbac
+            writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), 0x00, readback)
 
 
 def configure_downlink(oh_v, readback):
