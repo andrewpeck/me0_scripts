@@ -87,8 +87,7 @@ if __name__ == "__main__":
 
     if args.system == "chc":
         print("Using Rpi CHeeseCake for sub reset")
-        args.ohid = 0
-        args.gbtids  = 0
+        args.ohid = -9999
     elif args.system == "backend":
         print("Using Backend for sub reset")
     elif args.system == "dongle":
@@ -108,24 +107,36 @@ if __name__ == "__main__":
         print(Colors.YELLOW + "Reset line connected for oh_v2 only" + Colors.ENDC)
         sys.exit()
 
-    if args.ohid is None:
-        print(Colors.YELLOW + "Need OHID" + Colors.ENDC)
+    if args.ohid is None and args.system == "backend":
+        print(Colors.YELLOW + "Please select ohid = 0-1" + Colors.ENDC)
         sys.exit()
+    elif args.ohid is not None and args.system == "chc":
+        print(Colors.YELLOW + "Cannot select an ohid when running chc" + Colors.ENDC)
+        sys.exit()
+    elif args.ohid is None and args.system == "chc":
+        args.ohid  = -9999
     if int(args.ohid) > 1:
         print(Colors.YELLOW + "Only OHID 0-1 allowed" + Colors.ENDC)
         sys.exit()
 
-    if args.gbtids is None:
-        print(Colors.YELLOW + "Please select any combination of 0, 2, 4, 6" + Colors.ENDC)
-        sys.exit()
     gbtid_list = []
-    for gbtid in args.gbtids:
-        gbtid_int = int(gbtid)
-        master_gbtids = [0, 2, 4, 6]
-        if gbtid_int not in master_gbtids:
-            print(Colors.YELLOW + "Invalid master gbtids. Only 0, 2, 4, 6 allowed" + Colors.ENDC)
-            sys.exit()
-        gbtid_list.append(gbtid_int)
+    if args.gbtids is None and args.system == "backend":
+        print(Colors.YELLOW + "Please select any combination of 0, 2, 4, 6" + Colors.ENDC)
+        sys.exit()        
+    elif args.gbtids is not None and args.system == "chc":
+        print(Colors.YELLOW + "Cannot select gbtids when running chc" + Colors.ENDC)
+        sys.exit()
+    elif args.gbtids is None and args.system == "chc":
+        args.gbtids  = -9999
+        gbtid_list.append(args.gbtids)
+    else:
+        for gbtid in args.gbtids:
+            gbtid_int = int(gbtid)
+            master_gbtids = [0, 2, 4, 6]
+            if gbtid_int not in master_gbtids:
+                print(Colors.YELLOW + "Invalid master gbtids. Only 0, 2, 4, 6 allowed" + Colors.ENDC)
+                sys.exit()
+            gbtid_list.append(gbtid_int)
 
     # Parsing Registers XML Files
     print("Parsing xml file...")
