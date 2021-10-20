@@ -10,6 +10,12 @@ import datetime
 def main(system, boss, run_time_min, gain, voltage, oh_v):
 
     init_adc()
+
+    if oh_v == 2:
+        F = calculate_F(gain, system)
+    else:
+        F = 1
+    
     print("ADC Readings:")
 
     if not os.path.exists("lpgbt_data/lpgbt_vtrx+_rssi_data"):
@@ -47,7 +53,7 @@ def main(system, boss, run_time_min, gain, voltage, oh_v):
             seconds.append(second)
             rssi.append(rssi_current)
             minutes.append(second/60)
-            live_plot(ax, minutes, rssi, run_time_min)
+            live_plot(ax, minutes, rssi)
 
             file.write(str(second) + "\t" + str(rssi_current) + "\n" )
             print("\tch %X: 0x%03X = %f (RSSI (uA))" % (7, value, rssi_current))
@@ -59,11 +65,63 @@ def main(system, boss, run_time_min, gain, voltage, oh_v):
 
     powerdown_adc()
 
-def live_plot(ax, x, y, run_time_min):
+def calculate_F_from_DAC_range(gain, system):
+
+    # For sub: adc channel = 3
+    R_111 = 1e-03
+
+    XX = 3.55e-06
+    test_DAC_range = range(50, 200, 5)
+    
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
+
+    fig_F, ax_F = plt.subplots()
+    ax_F.set_xlabel("DAC")
+    ax_F.set_ylabel("F=V/V_m")
+
+    F_range = []
+    for DAC in test_DAC_range:
+        
+        I = DAC * XX
+        V = I * R_111
+
+        writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
+        writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x80, 0) 
+        sleep(0.01)
+        
+        V_m = read_adc(3, gain, system)
+        F = V/V_m
+        F_range.append(F)
+
+    live_plot(ax_F, test_DAC_range, F_range)    
+
+def calculate_F(gain, system):
+
+    # For sub: adc channel = 3
+    R_111 = 1e-03
+
+    XX = 3.55e-06
+    DAC = 150
+
+    I = DAC * XX
+    V = I * R_111
+
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x96, 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x80, 0)
+    sleep(0.01)
+
+    V_m = read_adc(7, gain, system)
+
+    F = V/V_m
+
+    return F
+
+
+def live_plot(ax, x, y):
     ax.plot(x, y, "turquoise")
     plt.draw()
     plt.pause(0.01)
-
 
 def init_adc():
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x1, 0)  # enable ADC
@@ -76,7 +134,6 @@ def init_adc():
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x63, 0) # vref tune
     sleep(0.01)
 
-
 def powerdown_adc():
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x0, 0)  # disable ADC
     writeReg(getNode("LPGBT.RW.ADC.TEMPSENSRESET"), 0x0, 0)  # disable temp sensor
@@ -86,7 +143,6 @@ def powerdown_adc():
     writeReg(getNode("LPGBT.RW.ADC.VDDANMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFENABLE"), 0x0, 0)  # vref disable
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x0, 0) # vref tune
-
 
 def read_adc(channel, gain, system):
 
