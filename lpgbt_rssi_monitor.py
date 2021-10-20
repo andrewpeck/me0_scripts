@@ -11,8 +11,8 @@ def main(system, boss, run_time_min, gain, voltage, oh_v):
 
     init_adc()
 
-    if oh_v == 2:
-        channel = 3
+    if oh_v == 2 
+        channel = 3 #servant_adc_in3
         F = calculate_F(channel, gain, system)
     else:
         F = 1
@@ -68,7 +68,6 @@ def main(system, boss, run_time_min, gain, voltage, oh_v):
 
 def calculate_F_from_DAC_range(gain, system):
 
-    # For sub: adc channel = 3
     R = 1e-03
 
     XX = 3.55e-06
@@ -104,8 +103,8 @@ def calculate_F(channel, gain, system):
     LSB = 3.55e-06
     DAC = 150
 
-    I = DAC * XX
-    V = I * R_111
+    I = DAC * LSB
+    V = I * R
 
     reg_data = convert_gpio_reg(channel)
 

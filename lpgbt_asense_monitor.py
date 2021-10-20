@@ -10,6 +10,12 @@ import datetime
 def main(system, boss, gbt, run_time_min, gain, oh_v):
 
     init_adc()
+    if oh_v == 2:
+        channel = 7 # master_adc_in7
+        F = calculate_F(channel, gain, system)
+    else:
+        F = 1
+        
     print("ADC Readings:")
 
     if not os.path.exists("lpgbt_data/lpgbt_asense_data"):
@@ -42,15 +48,15 @@ def main(system, boss, gbt, run_time_min, gain, oh_v):
         while int(time()) <= end_time:
             with open(filename, "a") as file:
                 if oh_v == 1:
-                    asense0_value = read_adc(4, gain, system)
-                    asense1_value = read_adc(2, gain, system)
-                    asense2_value = read_adc(1, gain, system)
-                    asense3_value = read_adc(3, gain, system)
+                    asense0_value = F * read_adc(4, gain, system)
+                    asense1_value = F * read_adc(2, gain, system)
+                    asense2_value = F * read_adc(1, gain, system)
+                    asense3_value = F * read_adc(3, gain, system)
                 if oh_v == 2:
-                    asense0_value = read_adc(6, gain, system)
-                    asense1_value = read_adc(1, gain, system)
-                    asense2_value = read_adc(0, gain, system)
-                    asense3_value = read_adc(3, gain, system)
+                    asense0_value = F * read_adc(6, gain, system)
+                    asense1_value = F * read_adc(1, gain, system)
+                    asense2_value = F * read_adc(0, gain, system)
+                    asense3_value = F * read_adc(3, gain, system)
                 asense0_converted = asense_current_conversion(asense0_value)
                 asense1_converted = asense_temp_voltage_conversion(asense1_value)
                 asense2_converted = asense_current_conversion(asense2_value)
@@ -79,6 +85,35 @@ def main(system, boss, gbt, run_time_min, gain, oh_v):
     fig2.savefig(figure_name2, bbox_inches="tight")
 
     powerdown_adc()
+
+def calculate_F(channel, gain, system):
+
+    # For master: adc channel = 7
+    R= 1e-03
+
+    LSB = 3.55e-06
+    DAC = 150
+
+    I = DAC * LSB
+    V = I * R
+
+    reg_data = convert_gpio_reg(channel)
+
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
+    sleep(0.01)
+
+    V_m = read_adc(channel, gain, system)
+
+    F = V/V_m
+
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x0, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x0, 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x0, 0)
+    sleep(0.01)
+
+    return F
 
 def live_plot_current(ax1, x, y0, y2, run_time_min, gbt):
     line0, = ax1.plot(x, y0, "red")
