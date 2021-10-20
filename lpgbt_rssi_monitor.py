@@ -71,7 +71,7 @@ def calculate_F_from_DAC_range(gain, system):
     R_111 = 1e-03
 
     XX = 3.55e-06
-    test_DAC_range = range(50, 200, 5)
+    DAC_range = range(50, 200, 5)
     
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
 
@@ -80,7 +80,7 @@ def calculate_F_from_DAC_range(gain, system):
     ax_F.set_ylabel("F=V/V_m")
 
     F_range = []
-    for DAC in test_DAC_range:
+    for DAC in DAC_range:
         
         I = DAC * XX
         V = I * R_111
@@ -93,7 +93,7 @@ def calculate_F_from_DAC_range(gain, system):
         F = V/V_m
         F_range.append(F)
 
-    live_plot(ax_F, test_DAC_range, F_range)    
+    live_plot(ax_F, DAC_range, F_range)    
 
 def calculate_F(gain, system):
 
