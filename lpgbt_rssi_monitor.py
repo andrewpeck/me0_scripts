@@ -97,9 +97,7 @@ def calculate_F_from_DAC_range(gain, system):
 
 def calculate_F(channel, gain, system):
 
-    # For sub: adc channel = 3
     R= 1e-03
-
     LSB = 3.55e-06
     DAC = 150
 

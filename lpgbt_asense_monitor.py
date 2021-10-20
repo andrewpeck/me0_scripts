@@ -15,7 +15,7 @@ def main(system, boss, gbt, run_time_min, gain, oh_v):
         F = calculate_F(channel, gain, system)
     else:
         F = 1
-        
+
     print("ADC Readings:")
 
     if not os.path.exists("lpgbt_data/lpgbt_asense_data"):
@@ -88,9 +88,7 @@ def main(system, boss, gbt, run_time_min, gain, oh_v):
 
 def calculate_F(channel, gain, system):
 
-    # For master: adc channel = 7
     R= 1e-03
-
     LSB = 3.55e-06
     DAC = 150
 
