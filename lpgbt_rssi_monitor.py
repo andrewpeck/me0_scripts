@@ -12,7 +12,8 @@ def main(system, boss, run_time_min, gain, voltage, oh_v):
     init_adc()
 
     if oh_v == 2:
-        F = calculate_F(gain, system)
+        channel = 3
+        F = calculate_F(channel, gain, system)
     else:
         F = 1
     
@@ -45,9 +46,9 @@ def main(system, boss, run_time_min, gain, voltage, oh_v):
     while int(time()) <= end_time:
         with open(filename, "a") as file:
             if oh_v == 1:
-                value = read_adc(7, gain, system)
+                value = F * read_adc(7, gain, system)
             if oh_v == 2:
-                value = read_adc(5, gain, system)
+                value = F * read_adc(5, gain, system)
             rssi_current = rssi_current_conversion(value, gain, voltage, oh_v) * 1e6 # in uA
             second = time() - start_time
             seconds.append(second)
@@ -68,7 +69,7 @@ def main(system, boss, run_time_min, gain, voltage, oh_v):
 def calculate_F_from_DAC_range(gain, system):
 
     # For sub: adc channel = 3
-    R_111 = 1e-03
+    R = 1e-03
 
     XX = 3.55e-06
     DAC_range = range(50, 200, 5)
@@ -86,7 +87,7 @@ def calculate_F_from_DAC_range(gain, system):
         V = I * R_111
 
         writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
-        writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x80, 0) 
+        writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x08, 0) 
         sleep(0.01)
         
         V_m = read_adc(3, gain, system)
@@ -95,27 +96,43 @@ def calculate_F_from_DAC_range(gain, system):
 
     live_plot(ax_F, DAC_range, F_range)    
 
-def calculate_F(gain, system):
+def calculate_F(channel, gain, system):
 
     # For sub: adc channel = 3
-    R_111 = 1e-03
+    R= 1e-03
 
-    XX = 3.55e-06
+    LSB = 3.55e-06
     DAC = 150
 
     I = DAC * XX
     V = I * R_111
 
+    reg_data = convert_gpio_reg(channel)
+
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
-    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x96, 0)  #Sets output current for the current DAC.
-    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x80, 0)
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
     sleep(0.01)
 
-    V_m = read_adc(7, gain, system)
+    V_m = read_adc(channel, gain, system)
 
     F = V/V_m
 
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x0, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x0, 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x0, 0)
+    sleep(0.01)
+
     return F
+
+def convert_gpio_reg(gpio):
+    reg_data = 0
+    if gpio <= 7:
+        bit = gpio
+    else:
+        bit = gpio - 8
+    reg_data |= (0x01 << bit)
+    return reg_data
 
 
 def live_plot(ax, x, y):
