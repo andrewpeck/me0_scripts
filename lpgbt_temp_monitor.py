@@ -14,7 +14,7 @@ def main(system, oh_v, boss, gain):
     # RTD sensors made of platinum are called PRT (Platinum Resistance Themometer)
 
     init_adc()
-
+    F = calculate_F
     channel = 6 #servant_adc_in6
     
     LSB = 3.55e-06
@@ -34,7 +34,7 @@ def main(system, oh_v, boss, gain):
         writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
         sleep(0.01)
 
-        V_m = read_adc(channel, gain, system)
+        V_m = F * read_adc(channel, gain, system)
         R = V_m/I
         R_range.append(R)
 
@@ -60,6 +60,33 @@ def convert_adc_reg(gpio):
         bit = gpio
     reg_data |= (0x01 << bit)
     return reg_data
+
+def calculate_F(channel, gain, system):
+
+    R= 1e-03
+    LSB = 3.55e-06
+    DAC = 150
+
+    I = DAC * LSB
+    V = I * R
+
+    reg_data = convert_adc_reg(channel)
+
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
+    sleep(0.01)
+
+    V_m = read_adc(channel, gain, system)
+
+    F = V/V_m
+
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x0, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x0, 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x0, 0)
+    sleep(0.01)
+
+    return F
 
 def live_plot(ax, x, y):
     ax.plot(x, y, "turquoise")
