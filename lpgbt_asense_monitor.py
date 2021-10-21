@@ -95,7 +95,7 @@ def calculate_F(channel, gain, system):
     I = DAC * LSB
     V = I * R
 
-    reg_data = convert_gpio_reg(channel)
+    reg_data = convert_adc_reg(channel)
 
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
@@ -112,6 +112,13 @@ def calculate_F(channel, gain, system):
     sleep(0.01)
 
     return F
+
+def convert_adc_reg(channel):
+    reg_data = 0
+    if gpio <= 7:
+        bit = gpio
+    reg_data |= (0x01 << bit)
+    return reg_data
 
 def live_plot_current(ax1, x, y0, y2, run_time_min, gbt):
     line0, = ax1.plot(x, y0, "red")
@@ -133,7 +140,6 @@ def live_plot_temp(ax2, x, y1, y3, run_time_min, gbt):
     plt.draw()
     plt.pause(0.01)
 
-
 def init_adc():
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x1, 0)  # enable ADC
     writeReg(getNode("LPGBT.RW.ADC.TEMPSENSRESET"), 0x1, 0)  # resets temp sensor
@@ -145,7 +151,6 @@ def init_adc():
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x63, 0) # vref tune
     sleep(0.01)
 
-
 def powerdown_adc():
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x0, 0)  # disable ADC
     writeReg(getNode("LPGBT.RW.ADC.TEMPSENSRESET"), 0x0, 0)  # disable temp sensor
@@ -155,7 +160,6 @@ def powerdown_adc():
     writeReg(getNode("LPGBT.RW.ADC.VDDANMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFENABLE"), 0x0, 0)  # vref disable
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x0, 0) # vref tune
-
 
 def read_adc(channel, gain, system):
 

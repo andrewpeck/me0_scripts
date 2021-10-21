@@ -14,9 +14,10 @@ def main(system, oh_v, boss, gain):
     # RTD sensors made of platinum are called PRT (Platinum Resistance Themometer)
 
     init_adc()
-    F = calculate_F
+
     channel = 6 #servant_adc_in6
-    
+    F = calculate_F(channel, gain, system)
+
     LSB = 3.55e-06
     DAC_range = range(50, 200, 5)
 
@@ -70,6 +71,7 @@ def calculate_F(channel, gain, system):
     I = DAC * LSB
     V = I * R
 
+    channel = 6
     reg_data = convert_adc_reg(channel)
 
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
@@ -151,7 +153,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ADC Precision Calibration Scan for ME0 Optohybrid")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", default="2", help="oh_v = 2 (no precision calibration for oh_v1)")
-    parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
+    parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")    
     ####### The above line (127) seems redundant when args.system = backend and args.ohid and args.lpgbt are valid
