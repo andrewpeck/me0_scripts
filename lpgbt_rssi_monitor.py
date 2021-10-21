@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import datetime
 
-def main(system, boss, run_time_min, gain, voltage, oh_v):
+def main(system, oh_v, boss, run_time_min, gain, voltage):
 
     init_adc()
 
@@ -104,7 +104,7 @@ def calculate_F(channel, gain, system):
     I = DAC * LSB
     V = I * R
 
-    reg_data = convert_gpio_reg(channel)
+    reg_data = convert_adc_reg(channel)
 
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
@@ -122,15 +122,12 @@ def calculate_F(channel, gain, system):
 
     return F
 
-def convert_gpio_reg(gpio):
+def convert_adc_reg(gpio):
     reg_data = 0
     if gpio <= 7:
         bit = gpio
-    else:
-        bit = gpio - 8
     reg_data |= (0x01 << bit)
     return reg_data
-
 
 def live_plot(ax, x, y):
     ax.plot(x, y, "turquoise")
@@ -315,7 +312,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, boss, args.minutes, gain, int(args.voltage), oh_v)
+        main(args.system, oh_v, boss, args.minutes, gain, int(args.voltage))
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
