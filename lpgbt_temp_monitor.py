@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import datetime
 
-def main(system, oh_v, boss, run_time_min, gain):
+def main(system, oh_v, boss, device, rate, offset, run_time_min, gain):
 
     # PT-100 is an RTD (Resistance Temperature Detector) sensor
     # PT (ie platinum) has linear temperature-resistance relationship
@@ -15,10 +15,14 @@ def main(system, oh_v, boss, run_time_min, gain):
 
     init_adc()
 
-    channel_1 = 6 # OH PT100
-    channel_2 = 0 # VTRX PT100
-    F_1 = calculate_F(channel_1, gain, system)
-    F_2 = calculate_F(channel_2, gain, system)
+    if device == "OH":
+        channel = 6
+        DAC = 50
+    else:
+        channel = 0
+        DAC = 20
+
+    F = calculate_F(gain, system)
 
     print("Temperature Readings:")
 
@@ -29,34 +33,20 @@ def main(system, oh_v, boss, run_time_min, gain):
     now = now.replace(":", "_")
     now = now.replace(" ", "_")
     foldername = "lpgbt_data/lpgbt_temp_data/"
-    filename = foldername + "temp_data" + now + ".txt"
+    filename = foldername + "temp_" + device + "_data" + now + ".txt"
 
     print(filename)
     open(filename, "w+").close()
-    minutes, seconds, T_1, T_2 = [], [], []
+    minutes, seconds, T = [], [], []
 
     run_time_min = float(run_time_min)
 
     # Set figure paramete
     fig, ax = plt.subplots()
-    ax_1 = fig.add_subplot(211)
-    ax_2 = fig.add_subplot(212)
-
-    # Turn off axis lines and ticks of the big subplot
-    ax.spines['top'].set_color('none')
-    ax.spines['bottom'].set_color('none')
-    ax.spines['left'].set_color('none')
-    ax.spines['right'].set_color('none')
-    ax.tick_params(labelcolor='w', top=False, bottom=False, left=False, right=False)
-
     ax.set_xlabel('minutes')
     ax.set_ylabel('T (C)')
 
-    ax1.set_title('OH')
-    ax2.set_title('VTRX')  
-
     LSB = 3.55e-06
-    DAC = 150
     I = DAC * LSB
     m = 0.385   # Conventional resistance change rate = 0.385 ohms per degree Celsius
 
@@ -68,28 +58,22 @@ def main(system, oh_v, boss, run_time_min, gain):
 
     while int(time()) <= end_time:
         with open(filename, "a") as file:
-            V_1 = F_1 * read_adc(channel_1, gain, system)
-            V_2 = F_2 * read_adc(channel_2, gain, system)
-            R_1 = V_1/I
-            R_2 = V_2/I
+            V = F * read_adc(channel, gain, system)
+            R = V/I
 
-            temp_1 = R_1-100/m
-            temp_2 = R_2-100/m
+            temp = (R-offset)/rate
 
             second = time() - start_time
             seconds.append(second)
-            T_1.append(temp_1)
-            T_2.append(temp_2)
+            T.append(temp)
             minutes.append(second/60)
-            live_plot(ax_1, minutes, T_1)
-            live_plot(ax_2, minutes, T_2)
+            live_plot(ax, minutes, T)
 
-            file.write(str(second) + "\t" + str(temp_1) + "\t" + str(temp_2) + "\n" )
-            print("\tch %X: 0x%03X = %f (T (C))" % (channel_1, value, temp_1))
-            print("\tch %X: 0x%03X = %f (T (C))" % (channel_2, value, temp_2))
+            file.write(str(second) + "\t" + str(temp) + "\t" + str(temp) + "\n" )
+            print("\tch %X: 0x%03X = %f (T (C))" % (channel, value, temp))
             sleep(1)
 
-    figure_name = foldername + "temp" + now + "_plot.pdf"
+    figure_name = foldername + "temp_" + device + now + "_plot.pdf"
     fig.savefig(figure_name, bbox_inches="tight")
 
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x0, 0)  #Enables current DAC.
@@ -106,7 +90,7 @@ def convert_adc_reg(gpio):
     reg_data |= (0x01 << bit)
     return reg_data
 
-def calculate_F(channel, gain, system):
+def calculate_F(gain, system):
 
     R= 1e-03
     LSB = 3.55e-06
@@ -124,7 +108,6 @@ def calculate_F(channel, gain, system):
     sleep(0.01)
 
     V_m = read_adc(channel, gain, system)
-
     F = V/V_m
 
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x0, 0)  #Enables current DAC.
@@ -198,6 +181,9 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
     parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", default="2", help="oh_v = 2 (no precision calibration for oh_v1)")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = sub")
+    parser.add_argument("-t", "--temp", action="store", dest="temp", help="temp = OH or VTRX")
+    parser.add_argument("-r", "--rate", action="store", dest="rate", default="0.385", help="rate = rate of change of R w.r.t T")
+    parser.add_argument("-b", "--b", action="store", dest="b", default="100", help="b = temperature offset at 0C")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 1, 3, 5 or 7")
     parser.add_argument("-m", "--minutes", action="store", dest="minutes", help="minutes = int. # of minutes you want to run")  
@@ -245,6 +231,19 @@ if __name__ == "__main__":
     if boss is None:
         sys.exit()
 
+    if args.temp is None or args.temp != "OH" or args.temp != "VTRX":
+        print (Colors.YELLOW + "Please select OH or VTRX" + Colors.ENDC)
+        sys.exit()
+
+    if args.rate is None:
+        print (Colors.YELLOW + "Please input a rate (default=0.385)" + Colors.ENDC)
+        sys.exit()
+
+    if args.b is None:
+        print (Colors.YELLOW + "Please input an offset (defaul=100)" + Colors.ENDC)
+        sys.exit()
+
+
     if args.system == "backend":
         if args.ohid is None:
             print(Colors.YELLOW + "Need OHID for backend" + Colors.ENDC)
@@ -288,7 +287,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, oh_v, boss, args.minutes, gain)
+        main(args.system, oh_v, boss, args.temp, float(args.rate), int(args.b), args.minutes, gain)
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
