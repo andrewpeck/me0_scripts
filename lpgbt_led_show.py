@@ -57,12 +57,21 @@ def set_pioout(gpio_list):
     value_l, value_h = 0
     for gpio in gpio_list:
         if gpio in range(0,8):
-            value_l = value_l | hex(gpio)
+            value_l |= convert_gpio_reg(gpio)
         elif gpio in range(8,16):
-            value_h = value_h | hex(gpio - 8)
+            value_h |= convert_gpio_reg(gpio)
 
     writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), value_l, 0)
     writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), value_h, 0)
+
+def convert_gpio_reg(gpio):
+    reg_data = 0
+    if gpio <= 7:
+        bit = gpio
+    else:
+        bit = gpio - 8
+    reg_data |= (0x01 << bit)
+    return reg_data
 
 def check_bit(byteval,idx):
     return ((byteval&(1<<idx))!=0);
