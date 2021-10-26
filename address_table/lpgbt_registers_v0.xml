@@ -10,8 +10,8 @@
 <!-- g = capitalize id -->
 
 <node id="TOP">
+    
     <node id="LPGBT">
-
 
         <node id="RWF" address="0x0" description="Read/Write/Fuse">
             <!-- CHIPID -->

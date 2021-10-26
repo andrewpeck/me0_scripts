@@ -44,8 +44,7 @@
                     mask="0xff" />
             </node> <!--CHIPID-->
 
-
-            <!-- 15.1.2 CALIBRATION DATA -->>
+            <!-- 15.1.2 CALIBRATION DATA -->
             <node id="CALIBRATION" address="0x8" description="Calibration Data">
                 
                 <!-- [0x008] DACCAL0 -->
@@ -2188,100 +2187,100 @@
                 <!-- Control registers for build-in PRBS7 generators in ePortRx -->
                 <node id="EPRXECPrbsEnable" address="0x0" permission="rw"
                     description=""
-                    mask="0x10">
+                    mask="0x10" />
                 <node id="EPRX63PrbsEnable" address="0x0" permission="rw"
                     description="Enables PRBS7 generator for channel 3 in group 6. If enabled, the data from the input pin are discarded."
-                    mask="0x08">
+                    mask="0x08" />
                 <node id="EPRX62PrbsEnable" address="0x0" permission="rw"
                     description=" Enables PRBS7 generator for channel 2 in group 6. If enabled, the data from the input pin are discarded."
-                    mask="0x04">
+                    mask="0x04" />
                 <node id="EPRX61PrbsEnable" address="0x0" permission="rw"
                     description="Enables PRBS7 generator for channel 1 in group 6. If enabled, the data from the input pin are discarded."
-                    mask="0x02">
+                    mask="0x02" />
                 <node id="EPRX60PrbsEnable" address="0x0" permission="rw"
                     description="Enables PRBS7 generator for channel 0 in group 6. If enabled, the data from the input pin are discarded."
-                    mask="0x01">
+                    mask="0x01" />
 
                 <!-- [0x133] EPRXPRBS2 -->
                 <!-- Control registers for build-in PRBS7 generators in ePortRx -->
                 <node id="EPRX53PrbsEnable" address="0x1" permission="rw"
                     description="Enables PRBS7 generator for channel 3 in group 5. If enabled, the data from the input pin are discarded."
-                    mask="0x80">
+                    mask="0x80" />
                 <node id="EPRX52PrbsEnable" address="0x1" permission="rw"
                     description="Enables PRBS7 generator for channel 2 in group 5. If enabled, the data from the input pin are discarded."
-                    mask="0x40">
+                    mask="0x40" />
                 <node id="EPRX51PrbsEnable" address="0x1" permission="rw"
                     description="Enables PRBS7 generator for channel 1 in group 5. If enabled, the data from the input pin are discarded."
-                    mask="0x20">
+                    mask="0x20" />
                 <node id="EPRX50PrbsEnable" address="0x1" permission="rw"
                     description="Enables PRBS7 generator for channel 0 in group 5. If enabled, the data from the input pin are discarded."
-                    mask="0x10">
+                    mask="0x10" />
                 <node id="EPRX43PrbsEnable" address="0x1" permission="rw"
                     description="Enables PRBS7 generator for channel 3 in group 4. If enabled, the data from the input pin are discarded."
-                    mask="0x08">
+                    mask="0x08" />
                 <node id="EPRX42PrbsEnable" address="0x1" permission="rw"
                     description="Enables PRBS7 generator for channel 2 in group 4. If enabled, the data from the input pin are discarded."
-                    mask="0x04">
+                    mask="0x04" />
                 <node id="EPRX41PrbsEnable" address="0x1" permission="rw"
                     description="Enables PRBS7 generator for channel 1 in group 4. If enabled, the data from the input pin are discarded."
-                    mask="0x02">
+                    mask="0x02" />
                 <node id="EPRX40PrbsEnable" address="0x1" permission="rw"
                     description="Enables PRBS7 generator for channel 0 in group 4. If enabled, the data from the input pin are discarded."
-                    mask="0x01">
+                    mask="0x01" />
 
                 <!-- [0x134] EPRXPRBS1 -->
                 <!-- Control registers for build-in PRBS7 generators in ePortRx -->
                 <node id="EPRX33PrbsEnable" address="0x2" permission="rw"
                     description="Enables PRBS7 generator for channel 3 in group 3. If enabled, the data from the input pin are discarded."
-                    mask="0x80">
+                    mask="0x80" />
                 <node id="EPRX32PrbsEnable" address="0x2" permission="rw"
                     description="Enables PRBS7 generator for channel 2 in group 3. If enabled, the data from the input pin are discarded."
-                    mask="0x40">
+                    mask="0x40" />
                 <node id="EPRX31PrbsEnable" address="0x2" permission="rw"
                     description="Enables PRBS7 generator for channel 1 in group 3. If enabled, the data from the input pin are discarded."
-                    mask="0x20">
+                    mask="0x20" />
                 <node id="EPRX30PrbsEnable" address="0x2" permission="rw"
                     description="Enables PRBS7 generator for channel 0 in group 3. If enabled, the data from the input pin are discarded."
-                    mask="0x10">
+                    mask="0x10" />
                 <node id="EPRX23PrbsEnable" address="0x2" permission="rw"
                     description="Enables PRBS7 generator for channel 3 in group 2. If enabled, the data from the input pin are discarded."
-                    mask="0x08">
+                    mask="0x08" />
                 <node id="EPRX22PrbsEnable" address="0x2" permission="rw"
                     description="Enables PRBS7 generator for channel 2 in group 2. If enabled, the data from the input pin are discarded."
-                    mask="0x04">
+                    mask="0x04" />
                 <node id="EPRX21PrbsEnable" address="0x2" permission="rw"
                     description="Enables PRBS7 generator for channel 1 in group 2. If enabled, the data from the input pin are discarded."
-                    mask="0x02">
+                    mask="0x02" />
                 <node id="EPRX20PrbsEnable" address="0x2" permission="rw"
                     description="Enables PRBS7 generator for channel 0 in group 2. If enabled, the data from the input pin are discarded."
-                    mask="0x01">
+                    mask="0x01" />
 
                 <!-- [0x135] EPRXPRBS0 -->
                 <!-- Control registers for build-in PRBS7 generators in ePortRx -->
                 <node id="EPRX13PrbsEnable" address="0x3" permission="rw"
                     description="Enables PRBS7 generator for channel 3 in group 1. If enabled, the data from the input pin are discarded."
-                    mask="0x80">
+                    mask="0x80" />
                 <node id="EPRX12PrbsEnable" address="0x3" permission="rw"
                     description="Enables PRBS7 generator for channel 2 in group 1. If enabled, the data from the input pin are discarded."
-                    mask="0x40">
+                    mask="0x40" />
                 <node id="EPRX11PrbsEnable" address="0x3" permission="rw"
                     description="Enables PRBS7 generator for channel 1 in group 1. If enabled, the data from the input pin are discarded."
-                    mask="0x20">
+                    mask="0x20" />
                 <node id="EPRX10PrbsEnable" address="0x3" permission="rw"
                     description="Enables PRBS7 generator for channel 0 in group 1. If enabled, the data from the input pin are discarded."
-                    mask="0x10">
+                    mask="0x10" />
                 <node id="EPRX03PrbsEnable" address="0x3" permission="rw"
                     description="Enables PRBS7 generator for channel 3 in group 0. If enabled, the data from the input pin are discarded."
-                    mask="0x08">
+                    mask="0x08" />
                 <node id="EPRX02PrbsEnable" address="0x3" permission="rw"
                     description="Enables PRBS7 generator for channel 2 in group 0. If enabled, the data from the input pin are discarded."
-                    mask="0x04">
+                    mask="0x04" />
                 <node id="EPRX01PrbsEnable" address="0x3" permission="rw"
                     description="Enables PRBS7 generator for channel 1 in group 0. If enabled, the data from the input pin are discarded."
-                    mask="0x02">
+                    mask="0x02" />
                 <node id="EPRX00PrbsEnable" address="0x3" permission="rw"
                     description="Enables PRBS7 generator for channel 0 in group 0. If enabled, the data from the input pin are discarded."
-                    mask="0x01">
+                    mask="0x01" />
             </node>
             
             <node id="BERT" address="0x136-0x100" description="">
@@ -2713,7 +2712,7 @@
                 <!-- Status register for ePortRxEc -->
                 <node id="EPRXECCURRENTPHASE" address="0x167-0x150" permission="r"
                     description="Currently selected phase for EC channel phase aligner"
-                    mask="0x07">
+                    mask="0x07" />
 
                 <node id="EPRX" address="0x168-0x150" description=""  
                     generate="true"
@@ -2738,7 +2737,8 @@
                         description="Loss of Lock counter value"
                         mask="0x1f" />
                 </node>
-            
+            </node>
+
             <!-- 15.3.3 I2C Masters -->
             <node id="I2CREAD" address="0x16f-0x150" description="I2C Read">
             
@@ -3366,31 +3366,31 @@
 
                 <!-- [0x1e1] CRCValue0 -->
                 <!-- Value of the recently calculated CRC. -->
-                <node id="CRCVALUE0" address="0x1e1-0x0x1d9" permission="r"
+                <node id="CRCVALUE0" address="0x1e1-0x1d9" permission="r"
                     description="Bits 7:0 of the recently calculated CRC. Refer to Cyclic Redundancy Check (CRC) for more details."
                     mask="0xff" />
 
                 <!-- [0x1e2] CRCValue1 -->
                 <!-- Value of the recently calculated CRC. -->
-                <node id="CRCVALUE1" address="0x1e2-0x0x1d9" permission="r"
+                <node id="CRCVALUE1" address="0x1e2-0x1d9" permission="r"
                     description="Bits 15:8 of the recently calculated CRC. Refer to Cyclic Redundancy Check (CRC) for more details."
                     mask="0xff" />
 
                 <!-- [0x1e3] CRCValue2 -->
                 <!-- Value of the recently calculated CRC. -->
-                <node id="CRCVALUE2" address="0x1e3-0x0x1d9" permission="r"
+                <node id="CRCVALUE2" address="0x1e3-0x1d9" permission="r"
                     description="Bits 23:16 of the recently calculated CRC. Refer to Cyclic Redundancy Check (CRC) for more details."
                     mask="0xff" />
 
                 <!-- [0x1e4] CRCValue3 -->
                 <!-- Value of the recently calculated CRC. -->
-                <node id="CRCVALUE3" address="0x1e4-0x0x1d9" permission="r"
+                <node id="CRCVALUE3" address="0x1e4-0x1d9" permission="r"
                     description="Bits 31:24 of the recently calculated CRC. Refer to Cyclic Redundancy Check (CRC) for more details."
                     mask="0xff" />
 
                 <!-- [0x1e5] FailedCRC -->
                 <!-- Counter of invalid CRC cycles. -->
-                <node id="FailedCRCCounter" address="0x1e5-0x0x1d9" permission="r"
+                <node id="FailedCRCCounter" address="0x1e5-0x1d9" permission="r"
                     description="Counts number of CRC calculations which resulted in invalid checksum."
                     mask="0xff" />
             </node>
@@ -3456,8 +3456,8 @@
                     description="Bits 7:0 of the configuration memory SEU counter."
                     mask="0xff" />
             </node>
- 
-        </node> <!-- /ro -->
+
+        </node><!-- /ro -->
 
     </node> <!--LPGBT-->
 
