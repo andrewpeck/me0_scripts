@@ -64,36 +64,7 @@ def main(system, oh_v, boss, run_time_min, gain, voltage):
     figure_name = foldername + "rssi_data_" + now + "_plot.pdf"
     fig.savefig(figure_name, bbox_inches="tight")
 
-    powerdown_adc()
-
-def calculate_F_from_DAC_range(gain, system):
-
-    R = 1e-03
-
-    XX = 3.55e-06
-    DAC_range = range(50, 200, 5)
-    
-    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
-
-    fig_F, ax_F = plt.subplots()
-    ax_F.set_xlabel("DAC")
-    ax_F.set_ylabel("F=V/V_m")
-
-    F_range = []
-    for DAC in DAC_range:
-        
-        I = DAC * XX
-        V = I * R_111
-
-        writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
-        writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x08, 0) 
-        sleep(0.01)
-        
-        V_m = read_adc(3, gain, system)
-        F = V/V_m
-        F_range.append(F)
-
-    live_plot(ax_F, DAC_range, F_range)    
+    powerdown_adc()  
 
 def calculate_F(channel, gain, system):
 
