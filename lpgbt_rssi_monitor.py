@@ -11,12 +11,13 @@ def main(system, oh_v, boss, run_time_min, gain, voltage):
 
     init_adc()
 
-    if oh_v == 2 
-        channel = 3 #servant_adc_in3
-        F = calculate_F(channel, gain, system)
-    else:
+    if system == "dryrun":
         F = 1
-    
+    else:
+        if oh_v == 2:
+            channel = 3 #servant_adc_in3
+            F = calculate_F(channel, gain, system)
+
     print("ADC Readings:")
 
     if not os.path.exists("lpgbt_data/lpgbt_vtrx+_rssi_data"):
@@ -77,8 +78,8 @@ def calculate_F(channel, gain, system):
 
     reg_data = convert_adc_reg(channel)
 
-    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
-    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x1, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), convert_adc_reg(DAC), 0)  #Sets output current for the current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
     sleep(0.01)
 
@@ -97,6 +98,8 @@ def convert_adc_reg(gpio):
     reg_data = 0
     if gpio <= 7:
         bit = gpio
+    else:
+        bit = gpio - 8
     reg_data |= (0x01 << bit)
     return reg_data
 
@@ -213,7 +216,7 @@ if __name__ == "__main__":
     if args.oh_v == "1":
         print("Using OH v1")
         oh_v = 1
-        if args.lpgbt is None or args.lpgbt != "boss" or args.lpgbt != "sub":
+        if args.lpgbt is None:
             print(Colors.YELLOW + "Please select boss." + Colors.ENDC)
             sys.exit()
         elif args.lpgbt == "boss":
@@ -222,10 +225,13 @@ if __name__ == "__main__":
         elif args.lpgbt == "sub":
             print(Colors.YELLOW + "Only boss allowed oh_v1" + Colors.ENDC)
             sys.exit()
+        else:
+            print(Colors.YELLOW + "Please select boss." + Colors.ENDC)
+            sys.exit()
     elif args.oh_v == "2":
         print("Using OH v2")
         oh_v = 2
-        if args.lpgbt is None or args.lpgbt != "boss" or args.lpgbt != "sub":
+        if args.lpgbt is None:
             print(Colors.YELLOW + "Please select sub" + Colors.ENDC)
             sys.exit()
         elif args.lpgbt == "boss":
@@ -234,6 +240,9 @@ if __name__ == "__main__":
         elif args.lpgbt == "sub":
             print("Using sub LPGBT")
             boss = 0
+        else:
+            print(Colors.YELLOW + "Please select boss." + Colors.ENDC)
+            sys.exit()
     else:
         print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
         sys.exit()
@@ -283,7 +292,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, oh_v, boss, args.minutes, gain, int(args.voltage))
+        main(args.system, oh_v, boss, args.minutes, gain, float(args.voltage))
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

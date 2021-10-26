@@ -18,27 +18,30 @@ def main(system, oh_v, boss, gain):
     
     R = 1e-03
     LSB = 3.55e-06
-    DAC_range = range(50, 200, 5)
+    if system == "dryrun":
+        DAC_range = []
+    else:
+        DAC_range = range(50, 200, 5)
 
     reg_data = convert_adc_reg(channel)
 
-    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x1, 0)  #Enables current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
 
     F_range = []
     for DAC in DAC_range:
         
-        I = DAC * XX
+        I = DAC * LSB
         V = I * R
 
-        writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
+        writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), convert_adc_reg(DAC), 0)  #Sets output current for the current DAC.
         sleep(0.01)
         
         V_m = read_adc(channel, gain, system)
         F = V/V_m
         F_range.append(F)
 
-    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x0, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x0, 0)  #Enables current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x0, 0)  #Sets output current for the current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x0, 0)
     sleep(0.01)
@@ -55,6 +58,8 @@ def convert_adc_reg(gpio):
     reg_data = 0
     if gpio <= 7:
         bit = gpio
+    else:
+        bit = gpio - 8
     reg_data |= (0x01 << bit)
     return reg_data
 

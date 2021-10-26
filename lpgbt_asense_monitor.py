@@ -7,14 +7,16 @@ import matplotlib.pyplot as plt
 import os
 import datetime
 
-def main(system, boss, gbt, run_time_min, gain, oh_v):
+def main(system, oh_v, boss, gbt, run_time_min, gain):
 
     init_adc()
-    if oh_v == 2:
-        channel = 7 # master_adc_in7
-        F = calculate_F(channel, gain, system)
-    else:
+
+    if system == "dryrun":
         F = 1
+    else:
+        if oh_v == 2:
+            channel = 3  # servant_adc_in3
+            F = calculate_F(channel, gain, system)
 
     print("ADC Readings:")
 
@@ -44,40 +46,39 @@ def main(system, boss, gbt, run_time_min, gain, oh_v):
     start_time = int(time())
     end_time = int(time()) + (60 * run_time_min)
 
+    while int(time()) <= end_time:
+        with open(filename, "a") as file:
+            if oh_v == 1:
+                asense0_value = F * read_adc(4, gain, system)
+                asense1_value = F * read_adc(2, gain, system)
+                asense2_value = F * read_adc(1, gain, system)
+                asense3_value = F * read_adc(3, gain, system)
+            if oh_v == 2:
+                asense0_value = F * read_adc(6, gain, system)
+                asense1_value = F * read_adc(1, gain, system)
+                asense2_value = F * read_adc(0, gain, system)
+                asense3_value = F * read_adc(3, gain, system)
+            asense0_converted = asense_current_conversion(asense0_value)
+            asense1_converted = asense_temp_voltage_conversion(asense1_value)
+            asense2_converted = asense_current_conversion(asense2_value)
+            asense3_converted = asense_temp_voltage_conversion(asense3_value)
+            second = time() - start_time
+            seconds.append(second)
+            asense0.append(asense0_converted)
+            asense1.append(asense1_converted)
+            asense2.append(asense2_converted)
+            asense3.append(asense3_converted)
+            minutes.append(second/60)
+            live_plot_current(ax1, minutes, asense0, asense2, run_time_min, gbt)
+            live_plot_temp(ax2, minutes, asense1, asense3, run_time_min, gbt)
 
-        while int(time()) <= end_time:
-            with open(filename, "a") as file:
-                if oh_v == 1:
-                    asense0_value = F * read_adc(4, gain, system)
-                    asense1_value = F * read_adc(2, gain, system)
-                    asense2_value = F * read_adc(1, gain, system)
-                    asense3_value = F * read_adc(3, gain, system)
-                if oh_v == 2:
-                    asense0_value = F * read_adc(6, gain, system)
-                    asense1_value = F * read_adc(1, gain, system)
-                    asense2_value = F * read_adc(0, gain, system)
-                    asense3_value = F * read_adc(3, gain, system)
-                asense0_converted = asense_current_conversion(asense0_value)
-                asense1_converted = asense_temp_voltage_conversion(asense1_value)
-                asense2_converted = asense_current_conversion(asense2_value)
-                asense3_converted = asense_temp_voltage_conversion(asense3_value)
-                second = time() - start_time
-                seconds.append(second)
-                asense0.append(asense0_converted)
-                asense1.append(asense1_converted)
-                asense2.append(asense2_converted)
-                asense3.append(asense3_converted)
-                minutes.append(second/60)
-                live_plot_current(ax1, minutes, asense0, asense2, run_time_min, gbt)
-                live_plot_temp(ax2, minutes, asense1, asense3, run_time_min, gbt)
+            file.write(str(second) + "\t" + str(asense0_converted) + "\t" + str(asense1_converted) + "\t" + str(asense2_converted) + "\t" + str(asense3_converted) + "\n" )
+            if gbt in [0,1]:
+                print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG2.5V current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt2 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2V current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt1 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
+            else:
+                print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG1.2VD current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt3 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2VA current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt4 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
 
-                file.write(str(second) + "\t" + str(asense0_converted) + "\t" + str(asense1_converted) + "\t" + str(asense2_converted) + "\t" + str(asense3_converted) + "\n" )
-                if gbt in [0,1]:
-                    print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG2.5V current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt2 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2V current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt1 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
-                else:
-                    print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG1.2VD current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt3 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2VA current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt4 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
-
-                sleep(1)
+            sleep(1)
 
     figure_name1 = foldername + now + "_pg_current_plot.pdf"
     fig1.savefig(figure_name1, bbox_inches="tight")
@@ -306,7 +307,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, boss, gbt, args.minutes, gain, oh_v)
+        main(args.system, oh_v, boss, gbt, args.minutes, gain)
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

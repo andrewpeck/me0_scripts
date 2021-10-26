@@ -15,6 +15,13 @@ def main(system, oh_v, boss, device, rate, offset, run_time_min, gain):
 
     init_adc()
 
+    if system == "dryrun":
+        F = 1
+    else:
+        if oh_v == 2:
+            channel = 3 #servant_adc_in3
+            F = calculate_F(channel, gain, system)
+
     if device == "OH":
         channel = 6
         DAC = 50
@@ -22,8 +29,15 @@ def main(system, oh_v, boss, device, rate, offset, run_time_min, gain):
         channel = 0
         DAC = 20
 
-    cal_channel = 3
-    F = calculate_F(cal_channel, gain, system)
+    LSB = 3.55e-06
+    I = DAC * LSB
+
+    reg_data = convert_adc_reg(channel)
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  # Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), convert_adc_reg(DAC),
+             0)  # Sets output current for the current DAC.
+    sleep(0.01)
 
     print("Temperature Readings:")
 
@@ -47,37 +61,31 @@ def main(system, oh_v, boss, device, rate, offset, run_time_min, gain):
     ax.set_xlabel('minutes')
     ax.set_ylabel('R (Ohms)')
 
-    LSB = 3.55e-06
-    I = DAC * LSB
-
-    reg_data = convert_adc_reg(channel)
-    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
-    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
-    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
-    sleep(0.01)
+    start_time = int(time())
+    end_time = int(time()) + (60 * run_time_min)
 
     while int(time()) <= end_time:
         with open(filename, "a") as file:
             V_m = F * read_adc(channel, gain, system)
             R_m = V_m/I
 
-            temp = (R-offset)/rate
+            temp = (R_m-offset)/rate
 
             second = time() - start_time
             seconds.append(second)
             T.append(temp)
             R.append(R_m)
             minutes.append(second/60)
-            live_plot(ax, minutes, R_m)
+            live_plot(ax, minutes, R)
 
             file.write(str(second) + "\t" + str(R_m)+ "\t" + str(temp) + "\n" )
-            print("\tch %X: 0x%03X = %f (R (Ohms))" % (channel, value, R_m))
+            print("\tch %X: 0x%03X = %f (R (Ohms))" % (channel, V_m, R_m))
             sleep(1)
 
     figure_name = foldername + "temp_" + device + now + "_plot.pdf"
     fig.savefig(figure_name, bbox_inches="tight")
 
-    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x0, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x0, 0)  #Enables current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x0, 0)  #Sets output current for the current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x0, 0)
     sleep(0.01)
@@ -88,6 +96,8 @@ def convert_adc_reg(gpio):
     reg_data = 0
     if gpio <= 7:
         bit = gpio
+    else:
+        bit = gpio - 8
     reg_data |= (0x01 << bit)
     return reg_data
 
@@ -103,7 +113,7 @@ def calculate_F(channel, gain, system):
     reg_data = convert_adc_reg(channel)
 
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
-    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), convert_adc_reg(DAC), 0)  #Sets output current for the current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
     sleep(0.01)
 
@@ -185,7 +195,7 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--rate", action="store", dest="rate", default="0.385", help="rate = rate of change of R w.r.t T")
     parser.add_argument("-b", "--b", action="store", dest="b", default="100", help="b = temperature offset at 0C")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
-    parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 1, 3, 5 or 7")
+    parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 1, 3, 5 or 7 (only needed for backend)")
     parser.add_argument("-m", "--minutes", action="store", dest="minutes", help="minutes = int. # of minutes you want to run")  
     parser.add_argument("-a", "--gain", action="store", dest="gain", default = "2", help="gain = Gain for RSSI ADC: 2, 8, 16, 32")
     args = parser.parse_args()
@@ -231,8 +241,11 @@ if __name__ == "__main__":
     if boss is None:
         sys.exit()
 
-    if args.temp is None or args.temp != "OH" or args.temp != "VTRX":
-        print (Colors.YELLOW + "Please select OH or VTRX" + Colors.ENDC)
+    if args.temp is None:
+        print(Colors.YELLOW + "Please select OH or VTRX" + Colors.ENDC)
+        sys.exit()
+    elif args.temp != "OH" and args.temp != "VTRX":
+        print(Colors.YELLOW + "Please select OH or VTRX" + Colors.ENDC)
         sys.exit()
 
     if args.system == "backend":
