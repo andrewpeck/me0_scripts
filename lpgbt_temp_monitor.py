@@ -22,7 +22,8 @@ def main(system, oh_v, boss, device, rate, offset, run_time_min, gain):
         channel = 0
         DAC = 20
 
-    F = calculate_F(gain, system)
+    cal_channel = 3
+    F = calculate_F(cal_channel, gain, system)
 
     print("Temperature Readings:")
 
@@ -37,18 +38,17 @@ def main(system, oh_v, boss, device, rate, offset, run_time_min, gain):
 
     print(filename)
     open(filename, "w+").close()
-    minutes, seconds, T = [], [], []
+    minutes, seconds, T, R = [], [], [], []
 
     run_time_min = float(run_time_min)
 
     # Set figure paramete
     fig, ax = plt.subplots()
     ax.set_xlabel('minutes')
-    ax.set_ylabel('T (C)')
+    ax.set_ylabel('R (Ohms)')
 
     LSB = 3.55e-06
     I = DAC * LSB
-    m = 0.385   # Conventional resistance change rate = 0.385 ohms per degree Celsius
 
     reg_data = convert_adc_reg(channel)
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
@@ -58,19 +58,20 @@ def main(system, oh_v, boss, device, rate, offset, run_time_min, gain):
 
     while int(time()) <= end_time:
         with open(filename, "a") as file:
-            V = F * read_adc(channel, gain, system)
-            R = V/I
+            V_m = F * read_adc(channel, gain, system)
+            R_m = V_m/I
 
             temp = (R-offset)/rate
 
             second = time() - start_time
             seconds.append(second)
             T.append(temp)
+            R.append(R_m)
             minutes.append(second/60)
-            live_plot(ax, minutes, T)
+            live_plot(ax, minutes, R_m)
 
-            file.write(str(second) + "\t" + str(temp) + "\t" + str(temp) + "\n" )
-            print("\tch %X: 0x%03X = %f (T (C))" % (channel, value, temp))
+            file.write(str(second) + "\t" + str(R_m)+ "\t" + str(temp) + "\n" )
+            print("\tch %X: 0x%03X = %f (R (Ohms))" % (channel, value, R_m))
             sleep(1)
 
     figure_name = foldername + "temp_" + device + now + "_plot.pdf"
@@ -90,7 +91,7 @@ def convert_adc_reg(gpio):
     reg_data |= (0x01 << bit)
     return reg_data
 
-def calculate_F(gain, system):
+def calculate_F(channel, gain, system):
 
     R= 1e-03
     LSB = 3.55e-06
@@ -99,7 +100,6 @@ def calculate_F(gain, system):
     I = DAC * LSB
     V = I * R
 
-    channel = 6
     reg_data = convert_adc_reg(channel)
 
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
@@ -235,15 +235,6 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Please select OH or VTRX" + Colors.ENDC)
         sys.exit()
 
-    if args.rate is None:
-        print (Colors.YELLOW + "Please input a rate (default=0.385)" + Colors.ENDC)
-        sys.exit()
-
-    if args.b is None:
-        print (Colors.YELLOW + "Please input an offset (defaul=100)" + Colors.ENDC)
-        sys.exit()
-
-
     if args.system == "backend":
         if args.ohid is None:
             print(Colors.YELLOW + "Need OHID for backend" + Colors.ENDC)
@@ -287,7 +278,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, oh_v, boss, args.temp, float(args.rate), int(args.b), args.minutes, gain)
+        main(args.system, oh_v, boss, args.temp, float(args.rate), float(args.b), args.minutes, gain)
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
