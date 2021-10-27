@@ -6,8 +6,10 @@ import csv
 import matplotlib.pyplot as plt
 import os
 import datetime
+import math
+import numpy as np
 
-def main(system, oh_v, boss, device, rate, offset, run_time_min, gain):
+def main(system, oh_v, boss, device, run_time_min, gain):
 
     # PT-100 is an RTD (Resistance Temperature Detector) sensor
     # PT (ie platinum) has linear temperature-resistance relationship
@@ -15,29 +17,8 @@ def main(system, oh_v, boss, device, rate, offset, run_time_min, gain):
 
     init_adc()
 
-    if system == "dryrun":
-        F = 1
-    else:
-        if oh_v == 2:
-            channel = 3 #servant_adc_in3
-            F = calculate_F(channel, gain, system)
-
-    if device == "OH":
-        channel = 6
-        DAC = 50
-    else:
-        channel = 0
-        DAC = 20
-
-    LSB = 3.55e-06
-    I = DAC * LSB
-
-    reg_data = convert_adc_reg(channel)
-    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  # Enables current DAC.
-    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
-    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), convert_adc_reg(DAC),
-             0)  # Sets output current for the current DAC.
-    sleep(0.01)
+    cal_channel = 3 #servant_adc_in3
+    F = calculate_F(cal_channel, gain, system)
 
     print("Temperature Readings:")
 
@@ -52,14 +33,30 @@ def main(system, oh_v, boss, device, rate, offset, run_time_min, gain):
 
     print(filename)
     open(filename, "w+").close()
-    minutes, seconds, T, R = [], [], [], []
+    minutes, seconds, T = [], [], []
 
     run_time_min = float(run_time_min)
 
-    # Set figure paramete
     fig, ax = plt.subplots()
     ax.set_xlabel('minutes')
-    ax.set_ylabel('R (Ohms)')
+    ax.set_ylabel('T (C)')
+
+    if device == "OH":
+        channel = 6
+        DAC = 50
+    else:
+        channel = 0
+        DAC = 20
+
+    LSB = 3.55e-06
+    I = DAC * LSB
+    find_temp = temp_res_fit()
+
+    reg_data = convert_adc_reg(channel)
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x1, 0)  # Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), DAC, 0)  # Sets output current for the current DAC.
+    sleep(0.01)
 
     start_time = int(time())
     end_time = int(time()) + (60 * run_time_min)
@@ -68,38 +65,28 @@ def main(system, oh_v, boss, device, rate, offset, run_time_min, gain):
         with open(filename, "a") as file:
             V_m = F * read_adc(channel, gain, system)
             R_m = V_m/I
-
-            temp = (R_m-offset)/rate
+            temp = find_temp(np.log10(R_m))
 
             second = time() - start_time
             seconds.append(second)
             T.append(temp)
-            R.append(R_m)
             minutes.append(second/60)
-            live_plot(ax, minutes, R)
+            live_plot(ax, minutes, T)
 
-            file.write(str(second) + "\t" + str(R_m)+ "\t" + str(temp) + "\n" )
-            print("\tch %X: 0x%03X = %f (R (Ohms))" % (channel, V_m, R_m))
+            file.write(str(second) + "\t" + str(temp) + "\n" )
+            print("\tch %X: 0x%03X = %f (T (C))" % (channel, V_m, temp))
             sleep(1)
 
     figure_name = foldername + "temp_" + device + now + "_plot.pdf"
     fig.savefig(figure_name, bbox_inches="tight")
 
-    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x0, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x0, 0)  # Enables current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x0, 0)  #Sets output current for the current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x0, 0)
     sleep(0.01)
 
     powerdown_adc()
 
-def convert_adc_reg(gpio):
-    reg_data = 0
-    if gpio <= 7:
-        bit = gpio
-    else:
-        bit = gpio - 8
-    reg_data |= (0x01 << bit)
-    return reg_data
 
 def calculate_F(channel, gain, system):
 
@@ -112,25 +99,62 @@ def calculate_F(channel, gain, system):
 
     reg_data = convert_adc_reg(channel)
 
-    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
-    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), convert_adc_reg(DAC), 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x1, 0)  # Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), DAC, 0)  #Sets output current for the current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
     sleep(0.01)
 
-    V_m = read_adc(channel, gain, system)
-    F = V/V_m
+    if system == "dryrun":
+        F = 1
+    else:
+        V_m = read_adc(channel, gain, system)
+        F = V/V_m
 
-    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x0, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x0, 0)  # Enables current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x0, 0)  #Sets output current for the current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x0, 0)
     sleep(0.01)
 
     return F
 
+
+def convert_adc_reg(adc):
+    reg_data = 0
+    bit = adc
+    reg_data |= (0x01 << bit)
+    return reg_data
+
+
+def temp_res_fit(power=2):
+
+    B_list = [3900, 3934, 3950, 3971]  # OH: NTCG103UH103JT1, VTRX+: NTCG063UH103HTBX
+    T_list = [50, 75, 85, 100]
+    R_list = []
+
+    for i in range(len(T_list)):
+        T_list[i] = T_list[i] + 272.15
+
+    for B, T in zip(B_list, T_list):
+        R = 10e3 * math.exp(-B * ((1/298.15) - (1/T)))
+        R_list.append(R)
+
+    T_list = [298.15] + T_list
+    R_list = [10000] + R_list
+
+    for i in range(len(T_list)):
+        T_list[i] = T_list[i] - 272.15
+
+    poly_coeffs = np.polyfit(np.log10(R_list), T_list, power)
+    fit = np.poly1d(poly_coeffs)
+
+    return fit
+
+
 def live_plot(ax, x, y):
     ax.plot(x, y, "turquoise")
     plt.draw()
     plt.pause(0.01)
+
 
 def init_adc(): ########## Not sure which ones are unnecesary, so I left them all here
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x1, 0)  # enable ADC
@@ -143,6 +167,7 @@ def init_adc(): ########## Not sure which ones are unnecesary, so I left them al
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x63, 0) # vref tune
     sleep(0.01)
 
+
 def powerdown_adc():    ######## Same here
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x0, 0)  # disable ADC
     writeReg(getNode("LPGBT.RW.ADC.TEMPSENSRESET"), 0x0, 0)  # disable temp sensor
@@ -152,6 +177,7 @@ def powerdown_adc():    ######## Same here
     writeReg(getNode("LPGBT.RW.ADC.VDDANMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFENABLE"), 0x0, 0)  # vref disable
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x0, 0) # vref tune
+
 
 def read_adc(channel, gain, system):
 
@@ -184,6 +210,7 @@ def read_adc(channel, gain, system):
 
     return val
 
+
 if __name__ == "__main__":
 
     # Parsing arguments
@@ -192,8 +219,6 @@ if __name__ == "__main__":
     parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", default="2", help="oh_v = 2 (no precision calibration for oh_v1)")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = sub")
     parser.add_argument("-t", "--temp", action="store", dest="temp", help="temp = OH or VTRX")
-    parser.add_argument("-r", "--rate", action="store", dest="rate", default="0.385", help="rate = rate of change of R w.r.t T")
-    parser.add_argument("-b", "--b", action="store", dest="b", default="100", help="b = temperature offset at 0C")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 1, 3, 5 or 7 (only needed for backend)")
     parser.add_argument("-m", "--minutes", action="store", dest="minutes", help="minutes = int. # of minutes you want to run")  
@@ -237,7 +262,7 @@ if __name__ == "__main__":
             sys.exit()
     else:
         print(Colors.YELLOW + "Please select OH v2" + Colors.ENDC)
-        sys.exit
+        sys.exit()
     if boss is None:
         sys.exit()
 
@@ -291,7 +316,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, oh_v, boss, args.temp, float(args.rate), float(args.b), args.minutes, gain)
+        main(args.system, oh_v, boss, args.temp, args.minutes, gain)
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

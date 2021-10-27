@@ -15,51 +15,67 @@ def main(system, oh_v, boss, gain):
         channel = 7 #master_adc_in7
     else:
         channel = 3 #servant_adc_in3
-    
+
+    print("ADC Calibration Scan:")
+
+    if not os.path.exists("lpgbt_data/lpgbt_calibration_data"):
+        os.makedirs("lpgbt_data/lpgbt_calibration_data")
+
+    now = str(datetime.datetime.now())[:16]
+    now = now.replace(":", "_")
+    now = now.replace(" ", "_")
+    foldername = "lpgbt_data/lpgbt_calibration_data/"
+    filename = foldername + "calibration_data_" + now + ".txt"
+
+    print(filename)
+    open(filename, "w+").close()
+    F_range = []
+
     R = 1e-03
     LSB = 3.55e-06
-    if system == "dryrun":
-        DAC_range = []
-    else:
-        DAC_range = range(50, 200, 5)
+    DAC_range = range(50, 200, 5)
 
     reg_data = convert_adc_reg(channel)
 
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x1, 0)  #Enables current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
 
-    F_range = []
     for DAC in DAC_range:
-        
-        I = DAC * LSB
-        V = I * R
+        with open(filename, "a") as file:
+            I = DAC * LSB
+            V = I * R
 
-        writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), convert_adc_reg(DAC), 0)  #Sets output current for the current DAC.
-        sleep(0.01)
-        
-        V_m = read_adc(channel, gain, system)
-        F = V/V_m
-        F_range.append(F)
+            writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), DAC, 0)  #Sets output current for the current DAC.
+            sleep(0.01)
+
+            if system == "dryrun":
+                F = 1
+            else:
+                V_m = read_adc(channel, gain, system)
+                F = V/V_m
+
+            F_range.append(F)
+            file.write(str(DAC) + "\t" + str(F) + "\n")
 
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x0, 0)  #Enables current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x0, 0)  #Sets output current for the current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x0, 0)
     sleep(0.01)
 
-    fig_F, ax_F = plt.subplots()
-    ax_F.set_xlabel("DAC")
-    ax_F.set_ylabel("F=V/V_m")
+    fig, ax = plt.subplots()
+    ax.set_xlabel("DAC")
+    ax.set_ylabel("F=V/V_m")
 
-    live_plot(ax_F, DAC_range, F_range)
+    live_plot(ax, DAC_range, F_range)
+
+    figure_name = foldername + "calibration_data_" + now + "_plot.pdf"
+    fig.savefig(figure_name, bbox_inches="tight")
 
     powerdown_adc()
 
-def convert_adc_reg(gpio):
+def convert_adc_reg(adc):
     reg_data = 0
-    if gpio <= 7:
-        bit = gpio
-    else:
-        bit = gpio - 8
+    bit = adc
     reg_data |= (0x01 << bit)
     return reg_data
 
@@ -128,8 +144,7 @@ if __name__ == "__main__":
     parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", default="2", help="oh_v = 2 (no precision calibration for oh_v1)")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
-    parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")    
-    ####### The above line (127) seems redundant when args.system = backend and args.ohid and args.lpgbt are valid
+    parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-a", "--gain", action="store", dest="gain", default = "2", help="gain = Gain for RSSI ADC: 2, 8, 16, 32")
     args = parser.parse_args()
 

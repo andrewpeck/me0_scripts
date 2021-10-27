@@ -11,12 +11,11 @@ def main(system, oh_v, boss, gbt, run_time_min, gain):
 
     init_adc()
 
-    if system == "dryrun":
+    if oh_v == 1:
         F = 1
-    else:
-        if oh_v == 2:
-            channel = 3  # servant_adc_in3
-            F = calculate_F(channel, gain, system)
+    elif oh_v == 2:
+        cal_channel = 3 #servant_adc_in3
+        F = calculate_F(cal_channel, gain, system)
 
     print("ADC Readings:")
 
@@ -98,14 +97,16 @@ def calculate_F(channel, gain, system):
 
     reg_data = convert_adc_reg(channel)
 
-    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x1, 0)  #Enables current DAC.
-    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), hex(DAC), 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x1, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), DAC, 0)  #Sets output current for the current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
     sleep(0.01)
 
-    V_m = read_adc(channel, gain, system)
-
-    F = V/V_m
+    if system == "dryrun":
+        F = 1
+    else:
+        V_m = read_adc(channel, gain, system)
+        F = V/V_m
 
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x0, 0)  #Enables current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x0, 0)  #Sets output current for the current DAC.
@@ -114,10 +115,9 @@ def calculate_F(channel, gain, system):
 
     return F
 
-def convert_adc_reg(channel):
+def convert_adc_reg(adc):
     reg_data = 0
-    if gpio <= 7:
-        bit = gpio
+    bit = adc
     reg_data |= (0x01 << bit)
     return reg_data
 
@@ -263,8 +263,11 @@ if __name__ == "__main__":
         sys.exit()
 
     if args.gbtid is None:
-        print(Colors.YELLOW + "Need GBTID for backend" + Colors.ENDC)
-        sys.exit()
+        if args.system == "backend":
+            print(Colors.YELLOW + "Need GBTID for backend" + Colors.ENDC)
+            sys.exit()
+        if args.system == "dryrun":
+            args.gbtid = "-9999"
     if int(args.gbtid) > 7:
         print(Colors.YELLOW + "Only GBTID 0-7 allowed" + Colors.ENDC)
         sys.exit()

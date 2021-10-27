@@ -79,12 +79,13 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="lpGBT VFAT RESET")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc, backend or dryrun")
-    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", default="1", help="oh_v = 1 or 2")
+    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", default="2", help="oh_v = 2")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     parser.add_argument("-g", "--gbtids", action="store", nargs="+", dest="gbtids", help="list of gbtids = 0-7 (only needed for backend)")
     
     args = parser.parse_args()
 
+    gbtid_list = []
     if args.system == "chc":
         print("Using Rpi CHeeseCake for sub reset")
         args.ohid = -9999
@@ -96,6 +97,7 @@ if __name__ == "__main__":
         sys.exit()
     elif args.system == "dryrun":
         print("Dry Run - not actually running")
+        gbtid_list.append(-9999)
     else:
         print(Colors.YELLOW + "Only valid options: backend, dryrun" + Colors.ENDC)
         sys.exit()
@@ -113,13 +115,12 @@ if __name__ == "__main__":
     elif args.ohid is not None and args.system == "chc":
         print(Colors.YELLOW + "Cannot select an ohid when running chc" + Colors.ENDC)
         sys.exit()
-    elif args.ohid is None and args.system == "chc":
+    elif args.ohid is None and (args.system == "chc" or args.system == "dryrun"):
         args.ohid  = -9999
     if int(args.ohid) > 1:
         print(Colors.YELLOW + "Only OHID 0-1 allowed" + Colors.ENDC)
         sys.exit()
 
-    gbtid_list = []
     if args.gbtids is None and args.system == "backend":
         print(Colors.YELLOW + "Please select any combination of 0, 2, 4, 6" + Colors.ENDC)
         sys.exit()        
