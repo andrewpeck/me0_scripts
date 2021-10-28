@@ -73,8 +73,8 @@ def main(system, oh_v, boss, device, run_time_min, gain):
             minutes.append(second/60)
             live_plot(ax, minutes, T)
 
-            file.write(str(second) + "\t" + str(temp) + "\n" )
-            print("\tch %X: 0x%03X = %f (T (C))" % (channel, V_m, temp))
+            file.write(str(second) + "\t" + str(R_m) + "\t" + str(temp) + "\n" )
+            print("\tch %X: 0x%03X = %f (R (Ohms) = %f (T (C))" % (channel, V_m, R_m, temp))
             sleep(1)
 
     figure_name = foldername + "temp_" + device + now + "_plot.pdf"
