@@ -83,6 +83,7 @@ if __name__ == "__main__":
             for thr in noise_result[vfat][sbit]:
                 threshold.append(thr)
                 noise_rate.append(0)
+                noise_rate_vfat.append(0)
             break
         for sbit in noise_result[vfat]:
             if sbit == "all":
