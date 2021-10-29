@@ -7,6 +7,7 @@ ADDRESS_TABLE_TOP_V0 = "./address_table/lpgbt_registers_v0.xml"
 ADDRESS_TABLE_TOP_V1 = "./address_table/lpgbt_registers_v1.xml"
 nodes = OrderedDict()
 system = ""
+oh_v = ""
 reg_list_dryrun = {}
 for i in range(462):
     reg_list_dryrun[i] = 0x00
@@ -296,9 +297,11 @@ def getRegsContaining(nodeString):
     else: return None
 
 # Functions regarding reading/writing registers
-def rw_initialize(system_val, boss=None, ohIdx=None, gbtIdx=None):
+def rw_initialize(system_val, oh_v_val, boss=None, ohIdx=None, gbtIdx=None):
     global system
+    global oh_v
     system = system_val
+    oh_v = oh_v_val
     if system=="chc":
         import rpi_chc
         global gbt_rpi_chc
@@ -332,6 +335,7 @@ def rw_initialize(system_val, boss=None, ohIdx=None, gbtIdx=None):
 
 def config_initialize_chc(boss):
     initialize_success = 1
+    gbt_rpi_chc.set_lpgbt_address(oh_v, boss)
     initialize_success *= gbt_rpi_chc.config_select(boss)
     if initialize_success:
         initialize_success *= gbt_rpi_chc.en_i2c_switch()
@@ -441,11 +445,18 @@ def rw_terminate():
 
 def check_rom_readback():
     romreg=readReg(getNode("LPGBT.RO.ROMREG"))
-    if (romreg != 0xA5):
-        print (Colors.RED + "ERROR: no communication with LPGBT. ROMREG=0x%x, EXPECT=0x%x" % (romreg, 0xA5) + Colors.ENDC)
-        rw_terminate()
-    else:
-        print ("Successfully read from ROM. I2C communication OK")
+    if oh_v == 1:
+        if (romreg != 0xA5):
+            print (Colors.RED + "ERROR: no communication with LPGBT. ROMREG=0x%x, EXPECT=0x%x" % (romreg, 0xA5) + Colors.ENDC)
+            rw_terminate()
+        else:
+            print ("Successfully read from ROM. I2C communication OK")
+    elif oh_v == 2:
+        if (romreg != 0xA6):
+            print (Colors.RED + "ERROR: no communication with LPGBT. ROMREG=0x%x, EXPECT=0x%x" % (romreg, 0xA6) + Colors.ENDC)
+            rw_terminate()
+        else:
+            print ("Successfully read from ROM. I2C communication OK")
 
 def vfat_oh_link_reset():
     if system=="backend":

@@ -230,7 +230,7 @@ if __name__ == "__main__":
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system, boss, args.ohid, args.gbtid)
+    rw_initialize(args.system, oh_v, boss, args.ohid, args.gbtid)
     print("Initialization Done\n")
     
     # Readback rom register to make sure communication is OK

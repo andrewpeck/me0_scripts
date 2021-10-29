@@ -10,7 +10,7 @@ for i in range(240):
     fuse_list[i] = 0x00
 n_rw_fuse = (0xEF+1) # number of registers in LPGBT rwf block
 
-def main(system, boss, fusing, input_config_file, input_vtrx, input_register, input_data, user_id, complete):
+def main(system, oh_v, boss, fusing, input_config_file, input_vtrx, input_register, input_data, user_id, complete):
 
     # Fusing of registers
     if fusing == "input_file":
@@ -27,9 +27,9 @@ def main(system, boss, fusing, input_config_file, input_vtrx, input_register, in
 
     # Write the fuse values of registers in text file
     if boss:
-        lpgbt_write_fuse_file("fuse_boss.txt")
+        lpgbt_write_fuse_file("fuse_boss_v%d.txt"%oh_v)
     else:
-        lpgbt_write_fuse_file("fuse_sub.txt")
+        lpgbt_write_fuse_file("fuse_sub_v%d.txt"%oh_v)
 
 def fuse_from_file(system, boss, filename, vtrx):
     f = open(filename, "r")
@@ -486,7 +486,7 @@ if __name__ == "__main__":
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system, boss)
+    rw_initialize(args.system, oh_v, boss)
     print("Initialization Done\n")
     
     # Readback rom register to make sure communication is OK
@@ -499,7 +499,7 @@ if __name__ == "__main__":
 
     # Fusing lpGBT
     try:
-        main(args.system, boss, args.fusing, args.input_config_file, args.vtrx, args.register, args.data, args.user_id, int(args.complete))
+        main(args.system, oh_v, boss, args.fusing, args.input_config_file, args.vtrx, args.register, args.data, args.user_id, int(args.complete))
     except KeyboardInterrupt:
         print (Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

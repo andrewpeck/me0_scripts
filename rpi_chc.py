@@ -25,12 +25,21 @@ class rpi_chc:
         # Set up the I2C bus
         device_bus = 1  # for SDA1 and SCL1
         self.bus = smbus.SMBus(device_bus)
-        self.lpgbt_address = 0x70
+        self.lpgbt_address = 0
 
     def __del__(self):
         self.bus.close()
         GPIO.cleanup()
 
+    def set_lpgbt_address(oh_v, boss):
+        if oh_v == 1:
+            self.lpgbt_address = 0x70
+        elif oh_v == 2:
+            if boss:
+                self.lpgbt_address = 0x70
+            else:
+                self.lpgbt_address = 0x71
+        
     def config_select(self, boss):
         # Setting GPIO 13/26 high, connected to config_select enabling I2C
         config_channel = 0

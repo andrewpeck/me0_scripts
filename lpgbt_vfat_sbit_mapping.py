@@ -255,7 +255,7 @@ if __name__ == "__main__":
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system)
+    rw_initialize(args.system, oh_v)
     initialize_vfat_config(int(args.ohid), args.use_dac_scan_results, args.use_channel_trimming)
     print("Initialization Done\n")
 

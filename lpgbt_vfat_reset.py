@@ -187,7 +187,7 @@ if __name__ == "__main__":
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system)
+    rw_initialize(args.system, oh_v)
     print("Initialization Done\n")
 
     # Running Phase Scan
