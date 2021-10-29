@@ -176,6 +176,8 @@ if __name__ == "__main__":
 
         fig2, ax2 = plt.subplots(8, 8, figsize=(80,80))
         for sbit in noise_result[vfat]:
+            if sbit=="all":
+                continue
             noise_rate_sbit = []
             for thr in range(0,len(threshold)):
                 noise_rate_sbit.append(noise_result[vfat][sbit][thr]/time)
