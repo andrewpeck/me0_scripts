@@ -134,7 +134,9 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, sbit_list, step, runtime, s_bi
             enableVfatchannel(vfat, oh_select, channel, 0, 0) # unmask channels
     for thr in range(0,256,step):
         print ("  Threshold: %d"%thr)
-        write_backend_reg(dac_node[vfat], thr)
+        for vfat in vfat_list:
+            write_backend_reg(dac_node[vfat], thr)
+            sleep(1e-3)
         global_reset()
         sleep(1.1)
         for vfat in vfat_list:
