@@ -9,9 +9,7 @@ nodes = OrderedDict()
 system = ""
 oh_v = ""
 reg_list_dryrun = {}
-for i in range(462):
-    reg_list_dryrun[i] = 0x00
-n_rw_reg = (0x13C+1) # number of registers in LPGBT rwf + rw block
+n_rw_reg = -9999
 
 TOP_NODE_NAME = "LPGBT"
 
@@ -302,6 +300,18 @@ def rw_initialize(system_val, oh_v_val, boss=None, ohIdx=None, gbtIdx=None):
     global oh_v
     system = system_val
     oh_v = oh_v_val
+    
+    global reg_list_dryrun
+    global n_rw_reg
+    if oh_v == 1:
+        for i in range(463):
+            reg_list_dryrun[i] = 0x00
+        n_rw_reg = (0x13C+1) # number of registers in LPGBT rwf + rw block
+    elif oh_v == 2:
+        for i in range(494):
+            reg_list_dryrun[i] = 0x00
+        n_rw_reg = (0x14F+1) # number of registers in LPGBT rwf + rw block
+    
     if system=="chc":
         import rpi_chc
         global gbt_rpi_chc
@@ -354,7 +364,14 @@ def select_ic_link(ohIdx, gbtIdx):
             rw_terminate()
         linkIdx = ohIdx * 8 + gbtIdx
         write_backend_reg(NODE_IC_GBTX_LINK_SELECT, linkIdx)
-        write_backend_reg(NODE_IC_GBTX_I2C_ADDRESS, 0x70)
+        
+        if oh_v == 1:
+            write_backend_reg(NODE_IC_GBTX_I2C_ADDRESS, 0x70)
+        elif oh_v == 2:
+            if gbtIdx%2 == 0:
+                write_backend_reg(NODE_IC_GBTX_I2C_ADDRESS, 0x70)
+            else:
+                write_backend_reg(NODE_IC_GBTX_I2C_ADDRESS, 0x71)       
         write_backend_reg(NODE_IC_READ_WRITE_LENGTH, 1)
 
 def check_lpgbt_link_ready(ohIdx, gbtIdx):
@@ -457,6 +474,29 @@ def check_rom_readback():
             rw_terminate()
         else:
             print ("Successfully read from ROM. I2C communication OK")
+
+def check_lpgbt_mode(boss):
+    mode = readReg(getNode("LPGBT.RO.LPGBTSETTINGS.LPGBTMODE"))
+    i2c_addr = readReg(getNode("LPGBT.RO.LPGBTSETTINGS.ASICCONTROLADR")) 
+
+    if boss and mode!=11:
+        print (Colors.RED + "ERROR: lpGBT mode mismatch for boss, observed mode = %d, expected = 11"%mode + Colors.ENDC)
+        rw_terminate()
+    if sub and mode!=9:
+        print (Colors.RED + "ERROR: lpGBT mode mismatch for sub, observed mode = %d, expected = 9"%mode + Colors.ENDC)
+        rw_terminate()
+
+    if oh_v == 1:
+        if i2c_addr!=0x70:
+            print (Colors.RED + "ERROR: Incorrect lpGBT I2C address 0x%02X, expect 0x70"%i2c_addr + Colors.ENDC)
+            rw_terminate()
+    elif oh_v == 2:
+        if boss and i2c_addr!=0x70:
+            print (Colors.RED + "ERROR: Incorrect lpGBT I2C address 0x%02X for boss, expect 0x70"%i2c_addr + Colors.ENDC)
+            rw_terminate()
+        if sub and i2c_addr!=0x71:
+            print (Colors.RED + "ERROR: Incorrect lpGBT I2C address 0x%02X for sub, expect 0x71"%i2c_addr + Colors.ENDC)
+            rw_terminate()
 
 def vfat_oh_link_reset():
     if system=="backend":
@@ -736,8 +776,12 @@ def lpgbt_write_config_file(config_file = "config.txt"):
     f = open(config_file,"w+")
     for i in range (n_rw_reg):
         val =  mpeek(i)
-        if i in range(0x0f0, 0x105): # I2C Masters
-            val = 0x00
+        if oh_v == 1:
+            if i in range(0x0f0, 0x105): # I2C Masters
+                val = 0x00
+        elif oh_v == 2:
+            if i in range(0x100, 0x115): # I2C Masters
+                val = 0x00
         write_string = "0x%03X  0x%02X\n" % (i, val)
         f.write(write_string)
     f.close()
@@ -749,7 +793,7 @@ def lpgbt_dump_config(config_file = "Loopback_test.txt"):
             tree = ET.parse(config_file)
             root = tree.getroot()
             reg_config = []
-            for i in range(0,366):
+            for i in range(0,n_rw_reg):
                 reg_config.append([0,0]) # Value / Mask
 
             for child in root:
@@ -780,9 +824,13 @@ def lpgbt_dump_config(config_file = "Loopback_test.txt"):
             input_file = open(config_file, "r")
             for line in input_file.readlines():
                 reg_addr = int(line.split()[0],16)
-                value = int(line.split()[1],16)
-                if reg_addr in range(0x0f0, 0x105): # I2C Masters
-                    value = 0x00
+                value = int(line.split()[1],16) 
+                if oh_v == 1:
+                    if reg_addr in range(0x0f0, 0x105): # I2C Masters
+                        value = 0x00
+                elif oh_v == 2:
+                    if reg_addr in range(0x100, 0x115): # I2C Masters
+                        value = 0x00
                 mpoke(reg_addr, value)
             input_file.close()
         print("lpGBT Configuration Done")

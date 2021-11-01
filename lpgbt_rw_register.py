@@ -3,11 +3,18 @@ from time import sleep, time
 import sys
 import argparse
 
-def main(system, boss, reg_list, data_list):
+def main(system, oh_v, boss, reg_list, data_list):
+
+    if oh_v1 == 1:
+        final_total_reg = 0x1CE
+        final_readonly_reg = 0x13C
+    elif oh_v1 == 1:
+        final_total_reg = 0x1ED
+        final_readonly_reg = 0x14F
 
     for i in range(0, len(reg_list)):
         r = reg_list[i]
-        if r>0x1CE:
+        if r > final_total_reg:
             print (Colors.YELLOW + "Register address out of range" + Colors.ENDC)
             rw_terminate()
         if system!="backend":
@@ -20,7 +27,7 @@ def main(system, boss, reg_list, data_list):
         
         d = data_list[i]
         
-        if r>0x13C:
+        if r > final_readonly_reg:
             print (Colors.YELLOW + "Register is Read-only" + Colors.ENDC)
             rw_terminate()
         mpoke(r, d)
@@ -155,7 +162,7 @@ if __name__ == "__main__":
 
     # Configuring LPGBT
     try:
-        main(args.system, boss, reg_list, data_list)
+        main(args.system, oh_v, boss, reg_list, data_list)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

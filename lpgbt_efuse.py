@@ -6,15 +6,29 @@ import argparse
 FUSE_TIMEOUT_MS = 10 # in ms
 TOTAL_EFUSE_ON_TIME_MS = 0 # in ms
 fuse_list = {}
-for i in range(240):
-    fuse_list[i] = 0x00
-n_rw_fuse = (0xEF+1) # number of registers in LPGBT rwf block
+n_rw_fuse = -9999
+efuse_done_reg = -9999
 
 def main(system, oh_v, boss, fusing, input_config_file, input_vtrx, input_register, input_data, user_id, complete):
 
+    global fuse_list
+    global n_rw_fuse
+    global efuse_done_reg
+
+    if oh_v == 1:
+        for i in range(240):
+            fuse_list[i] = 0x00
+        n_rw_fuse = (0xEF+1) # number of registers in LPGBT rwf block
+        efuse_done_reg = 0xEF    
+    elif oh_v == 2:
+        for i in range(256):
+            fuse_list[i] = 0x00
+        n_rw_fuse = (0xFF+1) # number of registers in LPGBT rwf block   
+        efuse_done_reg = 0xFB 
+
     # Fusing of registers
     if fusing == "input_file":
-        fuse_from_file(system, boss, input_config_file, input_vtrx)
+        fuse_from_file(system, oh_v, boss, input_config_file, input_vtrx)
     elif fusing == "register":
         fuse_register(system, boss, input_register, input_data)
     elif fusing == "user_id":
@@ -22,16 +36,19 @@ def main(system, oh_v, boss, fusing, input_config_file, input_vtrx, input_regist
     print ("")
     
     if complete==1:
-        print (Colors.YELLOW + "\nFusing Complete Configuration: 0xEF (dllConfigDone, pllConfigDone, updateEnable)" + Colors.ENDC)
-        fuse_register(system, boss, "0xEF", "0x07") #dllConfigDone=1, pllConfigDone=1, updateEnable=1
+        print (Colors.YELLOW + "\nFusing Complete Configuration: 0x0EF for OH_v1 (dllConfigDone, pllConfigDone, updateEnable) or 0x0FF for OH_v2 (dllConfigDone, pllConfigDone)" + Colors.ENDC)
+        if oh_v == 1:
+            fuse_register(system, boss, str(efuse_done_reg), "0x07") #dllConfigDone=1, pllConfigDone=1, updateEnable=1
+        elif oh_v == 2:
+            fuse_register(system, boss, str(efuse_done_reg), "0x06") #dllConfigDone=1, pllConfigDone=1
 
     # Write the fuse values of registers in text file
     if boss:
-        lpgbt_write_fuse_file("fuse_boss_v%d.txt"%oh_v)
+        lpgbt_write_fuse_file("lpgbt_data/fuse_boss_ohv%d.txt"%oh_v)
     else:
-        lpgbt_write_fuse_file("fuse_sub_v%d.txt"%oh_v)
+        lpgbt_write_fuse_file("lpgbt_data/fuse_sub_ohv%d.txt"%oh_v)
 
-def fuse_from_file(system, boss, filename, vtrx):
+def fuse_from_file(system, oh_v, boss, filename, vtrx):
     f = open(filename, "r")
     config = {}
     for line in f.readlines():
@@ -61,14 +78,14 @@ def fuse_from_file(system, boss, filename, vtrx):
 
     for reg_addr in range(0, len(config)):
         # Maximum fusible register
-        if (reg_addr > 0xEF):
+        if (reg_addr > (n_rw_fuse-1)):
             return
 
         if ((reg_addr % 4) == 0):
             data = 0x00
 
-        # DONT FUSE 0xEF HERE. Put it in a separate function for safety w/ updateEnable
-        if reg_addr == 0xEF:
+        # DONT FUSE efuse_done_reg HERE. Put it in a separate function for safety w/ updateEnable
+        if reg_addr == efuse_done_reg:
             value = 0
         else:
             value = config[reg_addr]
@@ -87,7 +104,7 @@ def write_blow_and_check_fuse(system, adr, data, fullblock=False):
 
 def write_fuse_block_data(system, adr, data, fullblock=False):
     # Set EFUSE Settings
-    # [0x109] FUSEControl
+    # FUSEControl
     writeReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWPULSELENGTH"), 0xC, 0)
     writeReg(getNode("LPGBT.RW.EFUSES.FUSEBLOW"), 0x0, 0)
 
@@ -96,15 +113,15 @@ def write_fuse_block_data(system, adr, data, fullblock=False):
 
     ok = 1
     # Write address
-    ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDRESS1"), 0xff&(fuse_block_adr>>8)) # [0x10e] FUSEBlowAddH
-    ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDRESS0"), 0xff&(fuse_block_adr>>0)) # [0x10f] FUSEBlowAddL
+    ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDH"), 0xff&(fuse_block_adr>>8)) # FUSEBlowAddH
+    ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDL"), 0xff&(fuse_block_adr>>0)) # FUSEBlowAddL
 
     # Zero out the rest of the address block to prevent accidental fusing
     if (not fullblock):
-       ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA0"), 0)
-       ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA1"), 0)
-       ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA2"), 0)
-       ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA3"), 0)
+       ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAA"), 0)
+       ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAB"), 0)
+       ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAC"), 0)
+       ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAD"), 0)
 
     if (fullblock):
         data0 = 0xff & (data >> 0)
@@ -119,19 +136,19 @@ def write_fuse_block_data(system, adr, data, fullblock=False):
             data2 = int(hex(data2).rstrip("L"),16)
         if "L" in str(hex(data3)):
             data3 = int(hex(data3).rstrip("L"),16)
-        ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA0"), data0)
-        ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA1"), data1)
-        ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA2"), data2)
-        ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA3"), data3)
+        ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAA"), data0)
+        ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAB"), data1)
+        ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAC"), data2)
+        ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAD"), data3)
     else:
         if (fuse_block_subadr==0):
-            ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA0"), data)
+            ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAA"), data)
         elif (fuse_block_subadr==1):
-            ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA1"), data)
+            ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAB"), data)
         elif (fuse_block_subadr==2):
-            ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA2"), data)
+            ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAC"), data)
         elif (fuse_block_subadr==3):
-            ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA3"), data)
+            ok &= writeandcheckReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAD"), data)
 
     if (not ok):
         print (Colors.RED + "ERROR: Failed to correctly read back fuse data block" + Colors.ENDC)
@@ -142,14 +159,14 @@ def write_fuse_block_data(system, adr, data, fullblock=False):
 def blow_fuse(system, boss):
     global TOTAL_EFUSE_ON_TIME_MS
     adr = 0;
-    adr |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDRESS1")) << 8
-    adr |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDRESS0")) << 0
+    adr |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDH")) << 8
+    adr |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDL")) << 0
 
     rd = 0;
-    rd |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA0")) << 0
-    rd |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA1")) << 8
-    rd |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA2")) << 16
-    rd |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATA3")) << 24
+    rd |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAA")) << 0
+    rd |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAB")) << 8
+    rd |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAC")) << 16
+    rd |= readReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWDATAD")) << 24
     print ("\nBlowing Fuse with BLOCK ADDRESS = 0X%03X, BLOCK DATA = 0X%08X" % (adr, rd))
 
     # Start 2.5V
@@ -210,14 +227,14 @@ def check_fuse_block_data(system, adr, data, fullblock=False):
             valid = 1
 
     # Write address
-    writeReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDRESS1"), 0xff&(fuse_block_adr>>8), 0) # [0x10e] FUSEBlowAddH
-    writeReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDRESS0"), 0xff&(fuse_block_adr>>0), 0) # [0x10f] FUSEBlowAddL
+    writeReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDH"), 0xff&(fuse_block_adr>>8), 0) # FUSEBlowAddH
+    writeReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDL"), 0xff&(fuse_block_adr>>0), 0) # FUSEBlowAddL
 
     read=4*[0]
-    read[0] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESA")) # [0x1a2] FUSEValuesA
-    read[1] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESB")) # [0x1a3] FUSEValuesB
-    read[2] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESC")) # [0x1a4] FUSEValuesC
-    read[3] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESD")) # [0x1a5] FUSEValuesD
+    read[0] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESA")) # FUSEValuesA
+    read[1] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESB")) # FUSEValuesB
+    read[2] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESC")) # FUSEValuesC
+    read[3] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESD")) # FUSEValuesD
 
     # Write fuseread off
     writeReg(getNode("LPGBT.RW.EFUSES.FUSEREAD"), 0x0, 0)
@@ -308,7 +325,7 @@ def write_fuse_magic(fuse_enable):
     value = 0x00
     if (fuse_enable):
         value = 0xA3
-    # [0x110] FuseMagic [7:0]
+    # FuseMagic [7:0]
     writeReg(getNode("LPGBT.RW.EFUSES.FUSEMAGICNUMBER"), value, 0)
     print ("Magic Number Set for Fusing: " + str(hex(value)))
     magic_number = readReg(getNode("LPGBT.RW.EFUSES.FUSEMAGICNUMBER"))

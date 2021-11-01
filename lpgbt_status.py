@@ -44,6 +44,18 @@ def main(system, oh_v, boss):
     if (mode==14): print ("\t4b1110    10 Gbps    FEC12   Simplex RX")
     if (mode==15): print ("\t4b1111    10 Gbps    FEC12   Transceiver")
 
+    if oh_v == 2:
+        print ("Boot Config:")
+        boot_config = readReg(getNode("LPGBT.RO.LPGBTSETTINGS.BOOTCONFIG"))
+        if boot_conifg == 0:
+            print ("\tLoad register values from fuses. If checksum does not match copy values from ROM")
+        elif boot_conifg == 1:
+            print ("\tCopy values from ROM")
+        elif boot_conifg == 2:
+            print ("\tLoad register values from fuses without checking the checksum")
+        elif boot_conifg == 3:
+            print ("\tSkip chip initialization")
+    
     print ("State Override:")
     if (readReg(getNode("LPGBT.RO.LPGBTSETTINGS.STATEOVERRIDE"))):
         print ("\t1 = Power up state machine halted.")
@@ -245,9 +257,9 @@ def main(system, oh_v, boss):
     
     # Writing lpGBT configuration to text file
     if boss:
-        lpgbt_write_config_file("lpgbt_data/status_boss.txt")
+        lpgbt_write_config_file("lpgbt_data/status_boss_ohv%d.txt"%oh_v)
     else:
-        lpgbt_write_config_file("lpgbt_data/status_sub.txt")
+        lpgbt_write_config_file("lpgbt_data/status_sub_ohv%d.txt"%oh_v)
 
 def init_adc():
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x1, 0) # enable ADC

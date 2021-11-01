@@ -1643,42 +1643,42 @@
                 <!-- [0x10a] FUSEBlowDataA -->
                 <!-- Data to be programmed to the fuses. -->
 
-                <node id="FUSEBLOWDATA0" address="0x1" permission="rw"
+                <node id="FUSEBLOWDATAA" address="0x1" permission="rw"
                     description="Bits 7:0 of the data word."
                     mask="0xff" />
 
                 <!-- [0x10b] FUSEBlowDataB -->
                 <!-- Data to be programmed to the fuses. -->
 
-                <node id="FUSEBLOWDATA1" address="0x2" permission="rw"
+                <node id="FUSEBLOWDATAB" address="0x2" permission="rw"
                     description="Bits 15:8 of the data word."
                     mask="0xff" />
 
                 <!-- [0x10c] FUSEBlowDataC -->
                 <!-- Data to be programmed to the fuses. -->
 
-                <node id="FUSEBLOWDATA2" address="0x3" permission="rw"
+                <node id="FUSEBLOWDATAC" address="0x3" permission="rw"
                     description="Bits 23:16 of the data word."
                     mask="0xff" />
 
                 <!-- [0x10d] FUSEBlowDataD -->
                 <!-- Data to be programmed to the fuses. -->
 
-                <node id="FUSEBLOWDATA3" address="0x4" permission="rw"
+                <node id="FUSEBLOWDATAD" address="0x4" permission="rw"
                     description="Bits 31:24 of the data word."
                     mask="0xff" />
 
                 <!-- [0x10e] FUSEBlowAddH -->
                 <!-- Address of the fuse block to be programmed. -->
 
-                <node id="FUSEBLOWADDRESS1" address="0x5" permission="rw"
+                <node id="FUSEBLOWADDH" address="0x5" permission="rw"
                     description="Bits 15:8 of the address."
                     mask="0xff" />
 
                 <!-- [0x10f] FUSEBlowAddL -->
                 <!-- Address of the fuse block to be programmed. -->
 
-                <node id="FUSEBLOWADDRESS0" address="0x6" permission="rw"
+                <node id="FUSEBLOWADDL" address="0x6" permission="rw"
                     description="Bits 7:0 of the address."
                     mask="0xff" />
 
@@ -2267,6 +2267,12 @@
                 <node id="STATEOVERRIDE" address="0x0" permission="r"
                     description="State of the STATEOVRD. The function of the pin is described in STATEOVRD."
                     mask="0x1" />
+
+                <!-- [0x141] I2CSlaveAddress -->
+                <!-- Chip address. -->
+                <node id="ASICCONTROLADR" address="0x1" permission="r"
+                    description="Address of the chip used in slow control protocols (I2C, IC, EC)."
+                    mask="0x7f" />
 
             </node>
 

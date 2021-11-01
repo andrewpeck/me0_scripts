@@ -75,7 +75,10 @@ def main(system, oh_v, boss, input_config_file, reset_before_config, minimal, re
     print("Configuration finished... asserting config done")
     # Finally, Set pll&dllConfigDone to run chip:
     if system=="backend":
-        mpoke(0x0EF, 0x06)
+        if oh_v == 1:
+            mpoke(0x0EF, 0x06)
+        elif oh_v == 2:
+            mpoke(0x0FB, 0x06)    
     else:
         writeReg(getNode("LPGBT.RWF.POWERUP.DLLCONFIGDONE"), 0x1, readback)
         writeReg(getNode("LPGBT.RWF.POWERUP.PLLCONFIGDONE"), 0x1, readback)
@@ -91,9 +94,9 @@ def main(system, oh_v, boss, input_config_file, reset_before_config, minimal, re
     # Writing lpGBT configuration to text file
     if not readback:
         if boss:
-            lpgbt_write_config_file("lpgbt_data/config_boss_v%d.txt"%oh_v)
+            lpgbt_write_config_file("lpgbt_data/config_boss_ohv%d.txt"%oh_v)
         else:
-            lpgbt_write_config_file("lpgbt_data/config_sub_v%d.txt"%oh_v)
+            lpgbt_write_config_file("lpgbt_data/config_sub_ohv%d.txt"%oh_v)
 
 def configLPGBT(oh_v, readback):
     print ("Configuring Clock Generator, Line Drivers, Power Good for CERN configuration...")
