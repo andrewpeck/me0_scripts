@@ -170,7 +170,7 @@ def lpgbt_vfat_bert(system, oh_select, vfat_list, reg_list, niter, runtime, verb
     final_sc_timeout_error_count = read_backend_reg(sc_timeout_error_node)
     total_sc_transactions = final_sc_transaction_count - initial_sc_transaction_count
     total_sc_crc_errors = final_sc_crc_error_count - initial_sc_crc_error_count
-    total_sc_timeout_errors = final_sc_crc_error_count - initial_sc_timeout_error_count
+    total_sc_timeout_errors = final_sc_timeout_error_count - initial_sc_timeout_error_count
     daq_downlink_data_packet_size = 904 # 113*8 bits
     daq_uplink_data_packet_size = 840 # 105*8 bits
 

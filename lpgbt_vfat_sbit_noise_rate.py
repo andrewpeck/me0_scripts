@@ -24,6 +24,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, sbit_list, step, runtime, s_bi
     sleep(0.1)
     write_backend_reg(get_rwreg_node("BEFE.GEM_AMC.GEM_SYSTEM.VFAT3.SC_ONLY_MODE"), 1)
 
+    sbit_list.append("all")
     sbit_data = {}
     # Check ready and get nodes
     for vfat in vfat_list:
@@ -60,21 +61,26 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, sbit_list, step, runtime, s_bi
     reset_sbit_counter_node = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.CTRL.SBIT_TEST_RESET")  # To reset all S-bit counters
 
     dac_node = {}
+    vfat_counter_node = {}
     dac = "CFG_THR_ARM_DAC"
     for vfat in vfat_list:
         dac_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.OH.OH%i.GEB.VFAT%d.%s"%(oh_select, vfat, dac))
+        vfat_counter_node[vfat] = get_rwreg_node("BEFE.GEM_AMC.SBIT_ME0.ME0_VFAT%d_SBIT_RATE"%vfat) # S-bit counter for enitre VFAT
 
     print ("\nRunning Sbit Noise Scans for VFATs:")
     print (vfat_list)
     print ("")
 
+    initial_thr = {}
     # Looping over VFATs
     for vfat in vfat_list:
         print ("VFAT: %02d"%vfat)
-        initial_thr = read_backend_reg(dac_node[vfat])
+        initial_thr[vfat] = read_backend_reg(dac_node[vfat])
         
         # Looping over sbits
         for sbit in sbit_list:
+            if sbit == "all":
+                continue
             print ("  VFAT: %02d, Sbit: %d"%(vfat, sbit))
             elink = int(sbit/8)
             channel_list = []
@@ -107,18 +113,38 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, sbit_list, step, runtime, s_bi
                 sleep(runtime)
                 sbit_data[vfat][sbit][thr]["fired"] = read_backend_reg(channel_sbit_counter_node)
                 sbit_data[vfat][sbit][thr]["time"] = runtime
-            # End of charge loop
+            # End of threshold loop
 
-            # Mask again the channels for this elink
+            # Mask again channels for this sbit
             for channel in channel_list:
                 enableVfatchannel(vfat, oh_select, channel, 1, 0) # mask channels
 
         # End of sbits loop
-        write_backend_reg(dac_node[vfat], initial_thr)
+        write_backend_reg(dac_node[vfat], initial_thr[vfat])
         sleep(1e-3)
         print ("")
     # End of VFAT loop
     print ("")
+
+    # Rate counters for entire VFATs
+    print ("All VFATs, Sbit: All")
+    for vfat in vfat_list:
+        # Unmask channels for this vfat
+        for channel in range(0,128):
+            enableVfatchannel(vfat, oh_select, channel, 0, 0) # unmask channels
+    for thr in range(0,256,step):
+        print ("  Threshold: %d"%thr)
+        write_backend_reg(dac_node[vfat], thr)
+        global_reset()
+        sleep(1.1)
+        for vfat in vfat_list:
+            sbit_data[vfat]["all"][thr]["fired"] = read_backend_reg(vfat_counter_node[vfat]) * runtime
+            sbit_data[vfat]["all"][thr]["time"] = runtime
+    for vfat in vfat_list:
+        write_backend_reg(dac_node[vfat], initial_thr[vfat])
+        # Mask again channels for this vfat
+        for channel in range(0,128):
+            enableVfatchannel(vfat, oh_select, channel, 1, 0) # unmask channels
 
     # Disable channels on VFATs
     for vfat in vfat_list:
@@ -134,7 +160,10 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, sbit_list, step, runtime, s_bi
             for thr in range(0,256,1):
                 if thr not in sbit_data[vfat][sbit]:
                     continue
-                file_out.write("%d    %d    %d    %d    %f\n"%(vfat, sbit, thr, sbit_data[vfat][sbit][thr]["fired"], sbit_data[vfat][sbit][thr]["time"]))
+                if sbit != "all":
+                    file_out.write("%d    %d    %d    %d    %f\n"%(vfat, sbit, thr, sbit_data[vfat][sbit][thr]["fired"], sbit_data[vfat][sbit][thr]["time"]))
+                else:
+                    file_out.write("%d    all    %d    %d    %f\n"%(vfat, thr, sbit_data[vfat][sbit][thr]["fired"], sbit_data[vfat][sbit][thr]["time"]))
 
     print ("")
     file_out.close()
@@ -207,7 +236,7 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Step size can only be between 1 and 256" + Colors.ENDC)
         sys.exit()
 
-    sbit_list = range(0,64)
+    sbit_list = [i for i in range(0,64)]
     s_bit_channel_mapping = {}
     print ("")
     if not os.path.isdir("vfat_data/vfat_sbit_mapping_results"):
