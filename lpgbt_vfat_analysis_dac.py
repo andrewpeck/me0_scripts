@@ -246,7 +246,7 @@ if __name__ == "__main__":
 
     # Parsing arguments
     parser = argparse.ArgumentParser(description="LpGBT VFAT DAC Scan Results")
-    parser.add_argument("-i", "--inFile", action="store", dest="inFile", help="Input file")
+    parser.add_argument("-f", "--inFile", action="store", dest="inFile", help="Input file")
     args = parser.parse_args()
 
     if args.inFile is None:
