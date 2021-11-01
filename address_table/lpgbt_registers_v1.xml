@@ -3130,7 +3130,7 @@
                     mask="0xff" />
 
                 <!-- [0x1c7] DLDPFecCorrectionCount1 -->
-                <!-- Number of error reported by the FEC decoder in the downlink data path. -->
+                <!-- Number of error reported by the FEC decoder in the downlink data path. A write access to this register will clear the whole DLDPFecCorrectionCount. -->
                 <node id="DLDPFECCORRECTIONCOUNT1" address="0x1" permission="r"
                     description="Bits 23:16 of the FEC correction counter."
                     mask="0xff" />

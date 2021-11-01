@@ -240,7 +240,7 @@ def configLPGBT(oh_v, readback):
     if oh_v == 1:
         writeReg(getNode("LPGBT.RW.DEBUG.DLDPFECERRCNTENA"), 0x1, readback)
     elif oh_v == 2:
-        writeReg(getNode("LPGBT.RW.DEBUG.DLDPFECERRCNTENABLE"), 0x1, readback)
+        writeReg(getNode("LPGBT.RW.DEBUG.DLDPFECCOUNTERENABLE"), 0x1, readback)
     writeReg(getNode("LPGBT.RW.DEBUG.ULDPBYPASSINTERLEAVER"), 0x0, readback)
     writeReg(getNode("LPGBT.RW.DEBUG.ULDPBYPASSSCRAMBLER"), 0x0, readback)
     writeReg(getNode("LPGBT.RW.DEBUG.ULDPBYPASSFECCODER"), 0x0, readback)
@@ -645,6 +645,7 @@ if __name__ == "__main__":
     # Readback rom register to make sure communication is OK
     if args.system!="dryrun" and args.system!="backend":
         check_rom_readback()
+        check_lpgbt_mode(boss)
 
     # Check if lpGBT is READY if running through backend
     #if args.system=="backend":

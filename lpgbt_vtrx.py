@@ -393,6 +393,7 @@ if __name__ == "__main__":
     # Readback rom register to make sure communication is OK
     if args.system!="dryrun" and args.system!="backend":
         check_rom_readback()
+        check_lpgbt_mode(boss)
 
     # Check if lpGBT link is READY if running through backend
     #if args.system=="backend":

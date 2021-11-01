@@ -3,7 +3,7 @@ from time import sleep, time
 import sys
 import argparse
 
-def main(system, boss, action, oh_select, gbt_select):
+def main(system, oh_v, boss, action, oh_select, gbt_select):
     print ("")
     if boss:
         print ("Performing action for boss lpGBT\n")
@@ -12,7 +12,10 @@ def main(system, boss, action, oh_select, gbt_select):
 
     if action=="reset":
         print ("Reset lpGBT\n")
-        mpoke(0x12C, 0x80)
+        if oh_v == 1:
+            mpoke(0x12C, 0x80)
+        elif oh_v == 1:
+            mpoke(0x13C, 0x80)
         check_ready = 0
         t0 = time()
         while not check_ready:
@@ -23,13 +26,19 @@ def main(system, boss, action, oh_select, gbt_select):
         #    print ("Enabling EC channel\n")
         #    mpoke(0xA8, 0x1F)
         print ("Enabling WatchDog\n")
-        mpoke(0xED, 0x03)
+        if oh_v == 1:
+            mpoke(0xED, 0x03)
+        elif oh_v == 2:
+            mpoke(0xF8, 0x00)
     elif action=="disable":
         #if boss:
         #    print ("Disabling EC channel\n")
         #    mpoke(0xA8, 0x0F)
         print ("Disabling WatchDog\n")
-        mpoke(0xED, 0x63)
+        if oh_v == 1:
+            mpoke(0xED, 0x63)
+        elif oh_v == 2:
+            mpoke(0xF8, 0x03)
 
 if __name__ == "__main__":
 
@@ -126,6 +135,7 @@ if __name__ == "__main__":
     # Readback rom register to make sure communication is OK
     if args.system!="dryrun" and args.system!="backend":
         check_rom_readback()
+        check_lpgbt_mode(boss)
 
     # Check if lpGBT is READY if running through backend
     #if args.system=="backend":
@@ -133,7 +143,7 @@ if __name__ == "__main__":
 
     # Configuring LPGBT
     try:
-        main(args.system, boss, args.action, args.ohid, args.gbtid)
+        main(args.system, oh_v, boss, args.action, args.ohid, args.gbtid)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

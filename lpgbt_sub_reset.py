@@ -12,7 +12,7 @@ def convert_gpio_reg(gpio):
     reg_data |= (0x01 << bit)
     return reg_data
 
-def lpgbt_vfat_reset(system, oh_select, gbtid_list):
+def lpgbt_sub_reset(system, oh_select, gbtid_list):
     print("SUB RESET\n")
 
     gpio_dirH_node = getNode("LPGBT.RWF.PIO.PIODIRH")
@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     # Running Phase Scan
     try:
-        lpgbt_vfat_reset(args.system, int(args.ohid), gbtid_list)
+        lpgbt_sub_reset(args.system, int(args.ohid), gbtid_list)
     except KeyboardInterrupt:
         print(Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
