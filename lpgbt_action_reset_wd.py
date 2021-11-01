@@ -22,18 +22,12 @@ def main(system, oh_v, boss, action, oh_select, gbt_select):
             check_ready = read_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%s.GBT%s_READY" % (oh_select, gbt_select)))
         print ("Time taken for lpGBT to get back to READY state: %.4f sec\n"%(time()-t0))
     elif action=="enable":
-        #if boss:
-        #    print ("Enabling EC channel\n")
-        #    mpoke(0xA8, 0x1F)
         print ("Enabling WatchDog\n")
         if oh_v == 1:
             mpoke(0xED, 0x03)
         elif oh_v == 2:
             mpoke(0xF8, 0x00)
     elif action=="disable":
-        #if boss:
-        #    print ("Disabling EC channel\n")
-        #    mpoke(0xA8, 0x0F)
         print ("Disabling WatchDog\n")
         if oh_v == 1:
             mpoke(0xED, 0x63)

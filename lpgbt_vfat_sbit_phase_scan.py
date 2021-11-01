@@ -7,8 +7,8 @@ import random
 import json
 from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
 
-config_boss_filename = "lpgbt_data/config_boss.txt"
-config_sub_filename = "lpgbt_data/config_sub.txt"
+config_boss_filename = ""
+config_sub_filename = ""
 config_boss = {}
 config_sub = {}
 
@@ -23,7 +23,7 @@ def getConfig (filename):
     return reg_map
 
 
-def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode, cal_dac, bestphase_list):
+def lpgbt_vfat_sbit(system, oh_v, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode, cal_dac, bestphase_list):
     print ("LPGBT VFAT S-Bit Phase Scan\n")
 
     if bestphase_list!={}:
@@ -32,7 +32,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
             sbit_elinks = vfat_to_sbit_elink(vfat)
             for elink in range(0,8):
                 set_bestphase = bestphase_list[vfat][elink]
-                setVfatSbitPhase(system, oh_select, vfat, sbit_elinks[elink], set_bestphase)
+                setVfatSbitPhase(system, oh_v, oh_select, vfat, sbit_elinks[elink], set_bestphase)
                 print ("VFAT %02d: Phase set for ELINK %02d to: %s" % (vfat, elink, hex(set_bestphase)))
         return
 
@@ -106,7 +106,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
         for vfat in vfat_list:
             sbit_elinks = vfat_to_sbit_elink(vfat)
             for elink in range(0,8):
-                setVfatSbitPhase(system, oh_select, vfat, sbit_elinks[elink], phase)
+                setVfatSbitPhase(system, oh_v, oh_select, vfat, sbit_elinks[elink], phase)
 
         s_bit_channel_mapping = {}
         print ("Checking errors: ")
@@ -246,7 +246,7 @@ def lpgbt_vfat_sbit(system, oh_select, vfat_list, nl1a, l1a_bxgap, set_cal_mode,
         sbit_elinks = vfat_to_sbit_elink(vfat)
         for elink in range(0,8):
             set_bestphase = bestphase_vfat_elink[vfat][elink]
-            setVfatSbitPhase(system, oh_select, vfat, sbit_elinks[elink], set_bestphase)
+            setVfatSbitPhase(system, oh_v, oh_select, vfat, sbit_elinks[elink], set_bestphase)
             print ("VFAT %02d: Phase set for ELINK %02d to: %s" % (vfat, elink, hex(set_bestphase)))
     for vfat in range(0,24):
         for elink in range(0,8):
@@ -307,7 +307,7 @@ def find_phase_center(err_list):
     return ngood_center, ngood_max
 
 
-def setVfatSbitPhase(system, oh_select, vfat, sbit_elink, phase):
+def setVfatSbitPhase(system, oh_v, oh_select, vfat, sbit_elink, phase):
     lpgbt, gbt_select, rx_elink, gpio = vfat_to_gbt_elink_gpio(vfat)
 
     if lpgbt == "boss":
@@ -316,7 +316,10 @@ def setVfatSbitPhase(system, oh_select, vfat, sbit_elink, phase):
         config = config_sub
 
     # set phase
-    GBT_ELINK_SAMPLE_PHASE_BASE_REG = 0x0CC
+    if oh_v == 1:
+        GBT_ELINK_SAMPLE_PHASE_BASE_REG = 0x0CC
+    elif oh_v == 2:
+        GBT_ELINK_SAMPLE_PHASE_BASE_REG = 0x0D0
     addr = GBT_ELINK_SAMPLE_PHASE_BASE_REG + sbit_elink
     value = (config[addr] & 0x0f) | (phase << 4)
 
@@ -444,12 +447,18 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Missing config file for sub: sub_boss.txt" + Colors.ENDC)
         sys.exit()
 
+    global config_boss_filename
+    global config_sub_filename
+    global config_boss
+    global config_sub
+    config_boss_filename = "lpgbt_data/config_boss_ohv%d.txt"%oh_v
+    config_sub_filename = "lpgbt_data/config_sub_ohv%d.txt"%oh_v
     config_boss = getConfig(config_boss_filename)
     config_sub  = getConfig(config_sub_filename)
 
     # Running Phase Scan
     try:
-        lpgbt_vfat_sbit(args.system, int(args.ohid), vfat_list, nl1a, l1a_bxgap, set_cal_mode, cal_dac, bestphase_list)
+        lpgbt_vfat_sbit(args.system, oh_v, int(args.ohid), vfat_list, nl1a, l1a_bxgap, set_cal_mode, cal_dac, bestphase_list)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

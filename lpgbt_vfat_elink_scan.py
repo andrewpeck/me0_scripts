@@ -3,8 +3,8 @@ from time import sleep, time
 import sys
 import argparse
 
-config_boss_filename = "config_boss.txt"
-config_sub_filename = "config_sub.txt"
+config_boss_filename = ""
+config_sub_filename = ""
 config_boss = {}
 config_sub = {}
 
@@ -18,7 +18,7 @@ def getConfig (filename):
     f.close()
     return reg_map
 
-def lpgbt_elink_scan(system, oh_select, vfat_list):
+def lpgbt_elink_scan(system, oh_v, oh_select, vfat_list):
     print ("LPGBT Elink Scan")
 
     n_err_vfat_elink = {}
@@ -27,7 +27,7 @@ def lpgbt_elink_scan(system, oh_select, vfat_list):
         for elink in range(0,28): # Loop for all 28 RX elinks
             print ("VFAT%02d , ELINK %02d" % (vfat, elink))
             # Disable RX elink under test
-            setVfatRxEnable(system, oh_select, vfat, 0, elink)
+            setVfatRxEnable(system, oh_v, oh_select, vfat, 0, elink)
 
             # Reset the link, give some time to accumulate any sync errors and then check VFAT comms
             sleep(0.1)
@@ -45,7 +45,7 @@ def lpgbt_elink_scan(system, oh_select, vfat_list):
                     n_err+=1
             n_err_vfat_elink[vfat][elink] = n_err
 
-            setVfatRxEnable(system, oh_select, vfat, 1, elink)
+            setVfatRxEnable(system, oh_v, oh_select, vfat, 1, elink)
         print ("")
 
     sleep(0.1)
@@ -63,7 +63,7 @@ def lpgbt_elink_scan(system, oh_select, vfat_list):
             sys.stdout.flush()
         print ("")
 
-def setVfatRxEnable(system, oh_select, vfat, enable, elink):
+def setVfatRxEnable(system, oh_v, oh_select, vfat, enable, elink):
     lpgbt, gbt_select, elink_old, gpio = vfat_to_gbt_elink_gpio(vfat)
 
     if lpgbt == "boss":
@@ -72,7 +72,10 @@ def setVfatRxEnable(system, oh_select, vfat, enable, elink):
         config = config_sub
 
     # disable/enable channel
-    GBT_ELINK_SAMPLE_ENABLE_BASE_REG = 0x0C4
+    if oh_v == 1:
+        GBT_ELINK_SAMPLE_ENABLE_BASE_REG = 0x0C4
+    elif oh_v == 2:
+        GBT_ELINK_SAMPLE_ENABLE_BASE_REG = 0x0C8
     addr = GBT_ELINK_SAMPLE_ENABLE_BASE_REG + elink/4
     bit = 4 + elink%4
     mask = (1 << bit)
@@ -160,12 +163,18 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Missing config file for sub: sub_boss.txt" + Colors.ENDC)
         sys.exit()
 
+    global config_boss_filename
+    global config_sub_filename
+    global config_boss
+    global config_sub
+    config_boss_filename = "lpgbt_data/config_boss_ohv%d.txt"%oh_v
+    config_sub_filename = "lpgbt_data/config_sub_ohv%d.txt"%oh_v
     config_boss = getConfig(config_boss_filename)
     config_sub  = getConfig(config_sub_filename)
     
     # Running Phase Scan
     try:
-        lpgbt_elink_scan(args.system, int(args.ohid), vfat_list)
+        lpgbt_elink_scan(args.system, oh_v, int(args.ohid), vfat_list)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

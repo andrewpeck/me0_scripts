@@ -12,9 +12,9 @@ def main(system, boss, reset, invert_rx, invert_clk, invert_tx, ecphase):
 
     if reset=="pll_reset":
         if system=="backend":
-            mpoke(0x12C, 0x80)
+            mpoke(getNode("LPGBT.RW.RESET.RSTPLLDIGITAL").address, 0x80)
             sleep(2)
-            mpoke(0x12C, 0x00)
+            mpoke(getNode("LPGBT.RW.RESET.RSTPLLDIGITAL").address, 0x00)
         else:
             writeReg(getNode("LPGBT.RW.RESET.RSTPLLDIGITAL"), 0x01, 0)
             sleep(2)
@@ -22,8 +22,8 @@ def main(system, boss, reset, invert_rx, invert_clk, invert_tx, ecphase):
         print ("Reset Done\n")
     elif reset=="full_reset":
         if system=="backend":
-            mpoke(0x130, 0xA3)
-            mpoke(0x12F, 0x80)
+            mpoke(getNode("LPGBT.RW.POWERUP.PUSMFORCEMAGIC").address, 0xA3)
+            mpoke(getNode("LPGBT.RW.POWERUP.PUSMFORCESTATE").address, 0x80)
         else:
             writeReg(getNode("LPGBT.RW.POWERUP.PUSMFORCEMAGIC"), 0xA3, 0)
             writeReg(getNode("LPGBT.RW.POWERUP.PUSMFORCESTATE"), 0x01, 0)
@@ -32,7 +32,7 @@ def main(system, boss, reset, invert_rx, invert_clk, invert_tx, ecphase):
 
     if ecphase:
         if system=="backend":
-            mpoke(0x0CB, 0x02)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRXECTRACKMODE").address, 0x02)
         else:
             writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXECTRACKMODE"), 0x2, readback)
         print ("Continuous phase tracking set for EC link\n")
@@ -54,18 +54,18 @@ def main(system, boss, reset, invert_rx, invert_clk, invert_tx, ecphase):
 def invert_eprx(boss, readback):
     if (boss):
         if system=="backend":
-            mpoke(0x0D5, 0x0A)
-            mpoke(0x0D0, 0x0A)
-            mpoke(0x0CE, 0x0A)
-            mpoke(0x0CC, 0x0A)
-            mpoke(0x0DF, 0x0A)
-            mpoke(0x0DD, 0x0A)
-            mpoke(0x0DE, 0x0A)
-            mpoke(0x0E0, 0x0A)
-            mpoke(0x0E2, 0x0A)
-            mpoke(0x0E4, 0x0A)
-            mpoke(0x0E6, 0x0A)
-            mpoke(0x0E5, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX9INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX4INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX2INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX0INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX19INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX17INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX18INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX20INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX22INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX24INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX26INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX25INVERT").address, 0x0A)
         else:
             writeReg(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX9INVERT"), 0x1, readback)
             writeReg(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX4INVERT"), 0x1, readback)
@@ -81,17 +81,17 @@ def invert_eprx(boss, readback):
             writeReg(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX25INVERT"), 0x1, readback)
     else:
         if system=="backend":
-            mpoke(0x0E1, 0x0A)
-            mpoke(0x0E3, 0x0A)
-            mpoke(0x0E7, 0x0A)
-            mpoke(0x0E5, 0x0A)
-            mpoke(0x0E4, 0x0A)
-            mpoke(0x0D5, 0x0A)
-            mpoke(0x0D6, 0x0A)
-            mpoke(0x0CF, 0x0A)
-            mpoke(0x0D1, 0x0A)
-            mpoke(0x0CD, 0x0A)
-            mpoke(0x0D8, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX21INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX23INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX27INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX24INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX25INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX9INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX10INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX31INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX5INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX1INVERT").address, 0x0A)
+            mpoke(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX12INVERT").address, 0x0A)
         else:
             writeReg(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX21INVERT"), 0x1, readback)
             writeReg(getNode("LPGBT.RWF.EPORTRX.EPRX_CHN_CONTROL.EPRX23INVERT"), 0x1, readback)
@@ -108,15 +108,15 @@ def invert_eprx(boss, readback):
 def invert_epclk(boss, readback):
     if (boss):
         if system=="backend":
-            mpoke(0x07A, 0x5C)
+            mpoke(getNode("LPGBT.RWF.EPORTCLK.EPCLK7INVERT").address, 0x5C)
         else:
             writeReg(getNode("LPGBT.RWF.EPORTCLK.EPCLK7INVERT"), 0x1, readback)
 
 def invert_eptx(boss, readback):
     if (boss):
         if system=="backend":
-            mpoke(0x0BE, 0x08)
-            mpoke(0x0C1, 0x80)
+            mpoke(getNode("LPGBT.RWF.EPORTTX.EPTX10INVERT").address, 0x08)
+            mpoke(getNode("LPGBT.RWF.EPORTTX.EPTX23INVERT").address, 0x80)
         else:
             writeReg(getNode("LPGBT.RWF.EPORTTX.EPTX10INVERT"), 0x1, readback) #boss 4
             writeReg(getNode("LPGBT.RWF.EPORTTX.EPTX23INVERT"), 0x1, readback) #boss 11

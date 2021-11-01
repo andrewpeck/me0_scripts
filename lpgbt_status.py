@@ -283,31 +283,21 @@ def powerdown_adc():
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x0, 0) # vref tune
 
 def read_adc(channel, system):
-    # "LPGBT.RW.ADC.ADCINPSELECT"
-    # "LPGBT.RW.ADC.ADCINNSELECT"
-    #mpoke (0x111, channel<<4 | 0xf)
     writeReg(getNode("LPGBT.RW.ADC.ADCINPSELECT"), channel, 0)
     writeReg(getNode("LPGBT.RW.ADC.ADCINNSELECT"), 0xf, 0)
 
-    # "LPGBT.RW.ADC.ADCGAINSELECT"
-    # "LPGBT.RW.ADC.ADCCONVERT"
-    #mpoke (0x113, 0x84)
     writeReg(getNode("LPGBT.RW.ADC.ADCCONVERT"), 0x1, 0)
 
     done = 0
     while (done==0):
-        #done = 0x1 & (mpeek(0x1b8) >> 6) # "LPGBT.RO.ADC.ADCDONE"
         if system!="dryrun":
             done = readReg(getNode("LPGBT.RO.ADC.ADCDONE"))
         else:
             done=1
 
-    #val  = mpeek(0x1b9)               # LPGBT.RO.ADC.ADCVALUEL
     val = readReg(getNode("LPGBT.RO.ADC.ADCVALUEL"))
-    #val |= (0x3 & mpeek (0x1b8)) << 8 # LPGBT.RO.ADC.ADCVALUEH
     val |= (readReg(getNode("LPGBT.RO.ADC.ADCVALUEH")) << 8)
 
-    #mpoke (0x113, 0x04)
     writeReg(getNode("LPGBT.RW.ADC.ADCCONVERT"), 0x0, 0)
     writeReg(getNode("LPGBT.RW.ADC.ADCGAINSELECT"), 0x0, 0)
     writeReg(getNode("LPGBT.RW.ADC.ADCINPSELECT"), 0x0, 0)

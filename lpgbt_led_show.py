@@ -61,8 +61,8 @@ def set_pioout(gpio_list):
         elif gpio in range(8,16):
             value_h |= convert_gpio_reg(gpio)
 
-    writeReg(getNode("LPGBT.RWF.PIO.PIOOUTL"), value_l, 0)
-    writeReg(getNode("LPGBT.RWF.PIO.PIOOUTH"), value_h, 0)
+    mpoke(getNode("LPGBT.RWF.PIO.PIOOUTL").address, value_l)
+    mpoke(getNode("LPGBT.RWF.PIO.PIOOUTH").address, value_h)
 
 def convert_gpio_reg(gpio):
     reg_data = 0
