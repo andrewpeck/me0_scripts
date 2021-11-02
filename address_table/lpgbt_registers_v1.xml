@@ -1566,7 +1566,7 @@
 
                 <!-- [0x0fa] POWERUP1 -->
                 <!-- Controls behavior of the power-up state machine (for more details refer to Power-up state machine) -->
-                <node id="PUSMRDLLTIMEOUTCONFIG" address="0x03" permission="rw"
+                <node id="PUSMDLLTIMEOUTCONFIG" address="0x03" permission="rw"
                     description="Determines the timeout duration in the WAIT_DLL_LOCK state in the power-up state machine. For more details see Power-up state machine. 'PUSMDllTimeoutConfig[3:0]' 'Wait time': 4'd0=1s, 4'd1=500 ms, 4'd2=100ms, 4'd3=50ms, 4'd4=20ms, 4'd5=10ms, 4'd6=5ms, 4'd7=2ms, 4'd8=1ms, 4'd9=500us, 4'd10=200us, 4'd11=100us, 4'd12=50us, 4'd13=20us, 4'd14=10us, 4'd15=disabled"
                     mask="0xf0" />
                 <node id="PUSMCHANNELSTIMEOUTCONFIG" address="0x03" permission="rw"
