@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import datetime
 
-def main(system, oh_v, boss, run_time_min, gain, voltage):
+def main(system, oh_v, boss, run_time_min, gain, voltage, plot):
 
     init_adc()
 
@@ -30,7 +30,7 @@ def main(system, oh_v, boss, run_time_min, gain, voltage):
 
     print(filename)
     open(filename, "w+").close()
-    minutes, seconds, rssi = [], [], []
+    minutes, rssi = [], []
 
     run_time_min = float(run_time_min)
 
@@ -43,26 +43,33 @@ def main(system, oh_v, boss, run_time_min, gain, voltage):
     start_time = int(time())
     end_time = int(time()) + (60 * run_time_min)
 
+    file = open(filename, "w")
+    file.write("Time (min) \t RSSI (uA)\n")
+    t0 = time()
     while int(time()) <= end_time:
-        with open(filename, "a") as file:
+        if (time()-t0)>60:
             if oh_v == 1:
                 value = F * read_adc(7, gain, system)
             if oh_v == 2:
                 value = F * read_adc(5, gain, system)
             rssi_current = rssi_current_conversion(value, gain, voltage, oh_v) * 1e6 # in uA
             second = time() - start_time
-            seconds.append(second)
             rssi.append(rssi_current)
-            minutes.append(second/60)
-            live_plot(ax, minutes, rssi)
+            minutes.append(second/60.0)
+            if plot:
+                live_plot(ax, minutes, rssi)
 
-            file.write(str(second) + "\t" + str(rssi_current) + "\n" )
-            print("\tch %X: 0x%03X = %f (RSSI (uA))" % (7, value, rssi_current))
-
-            sleep(1)
+            file.write(str(second/60.0) + "\t" + str(rssi_current) + "\n")
+            print("time = %.2f min, \tch %X: 0x%03X = %f (RSSI (uA)" % (second/60.0, 7, value, rssi_current))
+            t0 = time()
+    file.close()
 
     figure_name = foldername + "rssi_data_" + now + "_plot.pdf"
-    fig.savefig(figure_name, bbox_inches="tight")
+    fig1, ax1 = plt.subplots()
+    ax1.set_xlabel("minutes")
+    ax1.set_ylabel("RSSI (uA)")
+    ax1.plot(minutes, rssi, color="turquoise")
+    fig1.savefig(figure_name, bbox_inches="tight")
 
     powerdown_adc()  
 
@@ -191,6 +198,7 @@ if __name__ == "__main__":
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-v", "--voltage", action="store", dest="voltage", default = "2.5", help="voltage = exact value of the 2.5V input voltage to OH")
     parser.add_argument("-m", "--minutes", action="store", dest="minutes", help="minutes = int. # of minutes you want to run")
+    parser.add_argument("-p", "--plot", action="store_true", dest="plot", help="plot = enable live plot")
     parser.add_argument("-a", "--gain", action="store", dest="gain", default = "2", help="gain = Gain for RSSI ADC: 2, 8, 16, 32")
     args = parser.parse_args()
 
@@ -291,7 +299,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, oh_v, boss, args.minutes, gain, float(args.voltage))
+        main(args.system, oh_v, boss, args.minutes, gain, float(args.voltage), args.plot)
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

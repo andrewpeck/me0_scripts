@@ -208,12 +208,9 @@ def main(system, oh_v, boss):
 
     print ("Downlink FEC Errors:")
     if oh_v == 1:
-        print ("\t%d" % (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT_H")) << 8 |readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT_L"))))
+        print ("\t%d" % (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT_H")) << 8 | readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT_L"))))
     else:
-        print("\t%d" % (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT0")) << 8))
-        print("\t%d" % (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT1")) << 8))
-        print("\t%d" % (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT2")) << 8))
-        print("\t%d" % (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT3")) << 8))
+        print("\t%d" % (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT0")) << 24) | (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT1")) << 16) | (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT2")) << 8) | (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT3"))) )
 
     print ("CDR Resistor:")
     if (readReg(getNode("LPGBT.RO.CLKG.CLKG_ENABLE_CDR_R"))):
@@ -234,7 +231,7 @@ def main(system, oh_v, boss):
     print ("\t%f uA" % (5.46 * readReg(getNode("LPGBT.RO.CLKG.CLKG_CONFIG_I_FLL"))))
 
     print ("VCO Cap Select:")
-    print ("\t%d" % (readReg(getNode("LPGBT.RO.CLKG.CLKG_VCOCAPSELECTL")) << 1 |readReg(getNode("LPGBT.RO.CLKG.CLKG_VCOCAPSELECTH"))))
+    print ("\t%d" % (readReg(getNode("LPGBT.RO.CLKG.CLKG_VCOCAPSELECTH")) << 1 | readReg(getNode("LPGBT.RO.CLKG.CLKG_VCOCAPSELECTL"))))
 
    #print ("Configuring adc...")
    #writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x1, 0)

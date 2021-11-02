@@ -63,7 +63,7 @@
                     mask="0xf0" />
                 <node id="EPRXRELOCKTHRESHOLD" address="0x17" permission="rw"
                     description="Sets the relock threshold value of the instant lock low pass filter for ePortRx DLL's (default: 5)"
-                    mask="0x0f" />
+                    mask="0x0f" />E
             </node> <!--CALIBRATION-->
 
             <!--Clock Generator-->

@@ -228,10 +228,15 @@ def configLPGBT(oh_v, readback):
         writeReg(getNode("LPGBT.RWF.POWER_GOOD.PGLEVEL"), 0x4, readback)
     writeReg(getNode("LPGBT.RWF.POWER_GOOD.PGENABLE"), 0x1, readback)
     writeReg(getNode("LPGBT.RWF.POWER_GOOD.PGDELAY"), 0xC, readback)
-    
-    writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXLOCKTHRESHOLD"), 0x5, readback)
-    writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXRELOCKTHRESHOLD"), 0x5, readback)
-    writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXUNLOCKTHRESHOLD"), 0x5, readback)
+
+    if oh_v == 1:
+        writeReg(getNode("LPGBT.RWF.CALIBRATION.EPRXLOCKTHRESHOLD"), 0x5, readback)
+        writeReg(getNode("LPGBT.RWF.CALIBRATION.EPRXRELOCKTHRESHOLD"), 0x5, readback)
+        writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXUNLOCKTHRESHOLD"), 0x5, readback)
+    elif oh_v == 2:
+        writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXLOCKTHRESHOLD"), 0x5, readback)
+        writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXRELOCKTHRESHOLD"), 0x5, readback)
+        writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXUNLOCKTHRESHOLD"), 0x5, readback)
 
     # Datapath configuration
     writeReg(getNode("LPGBT.RW.DEBUG.DLDPBYPASDEINTERLEVEAR"), 0x0, readback)
@@ -524,16 +529,20 @@ def configure_eport_dlls(oh_v, readback):
     print ("Configuring eport dlls...")
     #2.2.2. Uplink: ePort Inputs DLLs
     #[0x034] EPRXDllConfig
-    writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXDLLCURRENT"), 0x1, readback)
-    writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXDLLCONFIRMCOUNT"), 0x1, readback)
-    writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXDLLFSMCLKALWAYSON"), 0x0, readback)
-    writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXDLLCOARSELOCKDETECTION"), 0x0, readback)
-    writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXENABLEREINIT"), 0x0, readback)
     if oh_v == 1:
+        writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDLLCURRENT"), 0x1, readback)
+        writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDLLCONFIRMCOUNT"), 0x1, readback)
+        writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDLLFSMCLKALWAYSON"), 0x0, readback)
+        writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDLLCOARSELOCKDETECTION"), 0x0, readback)
+        writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXENABLEREINIT"), 0x0, readback)
         writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.EPRXDATAGATINGENABLE"), 0x1, readback)
     elif oh_v == 2:
+        writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXDLLCURRENT"), 0x1, readback)
+        writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXDLLCONFIRMCOUNT"), 0x1, readback)
+        writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXDLLFSMCLKALWAYSON"), 0x0, readback)
+        writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXDLLCOARSELOCKDETECTION"), 0x0, readback)
+        writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXENABLEREINIT"), 0x0, readback)
         writeReg(getNode("LPGBT.RWF.EPORTRX.EPRXDATAGATINGDISABLE"), 0x0, readback)
-
 
 def configure_phase_shifter(readback):
     # turn on phase shifter clock

@@ -9,7 +9,7 @@ import datetime
 import math
 import numpy as np
 
-def main(system, oh_v, boss, device, run_time_min, gain):
+def main(system, oh_v, boss, device, run_time_min, gain, plot):
 
     # PT-100 is an RTD (Resistance Temperature Detector) sensor
     # PT (ie platinum) has linear temperature-resistance relationship
@@ -33,7 +33,7 @@ def main(system, oh_v, boss, device, run_time_min, gain):
 
     print(filename)
     open(filename, "w+").close()
-    minutes, seconds, T = [], [], []
+    minutes, T = [], []
 
     run_time_min = float(run_time_min)
 
@@ -61,24 +61,32 @@ def main(system, oh_v, boss, device, run_time_min, gain):
     start_time = int(time())
     end_time = int(time()) + (60 * run_time_min)
 
+    file = open(filename, "w")
+    file.write("Time (min) \t Voltage (V) \t Resistance (Ohm) \t Temperature (C)\n")
+    t0 = time()
     while int(time()) <= end_time:
-        with open(filename, "a") as file:
+        if (time()-t0)>60:
             V_m = F * read_adc(channel, gain, system)
             R_m = V_m/I
             temp = find_temp(np.log10(R_m))
 
             second = time() - start_time
-            seconds.append(second)
             T.append(temp)
-            minutes.append(second/60)
-            live_plot(ax, minutes, T)
+            minutes.append(second/60.0)
+            if plot:
+                live_plot(ax, minutes, T)
 
-            file.write(str(second) + "\t" + str(R_m) + "\t" + str(temp) + "\n" )
-            print("\tch %X: 0x%03X = %f (R (Ohms) = %f (T (C))" % (channel, V_m, R_m, temp))
-            sleep(1)
+            file.write(str(second/60.0) + "\t" + str(V_m) + "\t" + str(R_m) + "\t" + str(temp) + "\n")
+            print("time = %.2f min, \tch %X: 0x%03X = %f (R (Ohms) = %f (T (C))" % (second/60.0, channel, V_m, R_m, temp))
+            t0 = time()
+    file.close()
 
     figure_name = foldername + "temp_" + device + now + "_plot.pdf"
-    fig.savefig(figure_name, bbox_inches="tight")
+    fig1, ax1 = plt.subplots()
+    ax1.set_xlabel("minutes")
+    ax1.set_ylabel("T (C)")
+    ax1.plot(minutes, T, color="turquoise")
+    fig1.savefig(figure_name, bbox_inches="tight")
 
     writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x0, 0)  # Enables current DAC.
     writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x0, 0)  #Sets output current for the current DAC.
@@ -221,7 +229,8 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--temp", action="store", dest="temp", help="temp = OH or VTRX")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 1, 3, 5 or 7 (only needed for backend)")
-    parser.add_argument("-m", "--minutes", action="store", dest="minutes", help="minutes = int. # of minutes you want to run")  
+    parser.add_argument("-m", "--minutes", action="store", dest="minutes", help="minutes = int. # of minutes you want to run")
+    parser.add_argument("-p", "--plot", action="store_true", dest="plot", help="plot = enable live plot")
     parser.add_argument("-a", "--gain", action="store", dest="gain", default = "2", help="gain = Gain for RSSI ADC: 2, 8, 16, 32")
     args = parser.parse_args()
 
@@ -317,7 +326,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, oh_v, boss, args.temp, args.minutes, gain)
+        main(args.system, oh_v, boss, args.temp, args.minutes, gain, args.plot)
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

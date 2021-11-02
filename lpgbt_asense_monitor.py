@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import datetime
 
-def main(system, oh_v, boss, gbt, run_time_min, gain):
+def main(system, oh_v, boss, gbt, run_time_min, gain, plot):
 
     init_adc()
 
@@ -30,7 +30,7 @@ def main(system, oh_v, boss, gbt, run_time_min, gain):
 
     print(filename)
     open(filename, "w+").close()
-    minutes, seconds, asense0, asense1, asense2, asense3 = [], [], [], [], [], []
+    minutes, asense0, asense1, asense2, asense3 = [], [], [], [], []
 
     run_time_min = float(run_time_min)
 
@@ -45,8 +45,14 @@ def main(system, oh_v, boss, gbt, run_time_min, gain):
     start_time = int(time())
     end_time = int(time()) + (60 * run_time_min)
 
+    file = open(filename, "w")
+    if gbt in [0,1]:
+        file.write("Time (min) \t Asense0 (PG2.5V current) (A) \t Asense1 (Rt2 voltage) (V) \t Asense2 (PG1.2V current) (A) \t Asense3 (Rt1 voltage) (V)\n")
+    else:
+        file.write("Time (min) \t Asense0 (PG1.2VD current) (A) \t Asense1 (Rt3 voltage) (V) \t Asense2 (PG1.2VA current) (A) \t Asense3 (Rt4 voltage) (V)\n")
+    t0 = time()
     while int(time()) <= end_time:
-        with open(filename, "a") as file:
+        if (time()-t0)>60:
             if oh_v == 1:
                 asense0_value = F * read_adc(4, gain, system)
                 asense1_value = F * read_adc(2, gain, system)
@@ -62,27 +68,38 @@ def main(system, oh_v, boss, gbt, run_time_min, gain):
             asense2_converted = asense_current_conversion(asense2_value)
             asense3_converted = asense_temp_voltage_conversion(asense3_value)
             second = time() - start_time
-            seconds.append(second)
             asense0.append(asense0_converted)
             asense1.append(asense1_converted)
             asense2.append(asense2_converted)
             asense3.append(asense3_converted)
-            minutes.append(second/60)
-            live_plot_current(ax1, minutes, asense0, asense2, run_time_min, gbt)
-            live_plot_temp(ax2, minutes, asense1, asense3, run_time_min, gbt)
+            minutes.append(second/60.0)
+            if plot:
+                live_plot_current(ax1, minutes, asense0, asense2, run_time_min, gbt)
+                live_plot_temp(ax2, minutes, asense1, asense3, run_time_min, gbt)
 
-            file.write(str(second) + "\t" + str(asense0_converted) + "\t" + str(asense1_converted) + "\t" + str(asense2_converted) + "\t" + str(asense3_converted) + "\n" )
+            file.write(str(second/60.0) + "\t" + str(asense0_converted) + "\t" + str(asense1_converted) + "\t" + str(asense2_converted) + "\t" + str(asense3_converted) + "\n" )
             if gbt in [0,1]:
-                print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG2.5V current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt2 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2V current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt1 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
+                print("Time: " + "{:.2f}".format(second/60.0) + " min \t Asense0 (PG2.5V current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt2 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2V current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt1 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
             else:
-                print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG1.2VD current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt3 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2VA current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt4 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
+                print("Time: " + "{:.2f}".format(second/60.0) + " min \t Asense0 (PG1.2VD current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt3 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2VA current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt4 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
 
-            sleep(1)
-
+            t0 = time()
+    file.close()
+    
     figure_name1 = foldername + now + "_pg_current_plot.pdf"
-    fig1.savefig(figure_name1, bbox_inches="tight")
     figure_name2 = foldername + now + "_rt_voltage_plot.pdf"
-    fig2.savefig(figure_name2, bbox_inches="tight")
+    fig1, ax1 = plt.subplots()
+    fig2, ax2 = plt.subplots()
+    ax1.set_xlabel("minutes")
+    ax1.set_ylabel("PG Current (A)")
+    ax2.set_xlabel("minutes")
+    ax2.set_ylabel("Rt Voltage (V)")
+    ax1.plot(minutes, asense0, color="red")
+    ax1.plot(minutes, asense2, color="blue")
+    ax2.plot(minutes, asense1, color="red")
+    ax2.plot(minutes, asense3, color="blue")
+    fig1.savefig(figure_name1, bbox_inches="tight")
+    fig2.savefig(figure_name1, bbox_inches="tight")
 
     powerdown_adc()
 
@@ -220,6 +237,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7")
     parser.add_argument("-m", "--minutes", action="store", dest="minutes", help="minutes = int. # of minutes you want to run")
+    parser.add_argument("-p", "--plot", action="store_true", dest="plot", help="plot = enable live plot")
     parser.add_argument("-a", "--gain", action="store", dest="gain", default = "2", help="gain = Gain for Asense ADCs: 2, 8, 16, 32")
     args = parser.parse_args()
 
@@ -311,7 +329,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, oh_v, boss, gbt, args.minutes, gain)
+        main(args.system, oh_v, boss, gbt, args.minutes, gain, args.plot)
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
