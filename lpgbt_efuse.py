@@ -19,11 +19,11 @@ def main(system, oh_v, boss, fusing, input_config_file, input_vtrx, input_regist
         for i in range(240):
             fuse_list[i] = 0x00
         n_rw_fuse = (0xEF+1) # number of registers in LPGBT rwf block
-        efuse_done_reg = 0xEF    
+        efuse_done_reg = 0xEF
     elif oh_v == 2:
         for i in range(256):
             fuse_list[i] = 0x00
-        n_rw_fuse = (0xFF+1) # number of registers in LPGBT rwf block   
+        n_rw_fuse = (0xFF+1) # number of registers in LPGBT rwf block
         efuse_done_reg = 0xFB 
 
     # Fusing of registers
@@ -41,6 +41,17 @@ def main(system, oh_v, boss, fusing, input_config_file, input_vtrx, input_regist
             fuse_register(system, boss, str(efuse_done_reg), "0x07") #dllConfigDone=1, pllConfigDone=1, updateEnable=1
         elif oh_v == 2:
             fuse_register(system, boss, str(efuse_done_reg), "0x06") #dllConfigDone=1, pllConfigDone=1
+        if oh_v == 2:
+            print (Colors.YELLOW + "\nFusing CRC registers\n" + Colors.ENDC)
+
+            protected_registers = read_all_fuse_data(n_rw_fuse)
+            crc_registers = calculate_crc(protected_registers)
+            crc = crc_registers[0] | (crc_registers[1] << 8) | (crc_registers[2] << 16) | (crc_registers[3] << 24)
+            print ("CRC: %d\n"%crc)
+            fuse_register(system, boss, 0x0FC, crc_registers[0])
+            fuse_register(system, boss, 0x0FD, crc_registers[1])
+            fuse_register(system, boss, 0x0FE, crc_registers[2])
+            fuse_register(system, boss, 0x0FF, crc_registers[3])
 
     # Write the fuse values of registers in text file
     if boss:
@@ -212,6 +223,7 @@ def blow_fuse(system, boss):
         rw_terminate()
 
 def check_fuse_block_data(system, adr, data, fullblock=False):
+    global fuse_list
     fuse_block_adr    = adr & 0xfffc
     fuse_block_subadr = adr % 4
 
@@ -272,6 +284,37 @@ def check_fuse_block_data(system, adr, data, fullblock=False):
         print (Colors.RED + "ERROR: Mismatch in expected and read data from EFUSE" + Colors.ENDC)
         write_fuse_magic(0)
         rw_terminate()
+
+def read_all_fuse_data(n_rw_fuse):
+    protected_registers = (n_rw_fuse-4)*[0]
+    for i in range(0, (n_rw_fuse-4)):
+        if i%4 != 0:
+            continue
+        fuse_block_adr = i & 0xfffc
+
+        # Write fuseread on
+        writeReg(getNode("LPGBT.RW.EFUSES.FUSEREAD"), 0x1, 0)
+
+        valid = 0
+        while (valid==0):
+            if system!="dryrun":
+                valid = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEDATAVALID"))
+            else:
+                valid = 1
+
+        # Write address
+        writeReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDH"), 0xff&(fuse_block_adr>>8), 0) # FUSEBlowAddH
+        writeReg(getNode("LPGBT.RW.EFUSES.FUSEBLOWADDL"), 0xff&(fuse_block_adr>>0), 0) # FUSEBlowAddL
+
+        protected_registers[i] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESA")) # FUSEValuesA
+        protected_registers[i+1] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESB")) # FUSEValuesB
+        protected_registers[i+2] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESC")) # FUSEValuesC
+        protected_registers[i+3] = readReg(getNode("LPGBT.RO.FUSE_READ.FUSEVALUESD")) # FUSEValuesD
+
+        # Write fuseread off
+        writeReg(getNode("LPGBT.RW.EFUSES.FUSEREAD"), 0x0, 0)
+
+    return protected_registers
 
 def fuse_register(system, boss, input_register, input_data):
     input_register = int(input_register,16)
@@ -352,7 +395,7 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--register", action="store", dest="register", help="register = Enter a 16 bit register address in hex format")
     parser.add_argument("-d", "--data", action="store", dest="data", help="data = Enter a 8 bit data for the register in hex format")
     parser.add_argument("-u", "--user_id", action="store", dest="user_id", help="user_id = Enter a 32 bit number in hex format")
-    parser.add_argument("-c", "--complete", action="store", dest="complete", default = "0", help="complete = Set to 1 to fuse complete configuration by fusing dllConfigDone, pllConfigDone, updateEnable")
+    parser.add_argument("-c", "--complete", action="store", dest="complete", default = "0", help="complete = Set to 1 to fuse complete configuration by fusing dllConfigDone, pllConfigDone, updateEnable (only for OHv1)")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -402,7 +445,7 @@ if __name__ == "__main__":
         print (Colors.YELLOW + "Invalid value for vtrx option, only 0 or 1 allowed" + Colors.ENDC)
         sys.exit()
     if args.complete not in ["0", "1"]:
-        print (Colors.YELLOW + "Invalid valuefor complete option, only 0 or 1 allowed" + Colors.ENDC)
+        print (Colors.YELLOW + "Invalid value for complete option, only 0 or 1 allowed" + Colors.ENDC)
         sys.exit()
             
     if args.fusing == "input_file":

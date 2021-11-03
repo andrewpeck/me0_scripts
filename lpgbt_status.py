@@ -308,12 +308,43 @@ def main(system, oh_v, boss):
                 print ("\tch %X: 0x%03X = %f, reading = %f (%s)" % (i, read, read/1024., conv*read/1024., name))
 
     powerdown_adc()
-    
-    # Writing lpGBT configuration to text file
+
+    # CRC
+    if oh_v == 2:
+        n_rw_fuse = (0xFF+1)
+
+        print ("CRC value calculated from registers: ")
+        protected_registers = (n_rw_fuse-4)*[0]
+        for i in range(0, (n_rw_fuse-4)):
+            protected_registers[i] = mpeek(i)
+        crc_registers = calculate_crc(protected_registers)
+        crc = crc_registers[0] | (crc_registers[1] << 8) | (crc_registers[2] << 16) | (crc_registers[3] << 24)
+        print ("CRC: %d\n"%crc)
+
+        print ("CRC value written in EFuses: ")
+        crc_registers = 4*[0]
+        crc_registers[0] = readReg(getNode("LPGBT.RWF.POWERUP.CRC0"))
+        crc_registers[1] = readReg(getNode("LPGBT.RWF.POWERUP.CRC1"))
+        crc_registers[2] = readReg(getNode("LPGBT.RWF.POWERUP.CRC2"))
+        crc_registers[3] = readReg(getNode("LPGBT.RWF.POWERUP.CRC3"))
+        crc = crc_registers[0] | (crc_registers[1] << 8) | (crc_registers[2] << 16) | (crc_registers[3] << 24)
+        print ("CRC: %d\n"%crc)
+
+        print ("CRC value last computed: ")
+        crc_registers = 4*[0]
+        crc_registers[0] = readReg(getNode("LPGBT.RO.PUSM.CRCVALUE0"))
+        crc_registers[1] = readReg(getNode("LPGBT.RO.PUSM.CRCVALUE1"))
+        crc_registers[2] = readReg(getNode("LPGBT.RO.PUSM.CRCVALUE2"))
+        crc_registers[3] = readReg(getNode("LPGBT.RO.PUSM.CRCVALUE3"))
+        crc = crc_registers[0] | (crc_registers[1] << 8) | (crc_registers[2] << 16) | (crc_registers[3] << 24)
+        print ("CRC: %d\n"%crc)
+        print ("Number of CRC calculations which resulted in invalid checksum: %d"%(readReg(getNode("LPGBT.RO.PUSM.FAILEDCRCCOUNTER"))))
+
+    # Writing lpGBT configuration status to text file
     if boss:
-        lpgbt_write_config_file("lpgbt_data/status_boss_ohv%d.txt"%oh_v)
+        lpgbt_write_config_file("lpgbt_data/status_boss_ohv%d.txt"%oh_v, status=1)
     else:
-        lpgbt_write_config_file("lpgbt_data/status_sub_ohv%d.txt"%oh_v)
+        lpgbt_write_config_file("lpgbt_data/status_sub_ohv%d.txt"%oh_v, status=1)
 
 def init_adc():
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x1, 0) # enable ADC

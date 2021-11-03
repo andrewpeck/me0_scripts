@@ -1,5 +1,7 @@
 import xml.etree.ElementTree as xml
 import sys, os, subprocess
+import zlib
+import array
 from collections import OrderedDict
 
 DEBUG = True
@@ -775,10 +777,16 @@ def mask_to_lsb(mask):
                 return idx
             idx = idx+1
 
-def lpgbt_write_config_file(config_file = "config.txt"):
+def lpgbt_write_config_file(config_file = "config.txt", status=0):
     f = open(config_file,"w+")
     for i in range (n_rw_reg):
         val =  mpeek(i)
+        if status == 0:
+            if i <= 0x007: # CHIP ID and USER ID
+                val = 0x00
+            if oh_v == 2:
+                if i in range(0xfc, 0x100): # CRC
+                    val = 0x00
         if oh_v == 1:
             if i in range(0x0f0, 0x105): # I2C Masters
                 val = 0x00
@@ -827,7 +835,12 @@ def lpgbt_dump_config(config_file = "Loopback_test.txt"):
             input_file = open(config_file, "r")
             for line in input_file.readlines():
                 reg_addr = int(line.split()[0],16)
-                value = int(line.split()[1],16) 
+                value = int(line.split()[1],16)
+                if reg_addr <= 0x007: # CHIP ID and USER ID
+                    continue
+                if oh_v == 2:
+                    if reg_addr in range(0xfc, 0x100): # CRC
+                        continue
                 if oh_v == 1:
                     if reg_addr in range(0x0f0, 0x105): # I2C Masters
                         value = 0x00
@@ -837,6 +850,15 @@ def lpgbt_dump_config(config_file = "Loopback_test.txt"):
                 mpoke(reg_addr, value)
             input_file.close()
         print("lpGBT Configuration Done")
+
+def calculate_crc(protected_registers):
+    crc_registers = 4*[0]
+    protected_registers_as_bytes = array.array('B', protected_registers).tobytes()
+    crc = zlib.crc32(protected_registers_as_bytes) & 0xffffffff
+    crc_inverted = crc ^ 0xffffffff
+    for offset, value in enumerate(list(struct.pack("<I", crc_inverted))):
+        crc_registers[offset] = value
+    return crc_registers
 
 if __name__ == "__main__":
     main()

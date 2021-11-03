@@ -131,8 +131,6 @@ def configLPGBT(oh_v, readback):
     elif oh_v == 2:
         writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGPLLINTCURWHENLOCKED"), 0x9, readback)
         writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGPLLINTCUR"), 0x9, readback)
-    writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGPLLINTCURWHENLOCKED"), 0x5, readback)
-    writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGPLLINTCUR"), 0x5, readback)
       
     #[0x024] CLKGPLLPropCur
     if oh_v == 1:
@@ -141,8 +139,6 @@ def configLPGBT(oh_v, readback):
     elif oh_v == 2:
         writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGPLLPROPCURWHENLOCKED"), 0x9, readback)
         writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGPLLPROPCUR"), 0x9, readback)
-    writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGPLLPROPCURWHENLOCKED"), 0x5, readback)
-    writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGPLLPROPCUR"), 0x5, readback)
     
     #[0x025] CLKGCDRPropCur
     writeReg(getNode("LPGBT.RWF.CLOCKGENERATOR.CLKGCDRPROPCURWHENLOCKED"), 0x5, readback)
@@ -679,7 +675,7 @@ if __name__ == "__main__":
     readback = 1
     if (args.input_config_file is None and args.system!="backend"):
         try:
-            main(args.system, boss, args.input_config_file, int(args.reset_before_config), int(args.minimal), readback)
+            main(args.system, oh_v, boss, args.input_config_file, int(args.reset_before_config), int(args.minimal), readback)
         except KeyboardInterrupt:
             print (Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
             rw_terminate()
