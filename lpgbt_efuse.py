@@ -387,7 +387,7 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="LpGBT Fusing for ME0 Optohybrid")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or dryrun")
-    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", default="1", help="oh_v = 1 or 2")
+    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 1 or 2")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-f", "--fusing", action="store", dest="fusing", help="fusing = input_file, register, user_id")
     parser.add_argument("-i", "--input", action="store", dest="input_config_file", help="input_config_file = .txt file")

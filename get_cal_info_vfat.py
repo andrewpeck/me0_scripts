@@ -148,7 +148,7 @@ def main(oh_select, type, write):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Retrieve VFAT calibration info from database.')
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
-    parser.add_argument("-y","--oh_v", action="store", dest="oh_v", default="1", help="oh_v = 1 or 2")
+    parser.add_argument("-y","--oh_v", action="store", dest="oh_v", help="oh_v = 1 or 2")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-w", "--write", action="store_true", dest="write", help="write calib data to file")
     parser.add_argument("-t", "--type", action="store", dest="type", help="type = hw_id or file")
@@ -177,7 +177,7 @@ if __name__ == '__main__':
         print("Using OH v1")
         oh_v = 1
     elif args.oh_v == "2":
-        print("Using OH v2")
+        print("Using OH v2")`
         oh_v = 2
     else:
         print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)

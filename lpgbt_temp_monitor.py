@@ -224,7 +224,7 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="ADC Precision Calibration Scan for ME0 Optohybrid")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
-    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", default="2", help="oh_v = 2 (no precision calibration for oh_v1)")
+    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 2 (no precision calibration for oh_v1)")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = sub")
     parser.add_argument("-t", "--temp", action="store", dest="temp", help="temp = OH or VTRX")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
