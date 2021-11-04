@@ -439,10 +439,6 @@ if __name__ == "__main__":
     initialize_vfat_config(int(args.ohid), args.use_dac_scan_results, args.use_channel_trimming)
     print("Initialization Done\n")
 
-    global config_boss_filename
-    global config_sub_filename
-    global config_boss
-    global config_sub
     config_boss_filename = "lpgbt_data/config_boss_ohv%d.txt"%oh_v
     config_sub_filename = "lpgbt_data/config_sub_ohv%d.txt"%oh_v
 
