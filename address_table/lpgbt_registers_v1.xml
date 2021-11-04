@@ -1584,25 +1584,25 @@
 
                 <!-- [0x0fc] CRC0 -->
                 <!-- Cyclic redundancy checksum for configuration memory -->
-                <node id="CRC32_0TO7" address="0x05" permission="rw"
+                <node id="CRC0" address="0x05" permission="rw"
                     description="Bits 7:0 of CRC. Refer to Cyclic Redundancy Check (CRC) for more details."
                     mask="0xff" />
 
                 <!-- [0x0fd] CRC1 -->
                 <!-- Cyclic redundancy checksum for configuration memory -->
-                <node id="CRC32_8TO15" address="0x06" permission="rw"
+                <node id="CRC1" address="0x06" permission="rw"
                     description="Bits 15:8 of CRC. Refer to Cyclic Redundancy Check (CRC) for more details."
                     mask="0xff" />
 
                 <!-- [0x0fe] CRC2 -->
                 <!-- Cyclic redundancy checksum for configuration memory -->
-                <node id="CRC32_16TO23" address="0x07" permission="rw"
+                <node id="CRC2" address="0x07" permission="rw"
                     description="Bits 23:16 of CRC. Refer to Cyclic Redundancy Check (CRC) for more details."
                     mask="0xff" />
 
                 <!-- [0x0ff] CRC3 -->
                 <!-- Cyclic redundancy checksum for configuration memory -->
-                <node id="CRC32_24TO31" address="0x08" permission="rw"
+                <node id="CRC3" address="0x08" permission="rw"
                     description="Bits 31:24 of CRC. Refer to Cyclic Redundancy Check (CRC) for more details."
                     mask="0xff" />
             </node>
@@ -3390,7 +3390,7 @@
 
                 <!-- [0x1e5] FailedCRC -->
                 <!-- Counter of invalid CRC cycles. -->
-                <node id="FailedCRCCounter" address="0x1e5-0x1d9" permission="r"
+                <node id="FAILEDCRCCOUNTER" address="0x1e5-0x1d9" permission="r"
                     description="Counts number of CRC calculations which resulted in invalid checksum."
                     mask="0xff" />
             </node>
