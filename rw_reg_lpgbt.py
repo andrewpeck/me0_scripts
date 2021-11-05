@@ -2,6 +2,7 @@ import xml.etree.ElementTree as xml
 import sys, os, subprocess
 import zlib
 import array
+import struct
 from collections import OrderedDict
 from utils import *
 
