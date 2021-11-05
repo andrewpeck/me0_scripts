@@ -119,3 +119,4 @@ CONFIG_ME0_OH_VER = {
     1: [1, 1, 1, 1, 1, 1, 1, 1], # OH ver for 8 GBTs for OH1
     2: [1, 1, 1, 1, 1, 1, 1, 1], # OH ver for 8 GBTs for OH2
     3: [1, 1, 1, 1, 1, 1, 1, 1]  # OH ver for 8 GBTs for OH3
+}
