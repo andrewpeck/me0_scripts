@@ -489,7 +489,7 @@ def check_lpgbt_mode(boss):
     if boss and mode!=11:
         print (Colors.RED + "ERROR: lpGBT mode mismatch for boss, observed mode = %d, expected = 11"%mode + Colors.ENDC)
         rw_terminate()
-    if sub and mode!=9:
+    if not boss and mode!=9:
         print (Colors.RED + "ERROR: lpGBT mode mismatch for sub, observed mode = %d, expected = 9"%mode + Colors.ENDC)
         rw_terminate()
 
