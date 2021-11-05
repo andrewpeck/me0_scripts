@@ -44,7 +44,7 @@ def main(system, oh_v, boss, fusing, input_config_file, input_vtrx, input_regist
         if oh_v == 2:
             print (Colors.YELLOW + "\nFusing CRC registers\n" + Colors.ENDC)
 
-            protected_registers = read_all_fuse_data(n_rw_fuse)
+            protected_registers = read_all_fuse_data(system, n_rw_fuse)
             crc_registers = calculate_crc(protected_registers)
             crc = crc_registers[0] | (crc_registers[1] << 8) | (crc_registers[2] << 16) | (crc_registers[3] << 24)
             print ("CRC: %d\n"%crc)
@@ -285,7 +285,7 @@ def check_fuse_block_data(system, adr, data, fullblock=False):
         write_fuse_magic(0)
         rw_terminate()
 
-def read_all_fuse_data(n_rw_fuse):
+def read_all_fuse_data(system, n_rw_fuse):
     protected_registers = (n_rw_fuse-4)*[0]
     for i in range(0, (n_rw_fuse-4)):
         if i%4 != 0:
