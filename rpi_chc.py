@@ -31,7 +31,7 @@ class rpi_chc:
         self.bus.close()
         GPIO.cleanup()
 
-    def set_lpgbt_address(oh_v, boss):
+    def set_lpgbt_address(self, oh_v, boss):
         if oh_v == 1:
             self.lpgbt_address = 0x70
         elif oh_v == 2:
