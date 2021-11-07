@@ -162,7 +162,7 @@ Use -h option for any script to check usage
 
 ```lpgbt_status.py```: check status of lpGBT
 
-```lpgbt_sub_vtrx_reset.py```: resets sub using boss lpgbt in OHv2
+```lpgbt_sub_vtrx_reset.py```: resets sub lpGBT or VTRx+ using boss lpgbt in OHv2
 
 ```lpgbt_temp_monitor.py```: Checks for temperature of OH or VTRX in OHv2
 
