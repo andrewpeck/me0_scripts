@@ -12,9 +12,9 @@ def main(system, oh_v, boss, gain):
     init_adc()
 
     if boss == 1: 
-        channel = 7 #master_adc_in7
+        channel = 7 # master_adc_in7
     else:
-        channel = 3 #servant_adc_in3
+        channel = 3 # servant_adc_in3
 
     print("ADC Calibration Scan:")
 

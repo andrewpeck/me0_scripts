@@ -14,7 +14,7 @@ def main(system, oh_v, boss, gbt, run_time_min, gain, plot):
     if oh_v == 1:
         F = 1
     elif oh_v == 2:
-        cal_channel = 3 #servant_adc_in3
+        cal_channel = 7 # main_adc_in7
         F = calculate_F(cal_channel, gain, system)
 
     print("ADC Readings:")
@@ -105,7 +105,7 @@ def main(system, oh_v, boss, gbt, run_time_min, gain, plot):
 
 def calculate_F(channel, gain, system):
 
-    R= 1e-03
+    R = 1e-03
     LSB = 3.55e-06
     DAC = 150
 
