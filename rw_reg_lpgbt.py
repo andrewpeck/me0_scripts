@@ -503,7 +503,7 @@ def check_lpgbt_mode(boss):
         if boss and i2c_addr!=0x70:
             print (Colors.RED + "ERROR: Incorrect lpGBT I2C address 0x%02X for boss, expect 0x70"%i2c_addr + Colors.ENDC)
             rw_terminate()
-        if sub and i2c_addr!=0x71:
+        if not boss and i2c_addr!=0x71:
             print (Colors.RED + "ERROR: Incorrect lpGBT I2C address 0x%02X for sub, expect 0x71"%i2c_addr + Colors.ENDC)
             rw_terminate()
 
