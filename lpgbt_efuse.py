@@ -44,7 +44,7 @@ def main(system, oh_v, boss, fusing, input_config_file, input_vtrx, input_regist
         if oh_v == 2:
             print (Colors.YELLOW + "\nFusing CRC registers\n" + Colors.ENDC)
 
-            protected_registers = read_all_fuse_data(n_rw_fuse)
+            protected_registers = read_all_fuse_data(system, n_rw_fuse)
             crc_registers = calculate_crc(protected_registers)
             crc = crc_registers[0] | (crc_registers[1] << 8) | (crc_registers[2] << 16) | (crc_registers[3] << 24)
             print ("CRC: %d\n"%crc)
@@ -79,7 +79,7 @@ def fuse_from_file(system, oh_v, boss, filename, vtrx):
     print(Colors.YELLOW + "Fusing from file \"%s\"" % filename)
     print(Colors.ENDC)
     en = "no"
-    en = raw_input(Colors.YELLOW + "Please type \"yes\" to continue: " + Colors.ENDC)
+    en = input(Colors.YELLOW + "Please type \"yes\" to continue: " + Colors.ENDC)
     if (en != "yes"):
         print (Colors.YELLOW + "Fusing not done, exiting" + Colors.ENDC)
         rw_terminate()
@@ -285,7 +285,7 @@ def check_fuse_block_data(system, adr, data, fullblock=False):
         write_fuse_magic(0)
         rw_terminate()
 
-def read_all_fuse_data(n_rw_fuse):
+def read_all_fuse_data(system, n_rw_fuse):
     protected_registers = (n_rw_fuse-4)*[0]
     for i in range(0, (n_rw_fuse-4)):
         if i%4 != 0:
@@ -325,7 +325,7 @@ def fuse_register(system, boss, input_register, input_data):
         print (Colors.YELLOW + "Fusing Sub lpGBT, register: " + str(hex(input_register)) + ", data: " + str(hex(input_data)) + Colors.ENDC)
 
     en = "no"
-    en = raw_input(Colors.YELLOW + "Please type \"yes\" to continue: " + Colors.ENDC)
+    en = input(Colors.YELLOW + "Please type \"yes\" to continue: " + Colors.ENDC)
     if (en != "yes"):
         print (Colors.YELLOW + "Fusing not done, exiting" + Colors.ENDC)
         rw_terminate()
@@ -343,7 +343,7 @@ def fuse_user_id(system, boss, user_id):
         print (Colors.YELLOW + "Fusing Sub lpGBT with USER ID: " + str(hex(user_id)) + Colors.ENDC)
 
     en = "no"
-    en = raw_input(Colors.YELLOW + "Please type \"yes\" to continue: " + Colors.ENDC)
+    en = input(Colors.YELLOW + "Please type \"yes\" to continue: " + Colors.ENDC)
     if (en != "yes"):
         print (Colors.YELLOW + "Fusing not done, exiting" + Colors.ENDC)
         rw_terminate()
@@ -535,7 +535,7 @@ if __name__ == "__main__":
     if args.complete == "1": 
         en_complete = "no"
         print (Colors.YELLOW + "Final fusing, no changes possible after this" + Colors.ENDC)
-        en_complete = raw_input(Colors.YELLOW + "Please type \"yes\" to continue: " + Colors.ENDC)
+        en_complete = input(Colors.YELLOW + "Please type \"yes\" to continue: " + Colors.ENDC)
         if (en_complete != "yes"):
             print (Colors.YELLOW + "Fusing not done, exiting" + Colors.ENDC)
             sys.exit()

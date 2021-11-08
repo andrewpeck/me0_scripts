@@ -2,7 +2,9 @@ import xml.etree.ElementTree as xml
 import sys, os, subprocess
 import zlib
 import array
+import struct
 from collections import OrderedDict
+from utils import *
 
 DEBUG = True
 ADDRESS_TABLE_TOP_V0 = "./address_table/lpgbt_registers_v0.xml"
@@ -16,6 +18,7 @@ n_rw_reg = -9999
 TOP_NODE_NAME = "LPGBT"
 
 NODE_IC_GBTX_LINK_SELECT = None
+NODE_IC_GBTX_OH_VER_SELECT = None
 NODE_IC_GBTX_I2C_ADDRESS = None
 NODE_IC_READ_WRITE_LENGTH = None
 NODE_IC_ADDR = None
@@ -326,6 +329,7 @@ def rw_initialize(system_val, oh_v_val, boss=None, ohIdx=None, gbtIdx=None):
         rw_reg.parse_xml()
 
         global NODE_IC_GBTX_LINK_SELECT
+        global NODE_IC_GBTX_OH_VER_SELECT
         global NODE_IC_GBTX_I2C_ADDRESS
         global NODE_IC_READ_WRITE_LENGTH
         global NODE_IC_ADDR
@@ -334,6 +338,7 @@ def rw_initialize(system_val, oh_v_val, boss=None, ohIdx=None, gbtIdx=None):
         global NODE_IC_EXEC_READ
         global NODE_IC_READ_DATA
         NODE_IC_GBTX_LINK_SELECT = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBTX_LINK_SELECT")
+        NODE_IC_GBTX_OH_VER_SELECT = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBTX_OH_VER")
         NODE_IC_GBTX_I2C_ADDRESS = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBTX_I2C_ADDR")
         NODE_IC_READ_WRITE_LENGTH = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.READ_WRITE_LENGTH")
         NODE_IC_ADDR = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.ADDRESS")
@@ -348,7 +353,8 @@ def rw_initialize(system_val, oh_v_val, boss=None, ohIdx=None, gbtIdx=None):
 def config_initialize_chc(boss):
     initialize_success = 1
     gbt_rpi_chc.set_lpgbt_address(oh_v, boss)
-    initialize_success *= gbt_rpi_chc.config_select(boss)
+    if oh_v == 1:
+        initialize_success *= gbt_rpi_chc.config_select(boss)
     if initialize_success:
         initialize_success *= gbt_rpi_chc.en_i2c_switch()
     if initialize_success:
@@ -366,10 +372,11 @@ def select_ic_link(ohIdx, gbtIdx):
             rw_terminate()
         linkIdx = ohIdx * 8 + gbtIdx
         write_backend_reg(NODE_IC_GBTX_LINK_SELECT, linkIdx)
-        
-        if oh_v == 1:
+        oh_ver = get_config("CONFIG_ME0_OH_VER")[ohIdx][gbtIdx]
+        write_backend_reg(NODE_IC_GBTX_OH_VER_SELECT, oh_ver)
+        if oh_ver == 1:
             write_backend_reg(NODE_IC_GBTX_I2C_ADDRESS, 0x70)
-        elif oh_v == 2:
+        elif oh_ver == 2:
             if gbtIdx%2 == 0:
                 write_backend_reg(NODE_IC_GBTX_I2C_ADDRESS, 0x70)
             else:
@@ -484,7 +491,7 @@ def check_lpgbt_mode(boss):
     if boss and mode!=11:
         print (Colors.RED + "ERROR: lpGBT mode mismatch for boss, observed mode = %d, expected = 11"%mode + Colors.ENDC)
         rw_terminate()
-    if sub and mode!=9:
+    if not boss and mode!=9:
         print (Colors.RED + "ERROR: lpGBT mode mismatch for sub, observed mode = %d, expected = 9"%mode + Colors.ENDC)
         rw_terminate()
 
@@ -496,7 +503,7 @@ def check_lpgbt_mode(boss):
         if boss and i2c_addr!=0x70:
             print (Colors.RED + "ERROR: Incorrect lpGBT I2C address 0x%02X for boss, expect 0x70"%i2c_addr + Colors.ENDC)
             rw_terminate()
-        if sub and i2c_addr!=0x71:
+        if not boss and i2c_addr!=0x71:
             print (Colors.RED + "ERROR: Incorrect lpGBT I2C address 0x%02X for sub, expect 0x71"%i2c_addr + Colors.ENDC)
             rw_terminate()
 

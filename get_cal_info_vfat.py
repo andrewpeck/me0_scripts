@@ -177,7 +177,7 @@ if __name__ == '__main__':
         print("Using OH v1")
         oh_v = 1
     elif args.oh_v == "2":
-        print("Using OH v2")`
+        print("Using OH v2")
         oh_v = 2
     else:
         print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
@@ -202,7 +202,7 @@ if __name__ == '__main__':
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system)
+    rw_initialize(args.system, oh_v)
     print("Initialization Done\n")
 
     try: 

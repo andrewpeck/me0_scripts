@@ -9,12 +9,12 @@ import datetime
 
 def main(system, oh_v, boss, run_time_min, gain, voltage, plot):
 
-    init_adc()
+    init_adc(oh_v)
 
     if oh_v == 1:
         F = 1
     elif oh_v == 2:
-        cal_channel = 3 #servant_adc_in3
+        cal_channel = 3 # servant_adc_in3
         F = calculate_F(cal_channel, gain, system)
 
     print("ADC Readings:")
@@ -71,11 +71,11 @@ def main(system, oh_v, boss, run_time_min, gain, voltage, plot):
     ax1.plot(minutes, rssi, color="turquoise")
     fig1.savefig(figure_name, bbox_inches="tight")
 
-    powerdown_adc()  
+    powerdown_adc(oh_v)
 
 def calculate_F(channel, gain, system):
 
-    R= 1e-03
+    R = 1e-03
     LSB = 3.55e-06
     DAC = 150
 
@@ -113,23 +113,27 @@ def live_plot(ax, x, y):
     plt.draw()
     plt.pause(0.01)
 
-def init_adc():
+def init_adc(oh_v):
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x1, 0)  # enable ADC
     writeReg(getNode("LPGBT.RW.ADC.TEMPSENSRESET"), 0x1, 0)  # resets temp sensor
     writeReg(getNode("LPGBT.RW.ADC.VDDMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDTXMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDRXMONENA"), 0x1, 0)  # enable dividers
+    if oh_v == 1:
+        writeReg(getNode("LPGBT.RW.ADC.VDDPSTMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDANMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFENABLE"), 0x1, 0)  # vref enable
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x63, 0) # vref tune
     sleep(0.01)
 
-def powerdown_adc():
+def powerdown_adc(oh_v):
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x0, 0)  # disable ADC
     writeReg(getNode("LPGBT.RW.ADC.TEMPSENSRESET"), 0x0, 0)  # disable temp sensor
     writeReg(getNode("LPGBT.RW.ADC.VDDMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDTXMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDRXMONENA"), 0x0, 0)  # disable dividers
+    if oh_v == 1:
+        writeReg(getNode("LPGBT.RW.ADC.VDDPSTMONENA"), 0x0, 0)  # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDANMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFENABLE"), 0x0, 0)  # vref disable
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x0, 0) # vref tune
