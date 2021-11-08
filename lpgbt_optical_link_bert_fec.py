@@ -87,7 +87,10 @@ def check_fec_errors(system, oh_v, boss, path, opr, ohid, gbtid, runtime, vfat_l
     elif path == "downlink": # check FEC errors on lpGBT
         # Enable the counter
         if opr in ["start", "run"]:
-            writeReg(getNode("LPGBT.RW.DEBUG.DLDPFECCOUNTERENABLE"), 0x1, 0)
+            if oh_v == 1:
+                writeReg(getNode("LPGBT.RW.PROCESS_MONITOR.DLDPFECCOUNTERENABLE"), 0x1, 0)
+            elif oh_v == 2:
+                writeReg(getNode("LPGBT.RW.DEBUG.DLDPFECCOUNTERENABLE"), 0x1, 0)
     
         # start error counting loop
         start_fec_errors = lpgbt_fec_error_counter(oh_v)
@@ -136,7 +139,10 @@ def check_fec_errors(system, oh_v, boss, path, opr, ohid, gbtid, runtime, vfat_l
         
         # Disable the counter
         if opr in ["run", "stop"]:
-            writeReg(getNode("LPGBT.RW.DEBUG.DLDPFECCOUNTERENABLE"), 0x0, 0)
+            if oh_v == 1:
+                writeReg(getNode("LPGBT.RW.PROCESS_MONITOR.DLDPFECCOUNTERENABLE"), 0x0, 0)
+            elif oh_v == 2:
+                writeReg(getNode("LPGBT.RW.DEBUG.DLDPFECCOUNTERENABLE"), 0x0, 0)
 
         if opr != "run":
             return
