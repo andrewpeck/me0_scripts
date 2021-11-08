@@ -5,10 +5,10 @@ import argparse
 
 def main(system, oh_v, boss, reg_list, data_list):
 
-    if oh_v1 == 1:
+    if oh_v == 1:
         final_total_reg = 0x1CE
         final_readonly_reg = 0x13C
-    elif oh_v1 == 1:
+    elif oh_v == 1:
         final_total_reg = 0x1ED
         final_readonly_reg = 0x14F
 
