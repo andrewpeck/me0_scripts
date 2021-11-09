@@ -95,7 +95,7 @@ if __name__ == "__main__":
     parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 2")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
-    parser.add_argument("-c", "--choice", action="store", dest="choice", help="choice = vtrx or sub")
+    parser.add_argument("-r", "--reset", action="store", dest="reset", help="reset = sub lpGBT or VTRx+")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     
     args = parser.parse_args()
