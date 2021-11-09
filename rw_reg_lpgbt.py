@@ -18,7 +18,7 @@ n_rw_reg = -9999
 TOP_NODE_NAME = "LPGBT"
 
 NODE_IC_GBTX_LINK_SELECT = None
-NODE_IC_GBT_VER_SELECT = None
+NODE_IC_GBT_VER = None
 NODE_IC_GBTX_I2C_ADDRESS = None
 NODE_IC_READ_WRITE_LENGTH = None
 NODE_IC_ADDR = None
@@ -329,7 +329,7 @@ def rw_initialize(system_val, oh_v_val, boss=None, ohIdx=None, gbtIdx=None):
         rw_reg.parse_xml()
 
         global NODE_IC_GBTX_LINK_SELECT
-        global NODE_IC_GBT_VER_SELECT
+        global NODE_IC_GBT_VER
         global NODE_IC_GBTX_I2C_ADDRESS
         global NODE_IC_READ_WRITE_LENGTH
         global NODE_IC_ADDR
@@ -338,7 +338,7 @@ def rw_initialize(system_val, oh_v_val, boss=None, ohIdx=None, gbtIdx=None):
         global NODE_IC_EXEC_READ
         global NODE_IC_READ_DATA
         NODE_IC_GBTX_LINK_SELECT = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBTX_LINK_SELECT")
-        NODE_IC_GBT_VER_SELECT = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBT_VER_SELECT")
+        #NODE_IC_GBT_VER = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBT_VER")
         NODE_IC_GBTX_I2C_ADDRESS = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.GBTX_I2C_ADDR")
         NODE_IC_READ_WRITE_LENGTH = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.READ_WRITE_LENGTH")
         NODE_IC_ADDR = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.ADDRESS")
@@ -378,7 +378,7 @@ def select_ic_link(ohIdx, gbtIdx):
             oh_ver = 1
         elif gbt_ver == 1:
             oh_ver = 2
-        write_backend_reg(NODE_IC_GBT_VER_SELECT, gbt_ver)
+        #write_backend_reg(NODE_IC_GBT_VER, gbt_ver)
         if oh_ver == 1:
             write_backend_reg(NODE_IC_GBTX_I2C_ADDRESS, 0x70)
         elif oh_ver == 2:
