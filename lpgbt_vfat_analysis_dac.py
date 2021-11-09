@@ -199,25 +199,33 @@ def main(inFile, calFile, directoryName, oh):
 
             # Plot fit
             if numVfats == 1:
-                ax.set_xlabel(xlabel_plot)
-                ax.set_ylabel("DAC")
+                ax.set_xlabel(xlabel_plot, loc = 'right')
+                ax.set_ylabel("%s register value (DAC)" % DAC_reg, loc = 'top')
                 ax.plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
                 ax.set_title("VFAT%02d" % vfat)
+                ax.text(-0.12, 1.01, 'CMS', fontweight='bold', fontsize=28, transform=ax.transAxes)
+                ax.text(0.02, 1.01, 'Muon R&D',fontstyle='italic', fontsize=26, transform=ax.transAxes)
             elif numVfats <= 3:
-                ax[vfatCnt0].set_xlabel(xlabel_plot)
-                ax[vfatCnt0].set_ylabel("DAC")
+                ax[vfatCnt0].set_xlabel(xlabel_plot, loc = 'right')
+                ax[vfatCnt0].set_ylabel("%s register value (DAC)" % DAC_reg, loc = 'top')
                 ax[vfatCnt0].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
                 ax[vfatCnt0].set_title("VFAT%02d" % vfat)
+                ax[vfatCnt0].text(-0.12, 1.01, 'CMS', fontweight='bold', fontsize=28, transform=ax[vfatCnt0].transAxes)
+                ax[vfatCnt0].text(0.02, 1.01, 'Muon R&D',fontstyle='italic', fontsize=26, transform=ax[vfatCnt0].transAxes)
             elif numVfats <= 6:
-                ax[int(vfatCnt0/3), vfatCnt0%3].set_xlabel(xlabel_plot)
-                ax[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("DAC")
+                ax[int(vfatCnt0/3), vfatCnt0%3].set_xlabel(xlabel_plot, loc = 'right')
+                ax[int(vfatCnt0/3), vfatCnt0%3].set_ylabel("%s register value (DAC)" % DAC_reg, loc = 'top')
                 ax[int(vfatCnt0/3), vfatCnt0%3].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
                 ax[int(vfatCnt0/3), vfatCnt0%3].set_title("VFAT%02d" % vfat)
+                ax[int(vfatCnt0/3), vfatCnt0%3].text(-0.1, 1.01, 'CMS', fontweight='bold', fontsize=28, transform=ax[int(vfatCnt0/3), vfatCnt0%3].transAxes)
+                ax[int(vfatCnt0/3), vfatCnt0%3].text(0.02, 1.01, 'Muon R&D',fontstyle='italic', fontsize=26, transform=ax[int(vfatCnt0/3), vfatCnt0%3].transAxes)
             else:
-                ax[int(vfatCnt0/6), vfatCnt0%6].set_xlabel(xlabel_plot)
-                ax[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("DAC")
+                ax[int(vfatCnt0/6), vfatCnt0%6].set_xlabel(xlabel_plot, loc = 'right')
+                ax[int(vfatCnt0/6), vfatCnt0%6].set_ylabel("%s register value (DAC)" % DAC_reg, loc = 'top')
                 ax[int(vfatCnt0/6), vfatCnt0%6].plot(xdata, poly5(xdata, *fitData), "r-", linewidth=3) # plot fit
                 ax[int(vfatCnt0/6), vfatCnt0%6].set_title("VFAT%02d" % vfat)
+                ax[int(vfatCnt0/6), vfatCnt0%6].text(-0.12, 1.01, 'CMS', fontweight='bold', fontsize=28, transform=ax[int(vfatCnt0/6), vfatCnt0%6].transAxes)
+                ax[int(vfatCnt0/6), vfatCnt0%6].text(0.02, 1.01, 'Muon R&D',fontstyle='italic', fontsize=26, transform=ax[int(vfatCnt0/6), vfatCnt0%6].transAxes)
 
             vfatCnt0 += 1
 
@@ -226,12 +234,12 @@ def main(inFile, calFile, directoryName, oh):
         if DAC_reg == "CFG_THR_ARM_DAC":
             thr_pd.to_csv(thr_filename_out)
 
-        fig.suptitle(DAC_reg, fontsize=32) # place DAC name for main title
-        fig.subplots_adjust(top=0.88) # adjust main title
+        #fig.suptitle(DAC_reg, fontsize=32) # place DAC name for main title
+        #fig.subplots_adjust(top=0.88) # adjust main title
         fig.tight_layout()
         plt.savefig(directoryName + "/DAC_summaryPlots_%s_%s.pdf"%(oh, DAC_reg))
         file.close()
-        print("Total time to execute: %s s" % str(time() - startTime))
+        #print("Total time to execute: %s s" % str(time() - startTime))
         plt.close()
 
     if cal_dac_derive:
@@ -242,11 +250,13 @@ def main(inFile, calFile, directoryName, oh):
             caldacfile.write("%d;%d;%.4f;%.4f\n"%(vfat, vfat_cal_dac[vfat]["vfat_serial_num"], slope, intercept))
         caldacfile.close()
 
+    print(Colors.GREEN + "\nPlots saved at: %s \n" % directoryName + Colors.ENDC)
+
 if __name__ == "__main__":
 
     # Parsing arguments
     parser = argparse.ArgumentParser(description="LpGBT VFAT DAC Scan Results")
-    parser.add_argument("-i", "--inFile", action="store", dest="inFile", help="Input file")
+    parser.add_argument("-f", "--inFile", action="store", dest="inFile", help="Input file")
     args = parser.parse_args()
 
     if args.inFile is None:

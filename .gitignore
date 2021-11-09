@@ -1,4 +1,4 @@
-eye_scan_results
+vfat_data/vfat_*
 *.txt
 *.pyc
 archive/*

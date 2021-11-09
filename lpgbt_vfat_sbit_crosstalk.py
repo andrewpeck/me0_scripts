@@ -183,6 +183,7 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="LpGBT VFAT S-Bit Cross Talk")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
+    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 1 or 2")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
@@ -211,6 +212,16 @@ if __name__ == "__main__":
         print ("Dry Run - not actually running vfat bert")
     else:
         print (Colors.YELLOW + "Only valid options: backend, dryrun" + Colors.ENDC)
+        sys.exit()
+
+    if args.oh_v == "1":
+        print("Using OH v1")
+        oh_v = 1
+    elif args.oh_v == "2":
+        print("Using OH v2")
+        oh_v = 2
+    else:
+        print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
         sys.exit()
 
     if args.ohid is None:
@@ -269,11 +280,11 @@ if __name__ == "__main__":
 
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(oh_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system)
+    rw_initialize(args.system, oh_v)
     initialize_vfat_config(int(args.ohid), args.use_dac_scan_results, args.use_channel_trimming)
     print("Initialization Done\n")
 

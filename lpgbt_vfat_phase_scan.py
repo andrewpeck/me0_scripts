@@ -5,8 +5,8 @@ import argparse
 from lpgbt_vfat_config import initialize_vfat_config, configureVfat, enableVfatchannel
 import datetime
 
-config_boss_filename = "lpgbt_data/config_boss.txt"
-config_sub_filename = "lpgbt_data/config_sub.txt"
+config_boss_filename = ""
+config_sub_filename = ""
 config_boss = {}
 config_sub = {}
 
@@ -20,7 +20,7 @@ def getConfig (filename):
     f.close()
     return reg_map
 
-def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_list):
+def lpgbt_phase_scan(system, oh_v, oh_select, daq_err, vfat_list, depth, bestphase_list):
     print ("LPGBT Phase Scan depth=%s transactions" % (str(depth)))
 
     if system!= "dryrun" and system!= "backend":
@@ -30,7 +30,7 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_lis
         print ("Setting phases for VFATs only, not scanning")
         for vfat in vfat_list:
             set_bestphase = bestphase_list[vfat]
-            setVfatRxPhase(system, oh_select, vfat, set_bestphase)
+            setVfatRxPhase(system, oh_v, oh_select, vfat, set_bestphase)
             print ("Phase set for VFAT#%02d to: %s" % (vfat, hex(set_bestphase)))
         return
 
@@ -59,13 +59,13 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_lis
         #hwid_node = get_rwreg_node("BEFE.GEM_AMC.OH.OH%d.GEB.VFAT%d.HW_ID" % (oh_select, vfat))
         #output = simple_read_backend_reg(hwid_node, -9999)
         #if output == -9999:
-        #    setVfatRxPhase(system, oh_select, vfat, 6)
+        #    setVfatRxPhase(system, oh_v, oh_select, vfat, 6)
         #    output = simple_read_backend_reg(hwid_node, -9999)
         #    if output == -9999:
-        #        setVfatRxPhase(system, oh_select, vfat, 12)
+        #        setVfatRxPhase(system, oh_v, oh_select, vfat, 12)
         #        output = simple_read_backend_reg(hwid_node, -9999)
         #        if output == -9999:
-        #            setVfatRxPhase(system, oh_select, vfat, 0)
+        #            setVfatRxPhase(system, oh_v, oh_select, vfat, 0)
         #            print (Colors.RED + "Cannot configure VFAT %d"%(vfat) + Colors.ENDC)
         #            rw_terminate()
         #configureVfat(1, vfat, oh_select, 0)
@@ -86,7 +86,7 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_lis
 
         # set phases for all vfats under test
         for vfat in vfat_list:
-            setVfatRxPhase(system, oh_select, vfat, phase)
+            setVfatRxPhase(system, oh_v, oh_select, vfat, phase)
 
         # read cfg_run some number of times, check link good status and sync errors
         print ("Checking errors: ")
@@ -190,7 +190,7 @@ def lpgbt_phase_scan(system, oh_select, daq_err, vfat_list, depth, bestphase_lis
     print ("\nSetting all VFAT phases to best phases: ")
     for vfat in vfat_list:
         set_bestphase = bestphase_vfat[vfat]
-        setVfatRxPhase(system, oh_select, vfat, set_bestphase)
+        setVfatRxPhase(system, oh_v, oh_select, vfat, set_bestphase)
         print ("Phase set for VFAT#%02d to: %s" % (vfat, hex(set_bestphase)))
     for vfat in range(0,24):
         file_out.write("%d  0x%x\n"%(vfat,bestphase_vfat[vfat]))
@@ -250,7 +250,7 @@ def find_phase_center(err_list):
 
     return ngood_center, ngood_max
 
-def setVfatRxPhase(system, oh_select, vfat, phase):
+def setVfatRxPhase(system, oh_v, oh_select, vfat, phase):
 
     print ("Setting RX phase %s for VFAT%d" %(hex(phase), vfat))
     lpgbt, gbt_select, elink, gpio = vfat_to_gbt_elink_gpio(vfat)
@@ -261,7 +261,10 @@ def setVfatRxPhase(system, oh_select, vfat, phase):
         config = config_sub
     
     # set phase
-    GBT_ELINK_SAMPLE_PHASE_BASE_REG = 0x0CC
+    if oh_v == 1:
+        GBT_ELINK_SAMPLE_PHASE_BASE_REG = 0x0CC
+    elif oh_v == 2:
+        GBT_ELINK_SAMPLE_PHASE_BASE_REG = 0x0D0
     addr = GBT_ELINK_SAMPLE_PHASE_BASE_REG + elink
     value = (config[addr] & 0x0f) | (phase << 4)
 
@@ -288,6 +291,7 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="LpGBT Phase Scan")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = backend or dryrun")
+    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 1 or 2")
     #parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
     #parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
@@ -317,7 +321,17 @@ if __name__ == "__main__":
     else:
         print (Colors.YELLOW + "Only valid options: backend, dryrun" + Colors.ENDC)
         sys.exit()
-    
+
+    if args.oh_v == "1":
+        print("Using OH v1")
+        oh_v = 1
+    elif args.oh_v == "2":
+        print("Using OH v2")
+        oh_v = 2
+    else:
+        print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
+        sys.exit()
+
     if args.ohid is None:
         print(Colors.YELLOW + "Need OHID" + Colors.ENDC)
         sys.exit()
@@ -366,18 +380,21 @@ if __name__ == "__main__":
 
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(oh_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system)
+    rw_initialize(args.system, oh_v)
     initialize_vfat_config(int(args.ohid), args.use_dac_scan_results, args.use_channel_trimming)
     print("Initialization Done\n")
+
+    config_boss_filename = "lpgbt_data/config_boss_ohv%d.txt"%oh_v
+    config_sub_filename = "lpgbt_data/config_sub_ohv%d.txt"%oh_v
 
     if not os.path.isfile(config_boss_filename):
         print (Colors.YELLOW + "Missing config file for boss: config_boss.txt" + Colors.ENDC)
         sys.exit()
-    
+
     if not os.path.isfile(config_sub_filename):
         print (Colors.YELLOW + "Missing config file for sub: sub_boss.txt" + Colors.ENDC)
         sys.exit()
@@ -387,7 +404,7 @@ if __name__ == "__main__":
     
     # Running Phase Scan
     try:
-        lpgbt_phase_scan(args.system, int(args.ohid), args.daq_err, vfat_list, int(args.depth), bestphase_list)
+        lpgbt_phase_scan(args.system, oh_v, int(args.ohid), args.daq_err, vfat_list, int(args.depth), bestphase_list)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

@@ -7,9 +7,16 @@ import matplotlib.pyplot as plt
 import os
 import datetime
 
-def main(system, boss, gbt, run_time_min, gain):
+def main(system, oh_v, boss, gbt, run_time_min, gain, plot):
 
-    init_adc()
+    init_adc(oh_v)
+
+    if oh_v == 1:
+        F = 1
+    elif oh_v == 2:
+        cal_channel = 7 # main_adc_in7
+        F = calculate_F(cal_channel, gain, system)
+
     print("ADC Readings:")
 
     if not os.path.exists("lpgbt_data/lpgbt_asense_data"):
@@ -23,7 +30,7 @@ def main(system, boss, gbt, run_time_min, gain):
 
     print(filename)
     open(filename, "w+").close()
-    minutes, seconds, asense0, asense1, asense2, asense3 = [], [], [], [], [], []
+    minutes, asense0, asense1, asense2, asense3 = [], [], [], [], []
 
     run_time_min = float(run_time_min)
 
@@ -38,40 +45,98 @@ def main(system, boss, gbt, run_time_min, gain):
     start_time = int(time())
     end_time = int(time()) + (60 * run_time_min)
 
+    file = open(filename, "w")
+    if gbt in [0,1]:
+        file.write("Time (min) \t Asense0 (PG2.5V current) (A) \t Asense1 (Rt2 voltage) (V) \t Asense2 (PG1.2V current) (A) \t Asense3 (Rt1 voltage) (V)\n")
+    else:
+        file.write("Time (min) \t Asense0 (PG1.2VD current) (A) \t Asense1 (Rt3 voltage) (V) \t Asense2 (PG1.2VA current) (A) \t Asense3 (Rt4 voltage) (V)\n")
+    t0 = time()
     while int(time()) <= end_time:
-        with open(filename, "a") as file:
-            asense0_value = read_adc(4, gain, system)
-            asense1_value = read_adc(2, gain, system)
-            asense2_value = read_adc(1, gain, system)
-            asense3_value = read_adc(3, gain, system)
+        if (time()-t0)>60:
+            if oh_v == 1:
+                asense0_value = F * read_adc(4, gain, system)
+                asense1_value = F * read_adc(2, gain, system)
+                asense2_value = F * read_adc(1, gain, system)
+                asense3_value = F * read_adc(3, gain, system)
+            if oh_v == 2:
+                asense0_value = F * read_adc(6, gain, system)
+                asense1_value = F * read_adc(1, gain, system)
+                asense2_value = F * read_adc(0, gain, system)
+                asense3_value = F * read_adc(3, gain, system)
             asense0_converted = asense_current_conversion(asense0_value)
             asense1_converted = asense_temp_voltage_conversion(asense1_value)
             asense2_converted = asense_current_conversion(asense2_value)
             asense3_converted = asense_temp_voltage_conversion(asense3_value)
             second = time() - start_time
-            seconds.append(second)
             asense0.append(asense0_converted)
             asense1.append(asense1_converted)
             asense2.append(asense2_converted)
             asense3.append(asense3_converted)
-            minutes.append(second/60)
-            live_plot_current(ax1, minutes, asense0, asense2, run_time_min, gbt)
-            live_plot_temp(ax2, minutes, asense1, asense3, run_time_min, gbt)
+            minutes.append(second/60.0)
+            if plot:
+                live_plot_current(ax1, minutes, asense0, asense2, run_time_min, gbt)
+                live_plot_temp(ax2, minutes, asense1, asense3, run_time_min, gbt)
 
-            file.write(str(second) + "\t" + str(asense0_converted) + "\t" + str(asense1_converted) + "\t" + str(asense2_converted) + "\t" + str(asense3_converted) + "\n" )
+            file.write(str(second/60.0) + "\t" + str(asense0_converted) + "\t" + str(asense1_converted) + "\t" + str(asense2_converted) + "\t" + str(asense3_converted) + "\n" )
             if gbt in [0,1]:
-                print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG2.5V current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt2 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2V current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt1 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
+                print("Time: " + "{:.2f}".format(second/60.0) + " min \t Asense0 (PG2.5V current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt2 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2V current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt1 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
             else:
-                print("Time: " + "{:.2f}".format(second) + " s \t Asense0 (PG1.2VD current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt3 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2VA current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt4 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
+                print("Time: " + "{:.2f}".format(second/60.0) + " min \t Asense0 (PG1.2VD current): " + "{:.3f}".format(asense0_converted) + " A \t Asense1 (Rt3 voltage): " + "{:.3f}".format(asense1_converted) + " V \t Asense2 (PG1.2VA current): " + "{:.3f}".format(asense2_converted) + " A \t Asense3 (Rt4 voltage): " + "{:.3f}".format(asense3_converted) + " V \n" )
 
-            sleep(1)
-
+            t0 = time()
+    file.close()
+    
     figure_name1 = foldername + now + "_pg_current_plot.pdf"
-    fig1.savefig(figure_name1, bbox_inches="tight")
     figure_name2 = foldername + now + "_rt_voltage_plot.pdf"
-    fig2.savefig(figure_name2, bbox_inches="tight")
+    fig1, ax1 = plt.subplots()
+    fig2, ax2 = plt.subplots()
+    ax1.set_xlabel("minutes")
+    ax1.set_ylabel("PG Current (A)")
+    ax2.set_xlabel("minutes")
+    ax2.set_ylabel("Rt Voltage (V)")
+    ax1.plot(minutes, asense0, color="red")
+    ax1.plot(minutes, asense2, color="blue")
+    ax2.plot(minutes, asense1, color="red")
+    ax2.plot(minutes, asense3, color="blue")
+    fig1.savefig(figure_name1, bbox_inches="tight")
+    fig2.savefig(figure_name1, bbox_inches="tight")
 
-    powerdown_adc()
+    powerdown_adc(oh_v)
+
+def calculate_F(channel, gain, system):
+
+    R = 1e-03
+    LSB = 3.55e-06
+    DAC = 150
+
+    I = DAC * LSB
+    V = I * R
+
+    reg_data = convert_adc_reg(channel)
+
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE"), 0x1, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), DAC, 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), reg_data, 0)
+    sleep(0.01)
+
+    if system == "dryrun":
+        F = 1
+    else:
+        V_m = read_adc(channel, gain, system)
+        F = V/V_m
+
+    writeReg(getNode("LPGBT.RWF.VOLTAGE_DAC.CURDACENABLE "), 0x0, 0)  #Enables current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACSELECT"), 0x0, 0)  #Sets output current for the current DAC.
+    writeReg(getNode("LPGBT.RWF.CUR_DAC.CURDACCHNENABLE"), 0x0, 0)
+    sleep(0.01)
+
+    return F
+
+def convert_adc_reg(adc):
+    reg_data = 0
+    bit = adc
+    reg_data |= (0x01 << bit)
+    return reg_data
 
 def live_plot_current(ax1, x, y0, y2, run_time_min, gbt):
     line0, = ax1.plot(x, y0, "red")
@@ -93,51 +158,32 @@ def live_plot_temp(ax2, x, y1, y3, run_time_min, gbt):
     plt.draw()
     plt.pause(0.01)
 
-
-def init_adc():
+def init_adc(oh_v):
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x1, 0)  # enable ADC
     writeReg(getNode("LPGBT.RW.ADC.TEMPSENSRESET"), 0x1, 0)  # resets temp sensor
     writeReg(getNode("LPGBT.RW.ADC.VDDMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDTXMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDRXMONENA"), 0x1, 0)  # enable dividers
-    writeReg(getNode("LPGBT.RW.ADC.VDDPSTMONENA"), 0x1, 0)  # enable dividers
+    if oh_v == 1:
+        writeReg(getNode("LPGBT.RW.ADC.VDDPSTMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDANMONENA"), 0x1, 0)  # enable dividers
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFENABLE"), 0x1, 0)  # vref enable
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x63, 0) # vref tune
     sleep(0.01)
 
-
-def powerdown_adc():
+def powerdown_adc(oh_v):
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x0, 0)  # disable ADC
     writeReg(getNode("LPGBT.RW.ADC.TEMPSENSRESET"), 0x0, 0)  # disable temp sensor
     writeReg(getNode("LPGBT.RW.ADC.VDDMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDTXMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDRXMONENA"), 0x0, 0)  # disable dividers
-    writeReg(getNode("LPGBT.RW.ADC.VDDPSTMONENA"), 0x0, 0)  # disable dividers
+    if oh_v == 1:
+        writeReg(getNode("LPGBT.RW.ADC.VDDPSTMONENA"), 0x0, 0)  # enable dividers
     writeReg(getNode("LPGBT.RW.ADC.VDDANMONENA"), 0x0, 0)  # disable dividers
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFENABLE"), 0x0, 0)  # vref disable
     writeReg(getNode("LPGBT.RWF.CALIBRATION.VREFTUNE"), 0x0, 0) # vref tune
 
-
 def read_adc(channel, gain, system):
-    # ADCInPSelect[3:0]	|  Input
-    # ------------------|----------------------------------------
-    # 4"d0	        |  ADC0 (external pin)
-    # 4"d1	        |  ADC1 (external pin)
-    # 4"d2	        |  ADC2 (external pin)
-    # 4"d3	        |  ADC3 (external pin)
-    # 4"d4	        |  ADC4 (external pin)
-    # 4"d5	        |  ADC5 (external pin)
-    # 4"d6	        |  ADC6 (external pin)
-    # 4"d7	        |  ADC7 (external pin)
-    # 4"d8	        |  EOM DAC (internal signal)
-    # 4"d9	        |  VDDIO * 0.42 (internal signal)
-    # 4"d10	        |  VDDTX * 0.42 (internal signal)
-    # 4"d11	        |  VDDRX * 0.42 (internal signal)
-    # 4"d12	        |  VDD * 0.42 (internal signal)
-    # 4"d13	        |  VDDA * 0.42 (internal signal)
-    # 4"d14	        |  Temperature sensor (internal signal)
-    # 4"d15	        |  VREF/2 (internal signal)
 
     writeReg(getNode("LPGBT.RW.ADC.ADCINPSELECT"), channel, 0)
     writeReg(getNode("LPGBT.RW.ADC.ADCINNSELECT"), 0xf, 0)
@@ -190,10 +236,12 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="Asense monitoring for ME0 Optohybrid")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
+    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 1 or 2")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7")
     parser.add_argument("-m", "--minutes", action="store", dest="minutes", help="minutes = int. # of minutes you want to run")
+    parser.add_argument("-p", "--plot", action="store_true", dest="plot", help="plot = enable live plot")
     parser.add_argument("-a", "--gain", action="store", dest="gain", default = "2", help="gain = Gain for Asense ADCs: 2, 8, 16, 32")
     args = parser.parse_args()
 
@@ -213,17 +261,23 @@ if __name__ == "__main__":
         print(Colors.YELLOW + "Only valid options: chc, backend, dongle, dryrun" + Colors.ENDC)
         sys.exit()
 
-    boss = None
-    if args.lpgbt is None:
-        print(Colors.YELLOW + "Please select boss or sub" + Colors.ENDC)
+    if args.oh_v == "1":
+        print("Using OH v1")
+        oh_v = 1
+    elif args.oh_v == "2":
+        print("Using OH v2")
+        oh_v = 2
+    else:
+        print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
         sys.exit()
-    elif (args.lpgbt == "boss"):
+
+    boss = None
+    if (args.lpgbt == "boss"):
         print("Using boss LPGBT")
         boss = 1
     elif (args.lpgbt == "sub"):
-        #print("Using sub LPGBT")
-        print (Colors.YELLOW + "Only boss allowed" + Colors.ENDC)
-        boss = 0
+        print(Colors.YELLOW + "Only boss allowed" + Colors.ENDC)
+        sys.exit()
     else:
         print(Colors.YELLOW + "Please select boss" + Colors.ENDC)
         sys.exit()
@@ -231,8 +285,11 @@ if __name__ == "__main__":
         sys.exit()
 
     if args.gbtid is None:
-        print(Colors.YELLOW + "Need GBTID for backend" + Colors.ENDC)
-        sys.exit()
+        if args.system == "backend":
+            print(Colors.YELLOW + "Need GBTID for backend" + Colors.ENDC)
+            sys.exit()
+        if args.system == "dryrun":
+            args.gbtid = "-9999"
     if int(args.gbtid) > 7:
         print(Colors.YELLOW + "Only GBTID 0-7 allowed" + Colors.ENDC)
         sys.exit()
@@ -257,16 +314,17 @@ if __name__ == "__main__":
 
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(oh_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system, boss, args.ohid, args.gbtid)
+    rw_initialize(args.system, oh_v, boss, args.ohid, args.gbtid)
     print("Initialization Done\n")
 
     # Readback rom register to make sure communication is OK
     if args.system != "dryrun" and args.system != "backend":
         check_rom_readback()
+        check_lpgbt_mode(boss)
 
     # Check if lpGBT is READY if running through backend
     if args.system=="backend":
@@ -275,7 +333,7 @@ if __name__ == "__main__":
         check_lpgbt_ready()
 
     try:
-        main(args.system, boss, gbt, args.minutes, gain)
+        main(args.system, oh_v, boss, gbt, args.minutes, gain, args.plot)
     except KeyboardInterrupt:
         print(Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

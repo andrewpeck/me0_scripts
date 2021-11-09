@@ -150,6 +150,7 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="LPGBT EYE")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
+    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 1 or 2")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss allowed")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
@@ -176,6 +177,16 @@ if __name__ == "__main__":
         print ("Dry Run - not actually running on lpGBT")
     else:
         print (Colors.YELLOW + "Only valid options: chc, backend, dongle, dryrun" + Colors.ENDC)
+        sys.exit()
+
+    if args.oh_v == "1":
+        print("Using OH v1")
+        oh_v = 1
+    elif args.oh_v == "2":
+        print("Using OH v2")
+        oh_v = 2
+    else:
+        print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
         sys.exit()
 
     boss = None
@@ -243,18 +254,20 @@ if __name__ == "__main__":
             print (Colors.YELLOW + "Setting can be max 2 bits, therefore: 0x0, 0x1, 0x2, 0x3" + Colors.ENDC)
             sys.exit()
 
+
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(oh_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system, boss, args.ohid, args.gbtid)
+    rw_initialize(args.system, oh_v, boss, args.ohid, args.gbtid)
     print("Initialization Done\n")
     
     # Readback rom register to make sure communication is OK
     if args.system!="dryrun" and args.system!="backend":
         check_rom_readback()
+        check_lpgbt_mode(boss)
 
     # Check if lpGBT is READY
     if args.system!="dryrun":

@@ -10,8 +10,8 @@
 <!-- g = capitalize id -->
 
 <node id="TOP">
+    
     <node id="LPGBT">
-
 
         <node id="RWF" address="0x0" description="Read/Write/Fuse">
             <!-- CHIPID -->
@@ -43,7 +43,6 @@
                     mask="0xff" />
             </node> <!--CHIPID-->
 
-
             <!-- this node is partial!! -->
             <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#calibration-data -->
             <node id="CALIBRATION" address="0x8" description="Calibration Data">
@@ -64,7 +63,7 @@
                     mask="0xf0" />
                 <node id="EPRXRELOCKTHRESHOLD" address="0x17" permission="rw"
                     description="Sets the relock threshold value of the instant lock low pass filter for ePortRx DLL's (default: 5)"
-                    mask="0x0f" />
+                    mask="0x0f" />E
             </node> <!--CALIBRATION-->
 
             <!--Clock Generator-->
@@ -994,6 +993,7 @@
             <!-- ePortRx -->
             <!-- https://lpgbt.web.cern.ch/lpgbt/manual/registermap.html#eportrx -->
             <node id="EPORTRX" address="0xC4" description="">
+
                 <!-- [0x0c4] EPRX0Control -->
                 <!-- Configuration of ePortRx Group 0 -->
                 <node id="EPRX03ENABLE" address="0x0" permission="rw"
@@ -1017,7 +1017,6 @@
 
                 <!-- [0x0c5] EPRX1Control -->
                 <!-- Configuration of ePortRx Group 1 -->
-
                 <node id="EPRX13ENABLE" address="0x1" permission="rw"
                     description="Enables channel 3 in group 1."
                     mask="0x80" />
@@ -1644,42 +1643,42 @@
                 <!-- [0x10a] FUSEBlowDataA -->
                 <!-- Data to be programmed to the fuses. -->
 
-                <node id="FUSEBLOWDATA0" address="0x1" permission="rw"
+                <node id="FUSEBLOWDATAA" address="0x1" permission="rw"
                     description="Bits 7:0 of the data word."
                     mask="0xff" />
 
                 <!-- [0x10b] FUSEBlowDataB -->
                 <!-- Data to be programmed to the fuses. -->
 
-                <node id="FUSEBLOWDATA1" address="0x2" permission="rw"
+                <node id="FUSEBLOWDATAB" address="0x2" permission="rw"
                     description="Bits 15:8 of the data word."
                     mask="0xff" />
 
                 <!-- [0x10c] FUSEBlowDataC -->
                 <!-- Data to be programmed to the fuses. -->
 
-                <node id="FUSEBLOWDATA2" address="0x3" permission="rw"
+                <node id="FUSEBLOWDATAC" address="0x3" permission="rw"
                     description="Bits 23:16 of the data word."
                     mask="0xff" />
 
                 <!-- [0x10d] FUSEBlowDataD -->
                 <!-- Data to be programmed to the fuses. -->
 
-                <node id="FUSEBLOWDATA3" address="0x4" permission="rw"
+                <node id="FUSEBLOWDATAD" address="0x4" permission="rw"
                     description="Bits 31:24 of the data word."
                     mask="0xff" />
 
                 <!-- [0x10e] FUSEBlowAddH -->
                 <!-- Address of the fuse block to be programmed. -->
 
-                <node id="FUSEBLOWADDRESS1" address="0x5" permission="rw"
+                <node id="FUSEBLOWADDH" address="0x5" permission="rw"
                     description="Bits 15:8 of the address."
                     mask="0xff" />
 
                 <!-- [0x10f] FUSEBlowAddL -->
                 <!-- Address of the fuse block to be programmed. -->
 
-                <node id="FUSEBLOWADDRESS0" address="0x6" permission="rw"
+                <node id="FUSEBLOWADDL" address="0x6" permission="rw"
                     description="Bits 7:0 of the address."
                     mask="0xff" />
 
@@ -2268,6 +2267,12 @@
                 <node id="STATEOVERRIDE" address="0x0" permission="r"
                     description="State of the STATEOVRD. The function of the pin is described in STATEOVRD."
                     mask="0x1" />
+
+                <!-- [0x141] I2CSlaveAddress -->
+                <!-- Chip address. -->
+                <node id="ASICCONTROLADR" address="0x1" permission="r"
+                    description="Address of the chip used in slow control protocols (I2C, IC, EC)."
+                    mask="0x7f" />
 
             </node>
 

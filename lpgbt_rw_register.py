@@ -3,11 +3,18 @@ from time import sleep, time
 import sys
 import argparse
 
-def main(system, boss, reg_list, data_list):
+def main(system, oh_v, boss, reg_list, data_list):
+
+    if oh_v == 1:
+        final_total_reg = 0x1CE
+        final_readonly_reg = 0x13C
+    elif oh_v == 1:
+        final_total_reg = 0x1ED
+        final_readonly_reg = 0x14F
 
     for i in range(0, len(reg_list)):
         r = reg_list[i]
-        if r>0x1CE:
+        if r > final_total_reg:
             print (Colors.YELLOW + "Register address out of range" + Colors.ENDC)
             rw_terminate()
         if system!="backend":
@@ -20,7 +27,7 @@ def main(system, boss, reg_list, data_list):
         
         d = data_list[i]
         
-        if r>0x13C:
+        if r > final_readonly_reg:
             print (Colors.YELLOW + "Register is Read-only" + Colors.ENDC)
             rw_terminate()
         mpoke(r, d)
@@ -40,11 +47,12 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="LpGBT R/W Registers")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
+    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 1 or 2")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-r", "--reg", action="store", nargs="+", dest="reg", help="reg = register to read or write (in 0x format)")
-    parser.add_argument("-d", "--data", action="store", nargs="+", dest="data", help="data = data to write to registers (in 0x format)") 
+    parser.add_argument("-d", "--data", action="store", nargs="+", dest="data", help="data = data to write to registers (in 0x format)")
     args = parser.parse_args()
 
     if args.system == "chc":
@@ -61,6 +69,16 @@ if __name__ == "__main__":
         print ("Dry Run - not actually configuring lpGBT")
     else:
         print (Colors.YELLOW + "Only valid options: chc, backend, dongle, dryrun" + Colors.ENDC)
+        sys.exit()
+
+    if args.oh_v == "1":
+        print("Using OH v1")
+        oh_v = 1
+    elif args.oh_v == "2":
+        print("Using OH v2")
+        oh_v = 2
+    else:
+        print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
         sys.exit()
 
     boss = None
@@ -123,20 +141,21 @@ if __name__ == "__main__":
             data_list.append(d_val)
     if len(data_list)!=0 and (len(reg_list) != len(data_list)):
         print (Colors.YELLOW + "Number of data values must equal the number of registers" + Colors.ENDC)
-        sys.exit() 
+        sys.exit()
 
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(oh_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system, boss, args.ohid, args.gbtid)
+    rw_initialize(args.system, oh_v, boss, args.ohid, args.gbtid)
     print("Initialization Done\n")
     
     # Readback rom register to make sure communication is OK
     if args.system!="dryrun" and args.system!="backend":
         check_rom_readback()
+        check_lpgbt_mode(boss)
 
     # Check if lpGBT is READY if running through backend
     #if args.system=="backend":
@@ -144,7 +163,7 @@ if __name__ == "__main__":
 
     # Configuring LPGBT
     try:
-        main(args.system, boss, reg_list, data_list)
+        main(args.system, oh_v, boss, reg_list, data_list)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
