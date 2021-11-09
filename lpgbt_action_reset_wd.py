@@ -3,7 +3,7 @@ from time import sleep, time
 import sys
 import argparse
 
-def main(system, boss, action, oh_select, gbt_select):
+def main(system, oh_v, boss, action, oh_select, gbt_select):
     print ("")
     if boss:
         print ("Performing action for boss lpGBT\n")
@@ -12,34 +12,34 @@ def main(system, boss, action, oh_select, gbt_select):
 
     if action=="reset":
         print ("Reset lpGBT\n")
-        mpoke(0x12C, 0x80)
-
+        if oh_v == 1:
+            mpoke(0x12C, 0x80)
+        elif oh_v == 1:
+            mpoke(0x13C, 0x80)
         check_ready = 0
         t0 = time()
         while not check_ready:
             check_ready = read_backend_reg(get_rwreg_node("BEFE.GEM_AMC.OH_LINKS.OH%s.GBT%s_READY" % (oh_select, gbt_select)))
         print ("Time taken for lpGBT to get back to READY state: %.4f sec\n"%(time()-t0))
-
     elif action=="enable":
-        #if boss:
-        #    print ("Enabling EC channel\n")
-        #    mpoke(0xA8, 0x1F)
-        
         print ("Enabling WatchDog\n")
-        mpoke(0xED, 0x03)
+        if oh_v == 1:
+            mpoke(0xED, 0x03)
+        elif oh_v == 2:
+            mpoke(0xF8, 0x00)
     elif action=="disable":
-        #if boss:
-        #    print ("Disabling EC channel\n")
-        #    mpoke(0xA8, 0x0F)
-        
         print ("Disabling WatchDog\n")
-        mpoke(0xED, 0x63)
+        if oh_v == 1:
+            mpoke(0xED, 0x63)
+        elif oh_v == 2:
+            mpoke(0xF8, 0x03)
 
 if __name__ == "__main__":
 
     # Parsing arguments
     parser = argparse.ArgumentParser(description="LpGBT Reset, Disable/Enable Watchdog")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
+    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 1 or 2")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss or sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
@@ -60,6 +60,16 @@ if __name__ == "__main__":
         print ("Dry Run - not actually configuring lpGBT")
     else:
         print (Colors.YELLOW + "Only valid options: chc, backend, dongle, dryrun" + Colors.ENDC)
+        sys.exit()
+
+    if args.oh_v == "1":
+        print("Using OH v1")
+        oh_v = 1
+    elif args.oh_v == "2":
+        print("Using OH v2")
+        oh_v = 2
+    else:
+        print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
         sys.exit()
 
     boss = None
@@ -106,18 +116,20 @@ if __name__ == "__main__":
     elif args.action == "enable":
         print ("Enabling Watchdog")
 
+
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(oh_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system, boss, args.ohid, args.gbtid)
+    rw_initialize(args.system, oh_v, boss, args.ohid, args.gbtid)
     print("Initialization Done\n")
     
     # Readback rom register to make sure communication is OK
     if args.system!="dryrun" and args.system!="backend":
         check_rom_readback()
+        check_lpgbt_mode(boss)
 
     # Check if lpGBT is READY if running through backend
     #if args.system=="backend":
@@ -125,7 +137,7 @@ if __name__ == "__main__":
 
     # Configuring LPGBT
     try:
-        main(args.system, boss, args.action, args.ohid, args.gbtid)
+        main(args.system, oh_v, boss, args.action, args.ohid, args.gbtid)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()

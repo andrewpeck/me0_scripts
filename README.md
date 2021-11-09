@@ -134,6 +134,8 @@ Use -h option for any script to check usage
 
 ```lpgbt_action_reset_wd.py```: either reset or disable/enable watchdog for lpGBT
 
+```lpgbt_adc_calibration_scan.py```: scans F factor across a range of DAC currents
+
 ```lpgbt_asense_monitor.py```: monitor asense on ME0 GEB
 
 ```lpgbt_config.py```: configure or unconfigure lpGBT
@@ -159,6 +161,10 @@ Use -h option for any script to check usage
 ```lpgbt_rw_register.py```: read/write to any register on lpGBT
 
 ```lpgbt_status.py```: check status of lpGBT
+
+```lpgbt_sub_vtrx_reset.py```: resets sub lpGBT or VTRx+ using boss lpgbt in OHv2
+
+```lpgbt_temp_monitor.py```: Checks for temperature of OH or VTRX in OHv2
 
 ```lpgbt_vfat_analysis_dac.py```: DAC Scan Analysis for VFATs
 

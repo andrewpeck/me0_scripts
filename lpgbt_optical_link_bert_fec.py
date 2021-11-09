@@ -6,7 +6,7 @@ import random
 import datetime
 
 
-def check_fec_errors(system, boss, path, opr, ohid, gbtid, runtime, vfat_list, verbose):
+def check_fec_errors(system, oh_v, boss, path, opr, ohid, gbtid, runtime, vfat_list, verbose):
     if not os.path.exists("lpgbt_data/lpgbt_optical_link_bert_fec_results"):
         os.makedirs("lpgbt_data/lpgbt_optical_link_bert_fec_results")
     now = str(datetime.datetime.now())[:16]
@@ -87,10 +87,13 @@ def check_fec_errors(system, boss, path, opr, ohid, gbtid, runtime, vfat_list, v
     elif path == "downlink": # check FEC errors on lpGBT
         # Enable the counter
         if opr in ["start", "run"]:
-            writeReg(getNode("LPGBT.RW.PROCESS_MONITOR.DLDPFECCOUNTERENABLE"), 0x1, 0)
+            if oh_v == 1:
+                writeReg(getNode("LPGBT.RW.PROCESS_MONITOR.DLDPFECCOUNTERENABLE"), 0x1, 0)
+            elif oh_v == 2:
+                writeReg(getNode("LPGBT.RW.DEBUG.DLDPFECCOUNTERENABLE"), 0x1, 0)
     
         # start error counting loop
-        start_fec_errors = lpgbt_fec_error_counter()
+        start_fec_errors = lpgbt_fec_error_counter(oh_v)
         if opr == "run":
             print ("Start Error Counting for time = %f minutes" % (runtime))
             file_out.write("Start Error Counting for time = %f minutes\n" % (runtime))
@@ -104,13 +107,13 @@ def check_fec_errors(system, boss, path, opr, ohid, gbtid, runtime, vfat_list, v
             while ((time()-t0)/60.0) < runtime:
                 time_passed = (time()-time_prev)/60.0
                 if time_passed >= 1:
-                    curr_fec_errors = lpgbt_fec_error_counter()
+                    curr_fec_errors = lpgbt_fec_error_counter(oh_v)
                     if verbose:
                         print ("Time passed: %f minutes, number of FEC errors accumulated = %d" % ((time()-t0)/60.0, curr_fec_errors))
                         file_out.write("Time passed: %f minutes, number of FEC errors accumulated = %d\n" % ((time()-t0)/60.0, curr_fec_errors))
                     time_prev = time()
         
-        end_fec_errors = lpgbt_fec_error_counter()
+        end_fec_errors = lpgbt_fec_error_counter(oh_v)
         end_fec_error_print = ""
         end_fec_error_write = ""
         if end_fec_errors==0:
@@ -136,7 +139,10 @@ def check_fec_errors(system, boss, path, opr, ohid, gbtid, runtime, vfat_list, v
         
         # Disable the counter
         if opr in ["run", "stop"]:
-            writeReg(getNode("LPGBT.RW.PROCESS_MONITOR.DLDPFECCOUNTERENABLE"), 0x0, 0)
+            if oh_v == 1:
+                writeReg(getNode("LPGBT.RW.PROCESS_MONITOR.DLDPFECCOUNTERENABLE"), 0x0, 0)
+            elif oh_v == 2:
+                writeReg(getNode("LPGBT.RW.DEBUG.DLDPFECCOUNTERENABLE"), 0x0, 0)
 
         if opr != "run":
             return
@@ -181,10 +187,18 @@ def check_fec_errors(system, boss, path, opr, ohid, gbtid, runtime, vfat_list, v
     file_out.write(result_string_write + "\n")
     file_out.close()
     
-def lpgbt_fec_error_counter():
-    error_counter_h = readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT_H"))
-    error_counter_l = readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT_L"))
-    error_counter = (error_counter_h << 8) | error_counter_l
+def lpgbt_fec_error_counter(oh_v):
+    error_counter = 0
+    if oh_v == 1:
+        error_counter_h = readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT_H"))
+        error_counter_l = readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT_L"))
+        error_counter = (error_counter_h << 8) | error_counter_l
+    elif oh_v == 2:
+        error_counter_0 = readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT0"))
+        error_counter_1 = readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT1"))
+        error_counter_2 = readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT2"))
+        error_counter_3 = readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT3"))
+        error_counter = (error_counter_0 << 24) | (error_counter_1 << 16) | (error_counter_2 << 8) | error_counter_3
     return error_counter   
        
        
@@ -192,6 +206,7 @@ if __name__ == "__main__":
     # Parsing arguments
     parser = argparse.ArgumentParser(description="LPGBT Bit Error Ratio Test (BERT) using FEC Error Counters")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc or backend or dongle or dryrun")
+    parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 1 or 2")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = boss/sub")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend/dryrun)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend/dryrun)")
@@ -216,6 +231,16 @@ if __name__ == "__main__":
         print ("Dry Run - not actually running on lpGBT")
     else:
         print (Colors.YELLOW + "Only valid options: chc, backend, dongle, dryrun" + Colors.ENDC)
+        sys.exit()
+
+    if args.oh_v == "1":
+        print("Using OH v1")
+        oh_v = 1
+    elif args.oh_v == "2":
+        print("Using OH v2")
+        oh_v = 2
+    else:
+        print(Colors.YELLOW + "Please select either OH v1 or v2" + Colors.ENDC)
         sys.exit()
 
     boss = None
@@ -303,16 +328,17 @@ if __name__ == "__main__":
         
     # Parsing Registers XML File
     print("Parsing xml file...")
-    parseXML()
+    parseXML(oh_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system, boss, args.ohid, args.gbtid)
+    rw_initialize(args.system, oh_v, boss, args.ohid, args.gbtid)
     print("Initialization Done\n")
     
     # Readback rom register to make sure communication is OK
     if args.system!="dryrun" and args.system!="backend":
         check_rom_readback()
+        check_lpgbt_mode(boss)
 
     # Check if lpGBT is READY
     if args.system!="dryrun":
@@ -322,7 +348,7 @@ if __name__ == "__main__":
             check_lpgbt_ready()
 
     try:
-        check_fec_errors(args.system, boss, args.path, args.opr, int(args.ohid), int(args.gbtid), float(args.time), vfat_list, args.verbose)
+        check_fec_errors(args.system, oh_v, boss, args.path, args.opr, int(args.ohid), int(args.gbtid), float(args.time), vfat_list, args.verbose)
     except KeyboardInterrupt:
         print (Colors.RED + "\nKeyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
