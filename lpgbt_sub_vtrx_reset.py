@@ -33,7 +33,7 @@ def lpgbt_sub_vtrx_reset(system, oh_v, boss, reset):
         else:
             gpio_dirH_output = 0x02 | 0x04 | 0x08 # set as outputs
             gpio_dirL_output = 0x00 # set as outputs
-    elif of_v == 2:
+    elif oh_v == 2:
         if (boss):
             gpio_dirH_output = 0x01 | 0x02 | 0x20 # set as outputs (8, 9, 13)
             gpio_dirL_output = 0x01 | 0x04 | 0x20 # set as outputs (0, 2, 5)
