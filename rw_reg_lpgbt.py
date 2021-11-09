@@ -374,9 +374,9 @@ def select_ic_link(ohIdx, gbtIdx):
         write_backend_reg(NODE_IC_GBTX_LINK_SELECT, linkIdx)
         gbt_ver = get_config("CONFIG_ME0_GBT_VER")[ohIdx][gbtIdx]
         oh_ver = -9999
-        if gbt_ver = 0:
+        if gbt_ver == 0:
             oh_ver = 1
-        elif gbt_ver = 1:
+        elif gbt_ver == 1:
             oh_ver = 2
         write_backend_reg(NODE_IC_GBT_VER_SELECT, gbt_ver)
         if oh_ver == 1:
