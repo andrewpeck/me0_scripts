@@ -75,7 +75,7 @@ def lpgbt_sub_vtrx_reset(system, oh_v, boss, reset):
     print("Enable GPIO %d as output"%gpio)
     sleep(0.000001)
 
-    # Set GPIO to 0 for VFAT reset
+    # Set GPIO to 0 for reset
     if system == "backend":
         mpoke(gpio_out_addr, data_disable)
     else:
