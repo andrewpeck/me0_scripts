@@ -100,7 +100,8 @@ if __name__ == "__main__":
         if numVfats == 1:
             ax1.set_xlabel("Threshold (DAC)", loc='right')
             ax1.set_ylabel("S-Bit rate (Hz)", loc='top')
-            ax1.set_yscale("log")ax1.set_title("Total S-Bit rate for VFAT%02d" % vfat)
+            ax1.set_yscale("log")
+            ax1.set_title("Total S-Bit rate for VFAT%02d" % vfat)
             ax1.grid()
             ax1.plot(threshold, noise_rate, "o", markersize=12)
             ax1.text(-0.12, 1.01, 'CMS', fontweight='bold', fontsize=26, transform=ax1.transAxes)
