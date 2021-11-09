@@ -56,7 +56,7 @@ def lpgbt_vfat_reset(system, oh_select, vfat_list):
                 gpio_dirL_output = 0x00 # set as outputs
         elif of_v == 2:
             if (boss):
-                gpio_dirH_output = 0x01 | 0x02 # set as outputs (8, 9)
+                gpio_dirH_output = 0x01 | 0x02 | 0x20 # set as outputs (8, 9, 13)
                 gpio_dirL_output = 0x01 | 0x04 | 0x20 # set as outputs (0, 2, 5)
             else:
                 gpio_dirH_output = 0x01 | 0x02 | 0x04 | 0x08 | 0x20 # set as outputs

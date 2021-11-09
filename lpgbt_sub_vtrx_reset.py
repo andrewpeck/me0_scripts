@@ -12,71 +12,60 @@ def convert_gpio_reg(gpio):
     reg_data |= (0x01 << bit)
     return reg_data
 
-def lpgbt_sub_reset(system, oh_select, choice, gbtid):
+def lpgbt_sub_vtrx_reset(system, oh_v, boss, oh_select, gbt_select, boss, reset):
 
     gpio_dirH_node = getNode("LPGBT.RWF.PIO.PIODIRH")
     gpio_outH_node = getNode("LPGBT.RWF.PIO.PIOOUTH")
-
+    gpio_dirL_node = getNode("LPGBT.RWF.PIO.PIODIRL")
+    gpio_outL_node = getNode("LPGBT.RWF.PIO.PIOOUTL")
     gpio_dirH_addr = gpio_dirH_node.address
     gpio_outH_addr = gpio_outH_node.address
+    gpio_dirL_addr = gpio_dirL_node.address
+    gpio_outL_addr = gpio_outL_node.address
 
-    gpio_for_sub = 9
-    gpio_for_vtrx = 13
-    boss = 1
-
-    if choice == "vtrx":
-        print("VTRX RESET\n")
-        if system == "chc":
-            config_initialize_chc(boss)
-            check_lpgbt_ready()
-        if system != "dryrun" and system != "backend":
-            check_rom_readback()
-
-        # Set GPIO as output
-        gpio_dirH_output = 0x20
-
-        if system == "backend":
-            mpoke(gpio_dirH_addr, gpio_dirH_output)
+    # Set GPIO as output
+    gpio_dirH_output = 0
+    gpio_dirL_output = 0
+    if oh_v == 1:
+        if (boss):
+            gpio_dirH_output = 0x80 | 0x01
+            gpio_dirL_output = 0x01 | 0x04 # set as outputs
         else:
-            writeReg(gpio_dirH_node, gpio_dirH_output, 0)
+            gpio_dirH_output = 0x02 | 0x04 | 0x08 # set as outputs
+            gpio_dirL_output = 0x00 # set as outputs
+    elif of_v == 2:
+        if (boss):
+            gpio_dirH_output = 0x01 | 0x02 | 0x20 # set as outputs (8, 9, 13)
+            gpio_dirL_output = 0x01 | 0x04 | 0x20 # set as outputs (0, 2, 5)
+        else:
+            gpio_dirH_output = 0x01 | 0x02 | 0x04 | 0x08 | 0x20 # set as outputs
+            gpio_dirL_output = 0x01 | 0x02 | 0x08 # set as outputs
 
-        print("Set GPIO as output, register: 0x%03X, value: 0x%02X" % (gpio_dirH_addr, gpio_dirH_output))
-        sleep(0.000001)
+    if system == "backend":
+        mpoke(gpio_dirH_addr, gpio_dirH_output)
+        mpoke(gpio_dirL_addr, gpio_dirL_output)
+    else:
+        writeReg(gpio_dirH_node, gpio_dirH_output, 0)
+        writeReg(gpio_dirL_node, gpio_dirL_output, 0)
 
-        data_enable = convert_gpio_reg(gpio_for_vtrx)
-        data_disable = 0x00
+    print("Set GPIO as output (including GPIO 15/5 for boss lpGBT for OH-v1/v2), register: 0x%03X, value: 0x%02X" % (
+    gpio_dirH_addr, gpio_dirH_output))
+    print("Set GPIO as output, register: 0x%03X, value: 0x%02X" % (gpio_dirL_addr, gpio_dirL_output))
+    sleep(0.000001)
 
-        gpio_out_addr = gpio_outH_addr
-        gpio_out_node = gpio_outH_node
-
-    elif choice == "sub":
+    gpio = 0
+    if reset == "vtrx":
+        print("VTRx+ RESET\n")
+        gpio  = 13
+    elif reset == "sub":
         print("SUB RESET\n")
-        if system == "backend":
-            check_lpgbt_link_ready(oh_select, gbtid)
-            select_ic_link(oh_select, gbtid)
-        elif system == "chc":
-            config_initialize_chc(boss)
-            check_lpgbt_ready()
+        gpio = 9
 
-        if system != "dryrun" and system != "backend":
-            check_rom_readback()
+    data_enable = convert_gpio_reg(gpio)
+    data_disable = 0x00
 
-        # Set GPIO as output
-        gpio_dirH_output = 0x02
-
-        if system == "backend":
-            mpoke(gpio_dirH_addr, gpio_dirH_output)
-        else:
-            writeReg(gpio_dirH_node, gpio_dirH_output, 0)
-
-        print("Set GPIO as output, register: 0x%03X, value: 0x%02X" % (gpio_dirH_addr, gpio_dirH_output))
-        sleep(0.000001)
-
-        data_enable = convert_gpio_reg(gpio_for_sub)
-        data_disable = 0x00
-
-        gpio_out_addr = gpio_outH_addr
-        gpio_out_node = gpio_outH_node
+    gpio_out_addr = gpio_outH_addr
+    gpio_out_node = gpio_outH_node
 
     # Reset - 1
     if system == "backend":
@@ -96,8 +85,6 @@ def lpgbt_sub_reset(system, oh_select, choice, gbtid):
 
     print("")
 
-    vfat_oh_link_reset()
-    sleep(0.1)
 
 
 if __name__ == "__main__":
@@ -106,7 +93,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="lpGBT SUB RESET")
     parser.add_argument("-s", "--system", action="store", dest="system", help="system = chc, backend or dryrun")
     parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 2")
-    parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1")
+    parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss")
+    parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-c", "--choice", action="store", dest="choice", help="choice = vtrx or sub")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     
@@ -134,59 +122,69 @@ if __name__ == "__main__":
         print(Colors.YELLOW + "Reset line connected for oh_v2 only" + Colors.ENDC)
         sys.exit()
 
-    if args.ohid is None and args.system == "backend":
-        print(Colors.YELLOW + "Please select ohid = 0-1" + Colors.ENDC)
+    boss = None
+    if args.lpgbt is None:
+        print (Colors.YELLOW + "Please select boss or sub" + Colors.ENDC)
         sys.exit()
-    elif args.ohid is not None and args.system == "chc":
-        print(Colors.YELLOW + "Cannot select an ohid when running chc" + Colors.ENDC)
+    elif (args.lpgbt=="boss"):
+        print ("Configuring LPGBT as boss")
+        boss=1
+    elif (args.lpgbt=="sub"):
+        print ("Only boss lpGBT is allowed")
+        boss = 0
         sys.exit()
-    elif args.ohid is None and (args.system == "chc" or args.system == "dryrun"):
-        args.ohid  = -9999
-    if int(args.ohid) > 1:
-        print(Colors.YELLOW + "Only OHID 0-1 allowed" + Colors.ENDC)
-        sys.exit()
-
-    if args.choice == "vtrx":
-        if args.gbtid is not None:
-            print(Colors.YELLOW + "Cannot choose gbtid when resetting vtrx" + Colors.ENDC)
-            sys.exit()
-        else:
-            gbtid = -9999
-    elif args.choice == "sub":
-        if args.gbtid is None:
-            if args.system == "backend":
-                print(Colors.YELLOW + "Must choose gbtid" + Colors.ENDC)
-                sys.exit()
-            if args.system == "backend":
-                print(Colors.YELLOW + "Please select gbtid 0-7" + Colors.ENDC)
-                sys.exit()
-            if args.system == "dryrun":
-                gbtid = -9999
-        elif args.gbtid is not None:
-            if args.system == "chc":
-                print(Colors.YELLOW + "Cannot select gbtid when running chc" + Colors.ENDC)
-                sys.exit()
-            else:
-                gbtid = int(args.gbtid)
-                if gbtid not in [0,2,4,6]:
-                    print(Colors.YELLOW + "Invalid master gbtid. Only 0, 2, 4, 6 allowed" + Colors.ENDC)
-                    sys.exit()
     else:
-        print(Colors.YELLOW + "Please choose either sub or vtrx" + Colors.ENDC)
+        print (Colors.YELLOW + "Please select boss only" + Colors.ENDC)
+        sys.exit()
+    if boss is None:
         sys.exit()
 
-    # Parsing Registers XML Files
+    if args.system == "backend":
+        if args.ohid is None:
+            print (Colors.YELLOW + "Need OHID for backend" + Colors.ENDC)
+            sys.exit()
+        if args.gbtid is None:
+            print (Colors.YELLOW + "Need GBTID for backend" + Colors.ENDC)
+            sys.exit()
+        if int(args.ohid) > 1:
+            print(Colors.YELLOW + "Only OHID 0-1 allowed" + Colors.ENDC)
+            sys.exit()
+        if int(args.gbtid) > 7:
+            print(Colors.YELLOW + "Only GBTID 0-7 allowed" + Colors.ENDC)
+            sys.exit()
+    else:
+        if args.ohid is not None or args.gbtid is not None:
+            print (Colors.YELLOW + "OHID and GBTID only needed for backend" + Colors.ENDC)
+            sys.exit()
+
+    if args.reset not in ["vtrx", "sub"]:
+         print(Colors.YELLOW + "Please choose either sub or vtrx" + Colors.ENDC)
+         sys.exit()
+
+    # Parsing Registers XML File
     print("Parsing xml file...")
     parseXML(oh_v)
     print("Parsing complete...")
 
     # Initialization (for CHeeseCake: reset and config_select)
-    rw_initialize(args.system, oh_v)
+    rw_initialize(args.system, oh_v, boss, args.ohid, args.gbtid)
     print("Initialization Done\n")
+
+    # Readback rom register to make sure communication is OK
+    if args.system!="dryrun" and args.system!="backend":
+        check_rom_readback()
+        check_lpgbt_mode(boss)
+
+    # Check if lpGBT is READY
+    if args.system!="dryrun":
+        if args.system=="backend":
+            check_lpgbt_link_ready(args.ohid, args.gbtid)
+        else:
+            check_lpgbt_ready()
 
     # Running Phase Scan
     try:
-        lpgbt_sub_reset(args.system, int(args.ohid), args.choice, gbtid)
+        lpgbt_sub_vtrx_reset(args.system, oh_v, boss, int(args.ohid), int(args.gbtid), args.reset)
     except KeyboardInterrupt:
         print(Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
