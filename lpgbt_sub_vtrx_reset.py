@@ -12,7 +12,7 @@ def convert_gpio_reg(gpio):
     reg_data |= (0x01 << bit)
     return reg_data
 
-def lpgbt_sub_vtrx_reset(system, oh_v, boss, oh_select, gbt_select, reset):
+def lpgbt_sub_vtrx_reset(system, oh_v, boss, reset):
 
     gpio_dirH_node = getNode("LPGBT.RWF.PIO.PIODIRH")
     gpio_outH_node = getNode("LPGBT.RWF.PIO.PIOOUTH")
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     parser.add_argument("-y", "--oh_v", action="store", dest="oh_v", help="oh_v = 2")
     parser.add_argument("-l", "--lpgbt", action="store", dest="lpgbt", help="lpgbt = only boss")
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
-    parser.add_argument("-r", "--reset", action="store", dest="reset", help="reset = sub lpGBT or VTRx+")
+    parser.add_argument("-r", "--reset", action="store", dest="reset", help="reset = sub or vtrx")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     
     args = parser.parse_args()
@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     # Running Phase Scan
     try:
-        lpgbt_sub_vtrx_reset(args.system, oh_v, boss, int(args.ohid), int(args.gbtid), args.reset)
+        lpgbt_sub_vtrx_reset(args.system, oh_v, boss, args.reset)
     except KeyboardInterrupt:
         print(Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
