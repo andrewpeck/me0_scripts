@@ -38,9 +38,9 @@ def main(system, oh_v, boss, fusing, input_config_file, input_vtrx, input_regist
     if complete==1:
         print (Colors.YELLOW + "\nFusing Complete Configuration: 0x0EF for OH_v1 (dllConfigDone, pllConfigDone, updateEnable) or 0x0FF for OH_v2 (dllConfigDone, pllConfigDone)" + Colors.ENDC)
         if oh_v == 1:
-            fuse_register(system, boss, str(efuse_done_reg), "0x07") #dllConfigDone=1, pllConfigDone=1, updateEnable=1
+            fuse_register(system, boss, hex(efuse_done_reg), "0x07") #dllConfigDone=1, pllConfigDone=1, updateEnable=1
         elif oh_v == 2:
-            fuse_register(system, boss, str(efuse_done_reg), "0x06") #dllConfigDone=1, pllConfigDone=1
+            fuse_register(system, boss, hex(efuse_done_reg), "0x06") #dllConfigDone=1, pllConfigDone=1
         if oh_v == 2:
             print (Colors.YELLOW + "\nFusing CRC registers\n" + Colors.ENDC)
 
@@ -48,10 +48,10 @@ def main(system, oh_v, boss, fusing, input_config_file, input_vtrx, input_regist
             crc_registers = calculate_crc(protected_registers)
             crc = crc_registers[0] | (crc_registers[1] << 8) | (crc_registers[2] << 16) | (crc_registers[3] << 24)
             print ("CRC: %d\n"%crc)
-            fuse_register(system, boss, 0x0FC, crc_registers[0])
-            fuse_register(system, boss, 0x0FD, crc_registers[1])
-            fuse_register(system, boss, 0x0FE, crc_registers[2])
-            fuse_register(system, boss, 0x0FF, crc_registers[3])
+            fuse_register(system, boss, "0x0FC", crc_registers[0])
+            fuse_register(system, boss, "0x0FD", crc_registers[1])
+            fuse_register(system, boss, "0x0FE", crc_registers[2])
+            fuse_register(system, boss, "0x0FF", crc_registers[3])
 
     # Write the fuse values of registers in text file
     if boss:
@@ -320,9 +320,9 @@ def fuse_register(system, boss, input_register, input_data):
     input_register = int(input_register,16)
     input_data = int(input_data,16)
     if boss:
-        print (Colors.YELLOW + "Fusing Boss lpGBT, register: " + str(hex(input_register)) + ", data: " + str(hex(input_data)) + Colors.ENDC)
+        print (Colors.YELLOW + "Fusing Boss lpGBT, register: " + hex(input_register) + ", data: " + hex(input_data) + Colors.ENDC)
     else:
-        print (Colors.YELLOW + "Fusing Sub lpGBT, register: " + str(hex(input_register)) + ", data: " + str(hex(input_data)) + Colors.ENDC)
+        print (Colors.YELLOW + "Fusing Sub lpGBT, register: " + hex(input_register) + ", data: " + hex(input_data) + Colors.ENDC)
 
     en = "no"
     en = input(Colors.YELLOW + "Please type \"yes\" to continue: " + Colors.ENDC)

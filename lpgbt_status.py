@@ -342,9 +342,9 @@ def main(system, oh_v, boss):
 
     # Writing lpGBT configuration status to text file
     if boss:
-        lpgbt_write_config_file("lpgbt_data/status_boss_ohv%d.txt"%oh_v, status=1)
+        lpgbt_write_config_file(oh_v, "lpgbt_data/status_boss_ohv%d.txt"%oh_v, status=1)
     else:
-        lpgbt_write_config_file("lpgbt_data/status_sub_ohv%d.txt"%oh_v, status=1)
+        lpgbt_write_config_file(oh_v, "lpgbt_data/status_sub_ohv%d.txt"%oh_v, status=1)
 
 def init_adc(oh_v):
     writeReg(getNode("LPGBT.RW.ADC.ADCENABLE"), 0x1, 0) # enable ADC
