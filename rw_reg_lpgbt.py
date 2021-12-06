@@ -25,7 +25,7 @@ NODE_IC_ADDR = None
 NODE_IC_WRITE_DATA = None
 NODE_IC_EXEC_WRITE = None
 NODE_IC_EXEC_READ = None
-#NODE_IC_READ_DATA = None
+NODE_IC_READ_DATA = None
 
 # VFAT number: boss/sub, gbtid, elink
 # For GE2/1 GEB + Pizza
@@ -344,7 +344,7 @@ def rw_initialize(system_val, oh_v_val, boss=None, ohIdx=None, gbtIdx=None):
         NODE_IC_ADDR = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.ADDRESS")
         NODE_IC_WRITE_DATA = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.WRITE_DATA")
         NODE_IC_EXEC_WRITE = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.EXECUTE_WRITE")
-        NODE_IC_EXEC_READ = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.EXECUTE_READ")
+        #NODE_IC_EXEC_READ = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.EXECUTE_READ")
         #NODE_IC_READ_DATA = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.READ_DATA")
 
         if ohIdx is not None and gbtIdx is not None:
