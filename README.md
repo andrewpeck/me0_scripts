@@ -1,3 +1,10 @@
+
+### IMPORTANT
+
+This Repository is no loner supported. Plk
+
+Please use: https://gitlab.cern.ch/emu/0xbefe/-/tree/devel/scripts/gem
+
 ## General
 
 Script for configuring lpGBTs on ME0 Optohybrid using either RPi+Cheesecake or Backend

@@ -344,8 +344,8 @@ def rw_initialize(system_val, oh_v_val, boss=None, ohIdx=None, gbtIdx=None):
         NODE_IC_ADDR = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.ADDRESS")
         NODE_IC_WRITE_DATA = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.WRITE_DATA")
         NODE_IC_EXEC_WRITE = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.EXECUTE_WRITE")
-        NODE_IC_EXEC_READ = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.EXECUTE_READ")
-        NODE_IC_READ_DATA = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.READ_DATA")
+        #NODE_IC_EXEC_READ = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.EXECUTE_READ")
+        #NODE_IC_READ_DATA = rw_reg.get_node("BEFE.GEM_AMC.SLOW_CONTROL.IC.READ_DATA")
 
         if ohIdx is not None and gbtIdx is not None:
             select_ic_link(ohIdx, gbtIdx)
@@ -600,11 +600,11 @@ def mpeek(address):
             print(Colors.RED + "ERROR: Problem in reading register: " + str(hex(address)) + Colors.ENDC)
             rw_terminate()
     elif system=="backend":
-        write_backend_reg(NODE_IC_ADDR, address)
-        write_backend_reg(NODE_IC_EXEC_READ, 1)
-        data = read_backend_reg(NODE_IC_READ_DATA)
-        return data
-        #return reg_list_dryrun[address]
+        #write_backend_reg(NODE_IC_ADDR, address)
+        #write_backend_reg(NODE_IC_EXEC_READ, 1)
+        #data = read_backend_reg(NODE_IC_READ_DATA)
+        #return data
+        return reg_list_dryrun[address]
     #elif system=="dongle":
     #    return gbt_dongle.gbtx_read_register(address)
     elif system=="dryrun":
