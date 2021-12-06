@@ -1,7 +1,7 @@
 
 ### IMPORTANT
 
-This Repository is no loner supported. Plk
+This Repository is no loner supported.
 
 Please use: https://gitlab.cern.ch/emu/0xbefe/-/tree/devel/scripts/gem
 
