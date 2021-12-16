@@ -209,8 +209,8 @@ def main(system, oh_v, boss):
     print ("Downlink FEC Errors:")
     if oh_v == 1:
         print ("\t%d" % (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT_H")) << 8 | readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT_L"))))
-    else:
-        print("\t%d" % (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT0")) << 24) | (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT1")) << 16) | (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT2")) << 8) | (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT3"))) )
+    elif oh_v == 2:
+        print ("\t%d" % (readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT0")) << 24 | readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT1")) << 16 | readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT2")) << 8 | readReg(getNode("LPGBT.RO.FEC.DLDPFECCORRECTIONCOUNT3")) ))
 
     print ("CDR Resistor:")
     if (readReg(getNode("LPGBT.RO.CLKG.CLKG_ENABLE_CDR_R"))):
