@@ -398,7 +398,12 @@ def check_lpgbt_link_ready(ohIdx, gbtIdx):
 def check_lpgbt_ready(ohIdx=None, gbtIdx=None):
     if system!="dryrun":
         pusmstate = readReg(getNode("LPGBT.RO.PUSM.PUSMSTATE"))
-        if (pusmstate==18):
+        gbt_ver = get_config("CONFIG_ME0_GBT_VER")[ohIdx][gbtIdx]
+        if gbt_ver == 0:
+            ready_value = 18
+        elif gbt_ver == 1:
+            ready_value = 19
+        if (pusmstate==ready_value):
             print ("lpGBT status is READY")
         else:
             print (Colors.RED + "ERROR: lpGBT is not READY, configure lpGBT first" + Colors.ENDC)
