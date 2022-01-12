@@ -124,7 +124,7 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--ohid", action="store", dest="ohid", help="ohid = 0-1 (only needed for backend)")
     parser.add_argument("-g", "--gbtid", action="store", dest="gbtid", help="gbtid = 0-7 (only needed for backend)")
     parser.add_argument("-g_l", "--gpio_light", action="store", nargs="+", dest="gpio_light", help="gpio_light = [15 for boss in OHv1] or [5 for boss or {0,1,3,8,13} for sub in OHv2]")
-    parser.add_argument("-g_s", "--gpio_sound", action="store", dest="gpio_sound", default="off", help="gpio_sound = on, off")
+    parser.add_argument("-g_s", "--gpio_sound", action="store", dest="gpio_sound", help="gpio_sound = on, off")
     args = parser.parse_args()
 
     if args.system == "chc":
