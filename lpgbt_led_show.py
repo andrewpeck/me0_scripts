@@ -46,7 +46,7 @@ def main(boss, gpio_selected):
                         gpio_list = []
                     set_pioout(gpio_list)
 
-        stop = raw_input(Colors.YELLOW + "Please type \"stop\" to stop the show: " + Colors.ENDC)
+        stop = input(Colors.YELLOW + "Please type \"stop\" to stop the show: " + Colors.ENDC)
         if stop=="stop":
             gpio_list = []
             set_pioout(gpio_list)
@@ -54,7 +54,8 @@ def main(boss, gpio_selected):
             break
 
 def set_pioout(gpio_list):
-    value_l, value_h = 0
+    value_l = 0
+    value_h = 0
     for gpio in gpio_list:
         if gpio in range(0,8):
             value_l |= convert_gpio_reg(gpio)
@@ -144,24 +145,26 @@ if __name__ == "__main__":
 
     boss = None
     gpio_selected = []
+    oh_v = 0
     if args.oh_v == "1":
+        oh_v = 1
         print("Using OHv1")
-        if args.lpgbt is None or args.lpgbt is not "boss":
+        if args.lpgbt is None or args.lpgbt!="boss":
             print (Colors.YELLOW + "Please select boss for OH v1" + Colors.ENDC)
             sys.exit()
         else:
             print ("Configuring LPGBT as boss")
             boss = 1
-            if args.gpio_light is None or args.gpio_light == "15":
+            if args.gpio_light is None or args.gpio_light[0] == "15":
                 print("Enabling led")
-                gpio_selected.append(int(args.gpio_light))
-            elif args.gpio_light != "15":
+                gpio_selected.append(int(args.gpio_light[0]))
+            elif args.gpio_light[0] != "15":
                 print(Colors.YELLOW + "Only gpio15 connected to led" + Colors.ENDC)
                 sys.exit()
             if args.gpio_sound is not None:
                 print(Colors.YELLOW + "Sound not supported for OHv1" + Colors.ENDC)
                 sys.exit()
-    elif args.oh_v == "2"
+    elif args.oh_v == "2":
         print("Using OHv2")
         oh_v = 2
         if args.lpgbt is None:
@@ -170,10 +173,10 @@ if __name__ == "__main__":
         elif args.lpgbt == "boss":
             print("Configuring LPGBT as boss")
             boss = 1
-            if args.gpio_light is None or args.gpio_light == "5":
+            if args.gpio_light is None or args.gpio_light[0] == "5":
                 print("Enabling gpio5 for led")
-                gpio_selected.append(int(args.gpio_light))
-            elif args.gpio_light != "5":
+                gpio_selected.append(int(args.gpio_light[0]))
+            elif args.gpio_light[0] != "5":
                 print(Colors.YELLOW + "Only gpio5 connected to led" + Colors.ENDC)
                 sys.exit()
             if args.gpio_sound is not None or args.gpio_sound == "off":
@@ -247,7 +250,7 @@ if __name__ == "__main__":
 
     # LPGBT LED Show
     try:
-        main(args.system, int(args.oh_v), boss, gpio_selected)
+        main(boss, gpio_selected)
     except KeyboardInterrupt:
         print (Colors.RED + "Keyboard Interrupt encountered" + Colors.ENDC)
         rw_terminate()
