@@ -242,12 +242,9 @@ if __name__ == "__main__":
         check_lpgbt_mode(boss)
 
     # Check if lpGBT is READY
-    if args.system!="dryrun":
-        if args.system=="backend":
-            check_lpgbt_link_ready(args.ohid, args.gbtid)
-        else:
-            check_lpgbt_ready()
-
+    if args.system=="backend":
+        check_lpgbt_link_ready(args.ohid, args.gbtid)
+       
     # LPGBT LED Show
     try:
         main(boss, gpio_selected)
